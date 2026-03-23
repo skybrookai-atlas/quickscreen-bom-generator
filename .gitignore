@@ -11,6 +11,9 @@
 !Desktop/
 Desktop/*
 !Desktop/QuickScreen-BOM-Generator.html
+!Desktop/quickscreen_bom_ai_intake.html
+!Desktop/fence-mapper.js
+!Desktop/fence-mapper.css
 
 # Skill folder
 !.claude/

@@ -1,0 +1,757 @@
+
+<link rel="stylesheet" href="fence-mapper.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+.app{padding:1.5rem 0;max-width:740px;}
+.step{display:none;}.step.active{display:block;}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.25rem;margin-bottom:1rem;}
+.card-title{font-size:12px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:1rem;}
+.describe-area{width:100%;min-height:110px;font-size:15px;line-height:1.6;padding:12px 14px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-secondary);color:var(--color-text-primary);resize:vertical;font-family:var(--font-sans);}
+.describe-area:focus{outline:none;border-color:var(--color-border-primary);}
+.hint{font-size:13px;color:var(--color-text-secondary);margin-top:8px;line-height:1.5;}
+.primary-btn{width:100%;padding:12px;background:var(--color-background-primary);border:0.5px solid var(--color-border-primary);border-radius:var(--border-radius-lg);font-size:15px;font-weight:500;color:var(--color-text-primary);cursor:pointer;margin-top:.75rem;}
+.primary-btn:hover{background:var(--color-background-secondary);}
+.primary-btn:disabled{opacity:.4;cursor:default;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.field-row.triple{grid-template-columns:1fr 1fr 1fr;}
+.field-row.single{grid-template-columns:1fr;}
+.field{display:flex;flex-direction:column;gap:4px;}
+.field label{font-size:13px;color:var(--color-text-secondary);}
+.field input,.field select,.field textarea{font-size:14px;padding:8px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);width:100%;font-family:var(--font-sans);}
+.field input:focus,.field select:focus{outline:none;border-color:var(--color-border-primary);}
+.prefilled{border-color:var(--color-border-success) !important;background:var(--color-background-success) !important;}
+.needs-input{border-color:var(--color-border-warning) !important;}
+.legend{display:flex;gap:16px;margin-bottom:1rem;flex-wrap:wrap;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--color-text-secondary);}
+.dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.dot-green{background:var(--color-background-success);border:1px solid var(--color-border-success);}
+.dot-amber{background:var(--color-background-warning);border:1px solid var(--color-border-warning);}
+.toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;cursor:pointer;}
+.toggle-row input[type=checkbox]{width:16px;height:16px;cursor:pointer;}
+.toggle-row span{font-size:14px;color:var(--color-text-primary);}
+.gate-block{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:1rem;margin-bottom:10px;}
+.gate-title{font-size:12px;font-weight:500;color:var(--color-text-secondary);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.remove-btn{font-size:12px;color:var(--color-text-danger);background:none;border:none;cursor:pointer;}
+.add-gate{font-size:13px;color:var(--color-text-info);background:none;border:0.5px dashed var(--color-border-info);border-radius:var(--border-radius-md);padding:8px 14px;cursor:pointer;margin-top:4px;}
+.ai-summary{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:12px 14px;margin-bottom:1rem;font-size:13px;color:var(--color-text-secondary);line-height:1.6;}
+.ai-summary strong{color:var(--color-text-primary);font-weight:500;}
+.loading-state{text-align:center;padding:2rem;color:var(--color-text-secondary);font-size:14px;}
+.spinner{width:24px;height:24px;border:2px solid var(--color-border-secondary);border-top-color:var(--color-text-primary);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.back-btn{font-size:13px;color:var(--color-text-secondary);background:none;border:none;cursor:pointer;margin-bottom:1rem;padding:0;}
+.back-btn:hover{color:var(--color-text-primary);}
+.bom-table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed;}
+.bom-table th{font-size:12px;font-weight:500;color:var(--color-text-secondary);text-align:left;padding:6px 8px;border-bottom:0.5px solid var(--color-border-secondary);}
+.bom-table th:last-child{text-align:right;}
+.bom-table td{padding:8px 8px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary);vertical-align:top;}
+.bom-table td:last-child{text-align:right;}
+.bom-table .group-row td{font-weight:500;font-size:12px;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:6px 8px;}
+.totals{border-top:0.5px solid var(--color-border-primary);padding-top:1rem;margin-top:.5rem;}
+.total-row{display:flex;justify-content:space-between;font-size:14px;padding:3px 0;color:var(--color-text-secondary);}
+.total-row.grand{font-size:16px;font-weight:500;color:var(--color-text-primary);padding-top:8px;border-top:0.5px solid var(--color-border-tertiary);margin-top:4px;}
+.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:var(--border-radius-md);margin-left:4px;background:var(--color-background-warning);color:var(--color-text-warning);}
+.note{font-size:12px;color:var(--color-text-secondary);margin-top:10px;padding:8px 12px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);}
+.ask-btn{width:100%;padding:10px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-size:13px;color:var(--color-text-primary);cursor:pointer;margin-top:.75rem;}
+.step-indicator{display:flex;gap:6px;margin-bottom:1.5rem;align-items:center;}
+.step-dot{width:8px;height:8px;border-radius:50%;background:var(--color-border-secondary);}
+.step-dot.done{background:var(--color-text-primary);}
+.step-label{font-size:13px;color:var(--color-text-secondary);margin-left:4px;}
+</style>
+
+<div class="app">
+
+<div class="step active" id="step1">
+  <div class="step-indicator">
+    <div class="step-dot done"></div><div class="step-dot"></div><div class="step-dot"></div>
+    <span class="step-label">Describe the job</span>
+  </div>
+  <div class="card">
+    <div class="card-title">Describe the job in plain English</div>
+    <textarea class="describe-area" id="jobDesc" placeholder="e.g. 10 metre run of black slat fence, 1800mm high, sliding driveway gate 3 metres wide, trade pricing, customer is Smith residence in Byron Bay"></textarea>
+    <div class="hint">Include anything you know — length, height, colour, gate types, system type, pricing tier. The more detail the better. Claude will fill in what it can and flag what's still needed.</div>
+    <button class="primary-btn" id="parseBtn" onclick="parseDescription()">Interpret job description ↗</button>
+  </div>
+  <!-- Fence Layout Mapper -->
+  <div id="fm-section">
+    <div id="fm-toggle-bar" onclick="toggleFenceMapper()">
+      <span id="fm-toggle-label">Map Your Fence Layout (optional)</span>
+      <span id="fm-toggle-caret">▼</span>
+    </div>
+    <div id="fm-body">
+      <div id="fm-toolbar">
+        <button class="fm-btn active" id="fm-mode-draw" title="Draw fence run">✏ Draw</button>
+        <button class="fm-btn" id="fm-mode-gate" title="Place gate on segment">⊞ Gate</button>
+        <button class="fm-btn" id="fm-mode-move" title="Drag nodes to reposition">⤢ Move</button>
+        <div class="fm-sep"></div>
+        <button class="fm-btn" id="fm-undo" title="Undo last action (Ctrl+Z)">↩ Undo</button>
+        <button class="fm-btn danger" id="fm-clear" title="Clear all">✕ Clear</button>
+      </div>
+      <div id="fm-scale-row">
+        <label for="fm-scale">Scale:</label>
+        <input type="number" id="fm-scale" value="1000" min="100" step="100">
+        <span>mm per grid square</span>
+        <label id="fm-snap-toggle">
+          <input type="checkbox" id="fm-snap-cb" checked> Grid snap
+        </label>
+      </div>
+      <div id="fm-canvas-wrap" class="mode-draw">
+        <canvas id="fm-canvas"></canvas>
+        <canvas id="fm-overlay"></canvas>
+      </div>
+      <div id="fm-hint">Click to place nodes — double-click or press Enter to finish a run. Press Esc to cancel.</div>
+      <div id="fm-summary"></div>
+      <div id="fm-totals"></div>
+      <button id="fm-apply-btn" disabled>Use This Layout →</button>
+    </div>
+  </div>
+
+  <div class="card" style="padding:.75rem 1.25rem;">
+    <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:.5rem;font-weight:500;">Example descriptions</div>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <div class="hint" style="cursor:pointer;padding:6px 8px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);" onclick="useExample(0)">10m of 90mm surfmist slats, 1800 high, one pedestrian gate, standard pricing</div>
+      <div class="hint" style="cursor:pointer;padding:6px 8px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);" onclick="useExample(1)">Coastal project — 25 metre XPRESS Plus screen in monument, 2100mm, two sliding gates both 3m wide with motors, trade price</div>
+      <div class="hint" style="cursor:pointer;padding:6px 8px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);" onclick="useExample(2)">Small job, 5.5m woodland grey 65mm fence around equipment enclosure, surface mount base plates, no gates</div>
+    </div>
+  </div>
+</div>
+
+<div class="step" id="step2">
+  <div class="step-indicator">
+    <div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot"></div>
+    <span class="step-label">Confirm details</span>
+  </div>
+  <button class="back-btn" onclick="goBack(1)">← Back</button>
+  <div class="ai-summary" id="aiSummary"></div>
+  <div class="legend">
+    <div class="legend-item"><div class="dot dot-green"></div><span>Pre-filled from your description</span></div>
+    <div class="legend-item"><div class="dot dot-amber"></div><span>Needs your input</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Job & system</div>
+    <div class="field-row">
+      <div class="field"><label>Customer / job name</label><input type="text" id="f_job" placeholder="e.g. Smith residence"></div>
+      <div class="field"><label>System type</label>
+        <select id="f_system">
+          <option value="">Select...</option>
+          <option value="QS65">QuickScreen 65mm slat</option>
+          <option value="QS90">QuickScreen 90mm slat</option>
+          <option value="XPRESS">XPRESS Plus</option>
+          <option value="POSTA">POSTA letterbox</option>
+          <option value="ENCLOSURE">Equipment enclosure</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row triple">
+      <div class="field"><label>Total run (m)</label><input type="number" id="f_length" placeholder="e.g. 10" min="0" step="0.1"></div>
+      <div class="field"><label>90° corners</label><input type="number" id="f_corners" placeholder="0" min="0" step="1" value="0"></div>
+      <div class="field"><label>Height (mm)</label>
+        <select id="f_height">
+          <option value="">Select...</option>
+          <option value="1200">1200mm</option>
+          <option value="1500">1500mm</option>
+          <option value="1800">1800mm</option>
+          <option value="2100">2100mm</option>
+          <option value="2400">2400mm</option>
+        </select>
+      </div>
+      <div class="field"><label>Colour</label>
+        <select id="f_colour">
+          <option value="">Select...</option>
+          <option value="black">Black Satin</option>
+          <option value="monument">Monument Matt</option>
+          <option value="woodland_grey">Woodland Grey</option>
+          <option value="surfmist">Surfmist</option>
+          <option value="pearl_white">Pearl White</option>
+          <option value="basalt">Basalt Satin</option>
+          <option value="dune">Dune</option>
+          <option value="mill">Mill (raw aluminium)</option>
+          <option value="palladium_silver">Palladium Silver</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Posts & fixings</div>
+    <div class="field-row">
+      <div class="field"><label>Post spacing (mm)</label>
+        <select id="f_spacing">
+          <option value="2400">2400mm (standard)</option>
+          <option value="1800">1800mm</option>
+          <option value="3000">3000mm</option>
+        </select>
+      </div>
+      <div class="field"><label>Post installation</label>
+        <select id="f_install">
+          <option value="inground">In-ground (concrete)</option>
+          <option value="surface">Surface mount (base plates)</option>
+        </select>
+      </div>
+    </div>
+    <div class="toggle-row"><input type="checkbox" id="f_capping"><span>Include capping rail</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Gates</div>
+    <div id="f_gateList"></div>
+    <button class="add-gate" onclick="addGate()">+ Add gate</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Pricing</div>
+    <div class="field-row triple">
+      <div class="field"><label>Price tier</label>
+        <select id="f_tier">
+          <option value="standard">Standard</option>
+          <option value="mid">Mid-volume</option>
+          <option value="trade">Trade</option>
+        </select>
+      </div>
+      <div class="field"><label>Margin %</label><input type="number" id="f_margin" placeholder="e.g. 30" min="0" max="100"></div>
+      <div class="field"><label>Notes</label><input type="text" id="f_notes" placeholder="Optional"></div>
+    </div>
+  </div>
+
+  <button class="primary-btn" onclick="generateBOM()">Generate BOM ↗</button>
+</div>
+
+<div class="step" id="step3">
+  <div class="step-indicator">
+    <div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot done"></div>
+    <span class="step-label">Bill of materials</span>
+  </div>
+  <button class="back-btn" onclick="goBack(2)">← Edit details</button>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:1rem;">
+      <div id="bom_title" style="font-size:16px;font-weight:500;"></div>
+      <div id="bom_meta" style="font-size:13px;color:var(--color-text-secondary);"></div>
+    </div>
+    <div id="bom-site-plan"></div>
+    <table class="bom-table">
+      <thead><tr>
+        <th style="width:13%;">SKU</th>
+        <th style="width:38%;">Description</th>
+        <th style="width:10%;">Unit</th>
+        <th style="width:10%;">Qty</th>
+        <th style="width:14%;">Unit $</th>
+        <th style="width:15%;">Total</th>
+      </tr></thead>
+      <tbody id="bom_body"></tbody>
+    </table>
+    <div class="totals">
+      <div class="total-row"><span>Materials subtotal</span><span id="bom_sub"></span></div>
+      <div class="total-row" id="bom_margin_row"><span id="bom_margin_lbl"></span><span id="bom_margin_amt"></span></div>
+      <div class="total-row grand"><span>Total (ex GST)</span><span id="bom_grand"></span></div>
+    </div>
+    <div class="note">Prices are indicative. Items marked <span style="font-size:11px;background:var(--color-background-warning);color:var(--color-text-warning);padding:1px 6px;border-radius:4px;">verify</span> need manual confirmation. Confirm stock before quoting.</div>
+    <button class="ask-btn" onclick="askClaude()">Ask Claude to review this BOM ↗</button>
+    <button class="ask-btn" style="margin-top:6px;" onclick="startOver()">Start new quote</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+let gateCount = 0;
+const examples = [
+  "10m of 90mm surfmist slats, 1800 high, one pedestrian gate, standard pricing",
+  "Coastal project — 25 metre XPRESS Plus screen in monument, 2100mm, two sliding gates both 3m wide with motors, trade price",
+  "Small job, 5.5m woodland grey 65mm fence around equipment enclosure, surface mount base plates, no gates"
+];
+
+function useExample(i) {
+  document.getElementById('jobDesc').value = examples[i];
+}
+
+function goBack(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step' + n).classList.add('active');
+}
+
+function startOver() {
+  gateCount = 0;
+  document.getElementById('jobDesc').value = '';
+  document.getElementById('f_gateList').innerHTML = '';
+  goBack(1);
+}
+
+function resetGates() {
+  gateCount = 0;
+  document.getElementById('f_gateList').innerHTML = '';
+}
+
+async function parseDescription() {
+  const desc = document.getElementById('jobDesc').value.trim();
+  if (!desc) return;
+
+  document.getElementById('parseBtn').disabled = true;
+  document.getElementById('parseBtn').textContent = 'Interpreting...';
+
+  const prompt = `You are a QuickScreen fence quoting assistant. Extract job details from this description and return ONLY a JSON object (no markdown, no explanation):
+
+Description: "${desc}"
+
+Return this exact JSON structure with values filled in from the description, or null if not mentioned:
+{
+  "job": "<customer or job name or null>",
+  "system": "<QS65|QS90|XPRESS|POSTA|ENCLOSURE or null>",
+  "length": <number in metres or null>,
+  "height": <1200|1500|1800|2100|2400 or null>,
+  "colour": "<black|monument|woodland_grey|surfmist|pearl_white|basalt|dune|mill|palladium_silver or null>",
+  "spacing": <1800|2400|3000 — default 2400>,
+  "install": "<inground|surface — default inground>",
+  "capping": <true|false — default false>,
+  "tier": "<standard|mid|trade — default standard>",
+  "margin": <number or null>,
+  "corners": <number of 90° corners or turns in the fence run, default 0>,
+  "gates": [{"type":"<swing_single|swing_double|sliding|pedestrian>","width":<mm or null>,"motor":<true|false>}],
+  "summary": "<1-2 sentence plain English summary of what you understood>",
+  "missing": ["list of important things still needed to complete the quote"]
+}
+
+For system: if they say "65mm slat" use QS65, "90mm slat" use QS90, "XPRESS Plus" use XPRESS. If just "slat fence" default to QS65.`;
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content.map(b => b.text || '').join('').replace(/```json|```/g,'').trim();
+    const parsed = JSON.parse(text);
+    applyParsed(parsed);
+  } catch(e) {
+    alert('Could not interpret description. Please fill in the form manually.');
+    goBack(1);
+  }
+
+  document.getElementById('parseBtn').disabled = false;
+  document.getElementById('parseBtn').textContent = 'Interpret job description ↗';
+}
+
+function applyParsed(p) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step2').classList.add('active');
+
+  const set = (id, val, fieldId) => {
+    const el = document.getElementById(id);
+    if (!el || val === null || val === undefined) {
+      if (el) el.classList.add('needs-input');
+      return;
+    }
+    if (el.tagName === 'SELECT') {
+      for (let o of el.options) { if (o.value == val) { el.value = val; break; } }
+    } else {
+      el.value = val;
+    }
+    el.classList.add('prefilled');
+  };
+
+  set('f_job', p.job);
+  set('f_system', p.system);
+  set('f_length', p.length);
+  set('f_height', p.height ? String(p.height) : null);
+  set('f_colour', p.colour);
+  set('f_spacing', p.spacing ? String(p.spacing) : '2400');
+  set('f_install', p.install || 'inground');
+  set('f_tier', p.tier || 'standard');
+  if (p.margin) set('f_margin', p.margin);
+  if (p.corners != null) set('f_corners', p.corners);
+  if (p.capping) document.getElementById('f_capping').checked = true;
+
+  document.getElementById('f_gateList').innerHTML = '';
+  gateCount = 0;
+  if (p.gates && p.gates.length > 0) {
+    p.gates.forEach(g => addGate(g));
+  }
+
+  let summaryHtml = `<strong>Understood:</strong> ${p.summary || 'Job description interpreted.'}`;
+  if (p.missing && p.missing.length > 0) {
+    summaryHtml += `<br><br><strong>Still needed:</strong> ${p.missing.join(', ')}.`;
+  }
+  document.getElementById('aiSummary').innerHTML = summaryHtml;
+}
+
+function addGate(prefill) {
+  gateCount++;
+  const id = gateCount;
+  const div = document.createElement('div');
+  div.className = 'gate-block';
+  div.id = 'fg_' + id;
+  div.innerHTML = `<div class="gate-title">Gate ${id}<button class="remove-btn" onclick="document.getElementById('fg_${id}').remove()">Remove</button></div>
+  <div class="field-row triple">
+    <div class="field"><label>Type</label>
+      <select id="fg_type_${id}">
+        <option value="swing_single">Single swing</option>
+        <option value="swing_double">Double swing</option>
+        <option value="sliding">Sliding</option>
+        <option value="pedestrian">Pedestrian</option>
+      </select>
+    </div>
+    <div class="field"><label>Opening width (mm)</label><input type="number" id="fg_width_${id}" placeholder="e.g. 3000"></div>
+    <div class="field"><label>Motor?</label>
+      <select id="fg_motor_${id}"><option value="no">No</option><option value="yes">Yes — motorised</option></select>
+    </div>
+  </div>`;
+  document.getElementById('f_gateList').appendChild(div);
+
+  if (prefill) {
+    if (prefill.type) document.getElementById('fg_type_' + id).value = prefill.type;
+    if (prefill.width) { document.getElementById('fg_width_' + id).value = prefill.width; document.getElementById('fg_width_' + id).classList.add('prefilled'); }
+    if (prefill.motor) document.getElementById('fg_motor_' + id).value = 'yes';
+    if (prefill.type) { document.getElementById('fg_type_' + id).classList.add('prefilled'); document.getElementById('fg_motor_' + id).classList.add('prefilled'); }
+  }
+}
+
+function fmt(n) { return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,','); }
+
+function generateBOM() {
+  const system = document.getElementById('f_system').value;
+  const lengthM = parseFloat(document.getElementById('f_length').value) || 0;
+  const heightMm = parseInt(document.getElementById('f_height').value) || 0;
+  if (!system || !lengthM || !heightMm) { alert('Please fill in system type, run length and height.'); return; }
+  if (system === 'POSTA' || system === 'ENCLOSURE') { alert('POSTA letterbox and Equipment Enclosure BOMs require manual configuration. Use the Chat BOM assistant for these systems.'); return; }
+
+  const colourEl = document.getElementById('f_colour');
+  const colourLabel = colourEl.value ? colourEl.options[colourEl.selectedIndex].text : 'unspecified';
+  const systemEl = document.getElementById('f_system');
+  const systemLabel = systemEl.options[systemEl.selectedIndex].text;
+  const tier = document.getElementById('f_tier').value;
+  const tierIdx = {standard:0, mid:1, trade:2}[tier] || 0;
+  const marginPct = parseFloat(document.getElementById('f_margin').value) || 0;
+  const basePlate = document.getElementById('f_install').value === 'surface';
+
+  // Colour suffix map — real QuickScreen colour codes only
+  const colMap = {black:'B', monument:'MN', woodland_grey:'G', surfmist:'SM', pearl_white:'W', basalt:'BS', dune:'D', mill:'M', palladium_silver:'S'};
+  const colSfx = colMap[colourEl.value] || 'B';
+
+  // Price table: [price_1, price_2, price_3] — from product_list.csv
+  const PR = {
+    'XP-6100-S65':      [37.29, 34.65, 32.95],
+    'QS-6100-S90':      [50.49, 46.09, 43.89],
+    'XP-6100-GB65':     [55.36, 50.93, 48.72],
+    'QS-5800-SF':       [24.35, 23.16, 21.80],
+    'QS-5800-CFC':      [16.92, 15.94, 14.92],
+    'XP-5800-CSR':      [43.48, 39.56, 34.79],
+    'QS-SFC-B':         [0.86,  0.81,  0.74 ],
+    'XP-BTP':           [4.64,  4.13,  3.71 ],
+    'XP-CSRC':          [1.03,  0.92,  0.82 ],
+    'XP-SCREWS':        [6.06,  5.70,  4.91 ],
+    'XP-SCREWSGF-10PK': [3.02,  2.83,  2.43 ],
+    'XPL-SB-50PK-05MM': [3.01,  2.90,  2.41 ],
+    'XPL-SB-50PK-09MM': [3.01,  2.90,  2.41 ],
+    'XPL-SB-50PK-20MM': [3.56,  3.43,  2.85 ],
+    'XP-2400-FP':       [38.55, 36.25, 34.32],
+    'XP-2400-65HD':     [56.71, 53.80, 50.94],
+    'XP-BP-SET':        [9.79,  8.70,  7.83 ],
+    'XP-DC-2P':         [5.11,  4.56,  4.09 ],
+    'XP-65BP-SET':      [10.30, 9.16,  8.25 ],
+    'XP-65DC-2P':       [5.51,  4.95,  4.41 ],
+    'XP-6100-HD6545':   [124.56,118.33,112.10],
+    'XP-GKIT-LSET09':   [157.41,146.40,133.81],
+    'XP-GKIT-LSET09-M': [132.00,122.74,112.20],
+    'XPSG-6100-TR':     [147.48,140.10,131.26],
+    'XPSG-6100-BR':     [147.48,140.10,131.26],
+    'XPSG-WHEEL':       [21.53, 19.38, 19.38],
+    'XPSG-WHEEL-CS':    [6.00,  5.40,  5.40 ],
+    'XPSG-TOPROLL-2PK': [37.96, 34.15, 34.15],
+    'XPSG-GUIDE':       [38.69, 35.06, 35.06],
+    'XPSG-STOP':        [18.20, 15.64, 15.64],
+    'XPSG-CATCH-U':     [13.88, 12.50, 12.50],
+    'XPSG-3000-TRACK-ST':[26.52,24.29, 22.53],
+    'XPSG-6000-TRACK-ST':[50.44,46.46, 44.52],
+    'XPSG-ANCHOR':      [0.72,  0.64,  0.58 ],
+    'XPSG-2700-ST65':   [54.96, 54.96, 54.96],
+    'ML-TL-KF-H-FT':    [61.48, 61.48, 61.48],
+  };
+  function p(code) { return (PR[code] || [0,0,0])[tierIdx]; }
+
+  // Slat count formula (§1.3 calculation_rules.md)
+  const slatW = system === 'QS90' ? 90 : 65;
+  const gap = 9; // standard 9mm gap
+  function numSlats(targetH, sw, g) {
+    let n = 3;
+    while (Math.round(n * (sw + g) - g + 3) <= targetH) n++;
+    return n - 1;
+  }
+  function actualH(n, sw, g) { return Math.round(n * (sw + g) - g + 3); }
+
+  // Panel layout (§8.1 calculation_rules.md)
+  const lengthMm = Math.round(lengthM * 1000);
+  const maxPanelW = 2600;
+  const numPanels = Math.ceil(lengthMm / maxPanelW);
+  const panelW = Math.round(lengthMm / numPanels);
+
+  // Slat quantities
+  const slatsPerPanel = numSlats(heightMm, slatW, gap);
+  const achievedH = actualH(slatsPerPanel, slatW, gap);
+  const totalSlats = slatsPerPanel * numPanels;
+  const slatCutLen = panelW - 15; // §1.2 FENCE deduction
+  const slatsPerStock = Math.max(1, Math.floor(6100 / slatCutLen));
+  const slatStocks = Math.ceil(totalSlats / slatsPerStock);
+
+  // Side frame quantities (§1.5, §1.6)
+  const sfCutLen = heightMm - 3;
+  const sfPerStock = Math.max(1, Math.floor(5800 / sfCutLen));
+  const totalSf = numPanels * 2;
+  const sfStocks = Math.ceil(totalSf / sfPerStock);
+
+  // Centre support rails (§1.4 — required for panels ≥ 2000mm)
+  const csrPerPanel = panelW >= 4000 ? 2 : panelW >= 2000 ? 1 : 0;
+  const totalCsr = numPanels * csrPerPanel;
+  const csrCutLen = heightMm - 6;
+  const csrPerStock = Math.max(1, Math.floor(5800 / csrCutLen));
+  const csrStocks = totalCsr > 0 ? Math.ceil(totalCsr / csrPerStock) : 0;
+
+  // Spacers (§1.8 — 2×(slats+1) per panel, in 50-packs)
+  const totalSpacers = numPanels * 2 * (slatsPerPanel + 1);
+  const spacerPacks = Math.ceil(totalSpacers / 50);
+
+  // Screws (§1.8 — slats×2×1.01 + CSR screws, in 100-packs)
+  const rawScrews = Math.ceil(totalSlats * 2 * 1.01 + totalCsr * slatsPerPanel);
+  const screwPacks = Math.ceil(rawScrews / 100);
+
+  // Posts (§7.2 — >1800mm uses 65mm HD; each 90° corner adds 1 extra post)
+  const use65Post = heightMm > 1800;
+  const numCorners = parseInt(document.getElementById('f_corners').value) || 0;
+  const numPosts = numPanels + 1 + numCorners;
+
+  const items = [];
+
+  // ── Screening Material ──────────────────────────────────────────────────────
+  const slatBase = slatW === 90 ? 'QS-6100-S90' : 'XP-6100-S65';
+  items.push({
+    group: 'Screening Material',
+    sku: `${slatBase}-${colSfx}`,
+    desc: `${slatW}mm slat ${colSfx} 6100mm · ${slatsPerPanel} slats/panel × ${numPanels} panels = ${totalSlats} slats · ${slatsPerStock}/length → ${slatStocks} lengths`,
+    unit: 'length', qty: slatStocks, price: p(slatBase)
+  });
+  items.push({
+    group: 'Screening Material',
+    sku: 'XPL-SB-50PK-09MM',
+    desc: `9mm spacer blocks 50-pack · ${totalSpacers} spacers needed → ${spacerPacks} packs`,
+    unit: 'pack', qty: spacerPacks, price: p('XPL-SB-50PK-09MM')
+  });
+
+  // ── Frames ──────────────────────────────────────────────────────────────────
+  items.push({
+    group: 'Frames',
+    sku: `QS-5800-SF-${colSfx}`,
+    desc: `Side frame ${colSfx} 5800mm · ${totalSf} frames · ${sfPerStock}/length → ${sfStocks} lengths`,
+    unit: 'length', qty: sfStocks, price: p('QS-5800-SF')
+  });
+  items.push({
+    group: 'Frames',
+    sku: `QS-5800-CFC-${colSfx}`,
+    desc: `Concealed fixing cover ${colSfx} 5800mm · 1:1 with side frames`,
+    unit: 'length', qty: sfStocks, price: p('QS-5800-CFC')
+  });
+  items.push({
+    group: 'Frames',
+    sku: 'QS-SFC-B',
+    desc: `Side frame end caps (nylon, black) · 2 per frame × ${totalSf} frames`,
+    unit: 'ea', qty: totalSf * 2, price: p('QS-SFC-B')
+  });
+  items.push({
+    group: 'Frames',
+    sku: `XP-SCREWS-${colSfx}`,
+    desc: `Screening screws 100-pack · ${rawScrews} needed → ${screwPacks} packs`,
+    unit: 'pack', qty: screwPacks, price: p('XP-SCREWS')
+  });
+
+  if (totalCsr > 0) {
+    items.push({
+      group: 'Frames',
+      sku: `XP-5800-CSR-${colSfx}`,
+      desc: `Centre support rail ${colSfx} 5800mm · ${totalCsr} rails · ${csrPerStock}/length → ${csrStocks} lengths (panels ≥ 2000mm)`,
+      unit: 'length', qty: csrStocks, price: p('XP-5800-CSR')
+    });
+    items.push({
+      group: 'Frames',
+      sku: 'XP-CSRC-B',
+      desc: `CSR end caps (nylon) · 1 per rail`,
+      unit: 'ea', qty: totalCsr, price: p('XP-CSRC')
+    });
+    items.push({
+      group: 'Frames',
+      sku: `XP-BTP-${colSfx}`,
+      desc: `CSR base/top plates · 2 per rail (top + bottom)`,
+      unit: 'ea', qty: totalCsr * 2, price: p('XP-BTP')
+    });
+  }
+
+  // ── Posts ────────────────────────────────────────────────────────────────────
+  const postBase = use65Post ? 'XP-2400-65HD' : 'XP-2400-FP';
+  items.push({
+    group: 'Posts',
+    sku: `${postBase}-${colSfx}`,
+    desc: `${use65Post ? '65×65mm HD' : '50×50mm'} post 2400mm ${colSfx} · ${numPosts} posts`,
+    unit: 'ea', qty: numPosts, price: p(postBase)
+  });
+  if (basePlate) {
+    const bpBase = use65Post ? 'XP-65BP-SET' : 'XP-BP-SET';
+    const dcBase = use65Post ? 'XP-65DC-2P' : 'XP-DC-2P';
+    items.push({group:'Posts', sku:`${bpBase}-${colSfx}`, desc:`Base plate set ${colSfx} (${use65Post?'115×100':'100×100'}mm)`, unit:'set', qty:numPosts, price:p(bpBase)});
+    items.push({group:'Posts', sku:`${dcBase}-${colSfx}`, desc:`Domical cover 2-part ${colSfx} (suits ${use65Post?'65':'50'}mm post)`, unit:'ea', qty:numPosts, price:p(dcBase)});
+  }
+
+  // ── Gates ────────────────────────────────────────────────────────────────────
+  function gateBladeCount(hMm, sw, g) {
+    let n = 3;
+    while (Math.round(n * (sw + g) - g + 3) <= hMm) n++;
+    return n - 1;
+  }
+
+  for (let i = 1; i <= gateCount; i++) {
+    const gEl = document.getElementById('fg_' + i);
+    if (!gEl) continue;
+    const gtype = document.getElementById('fg_type_' + i)?.value;
+    const gwidth = parseInt(document.getElementById('fg_width_' + i)?.value) || 0;
+    const gmotor = document.getElementById('fg_motor_' + i)?.value === 'yes';
+    if (!gwidth) continue;
+
+    const isSliding = gtype === 'sliding';
+    const isDouble = gtype === 'swing_double';
+    const leaves = isDouble ? 2 : 1;
+    // Gate blades are always XP-6100-GB65 (only gate blade in catalogue)
+    const bladeCode = `XP-6100-GB65-${colSfx}`;
+    const blades = gateBladeCount(heightMm, 65, gap); // gate blades are 65mm
+    const bladeCutLen = Math.round(gwidth / leaves) - 15;
+    const bladesPerStock = Math.max(1, Math.floor(6100 / bladeCutLen));
+    const bladeStocks = Math.ceil((blades * leaves) / bladesPerStock);
+
+    if (isSliding) {
+      // ── Sliding Gate ──
+      const railCutLen = gwidth + 50;
+      const railStocks = railCutLen <= 6100 ? 1 : 2;
+
+      items.push({group:'Gate Components', sku:bladeCode,
+        desc:`65mm gate blade ${colSfx} 6100mm · ${blades} blades × 1 gate = ${blades*leaves} blades → ${bladeStocks} lengths`,
+        unit:'length', qty:bladeStocks, price:p('XP-6100-GB65')});
+      items.push({group:'Gate Components', sku:`XPSG-6100-TR-${colSfx}`,
+        desc:`Sliding gate top rail 65×82mm ${colSfx} 6100mm`,
+        unit:'length', qty:railStocks, price:p('XPSG-6100-TR')});
+      items.push({group:'Gate Components', sku:`XPSG-6100-BR-${colSfx}`,
+        desc:`Sliding gate bottom rail 120×45mm ${colSfx} 6100mm`,
+        unit:'length', qty:railStocks, price:p('XPSG-6100-BR')});
+      items.push({group:'Gate Components', sku:`XPSG-2700-ST65-${colSfx}`,
+        desc:`65×65mm galvanised steel post 2700mm ${colSfx} · 2 per gate`,
+        unit:'ea', qty:2, price:p('XPSG-2700-ST65')});
+      items.push({group:'Gate Hardware', sku:'XPSG-WHEEL',
+        desc:'Sliding gate wheel 80mm · 2 per gate', unit:'ea', qty:2, price:p('XPSG-WHEEL')});
+      items.push({group:'Gate Hardware', sku:'XPSG-WHEEL-CS',
+        desc:'Wheel clamping set 2-pack · 1 per wheel → 2 per gate', unit:'pk', qty:2, price:p('XPSG-WHEEL-CS')});
+      items.push({group:'Gate Hardware', sku:'XPSG-TOPROLL-2PK',
+        desc:'Top roller pair (nylon)', unit:'pk', qty:1, price:p('XPSG-TOPROLL-2PK')});
+      items.push({group:'Gate Hardware', sku:'XPSG-GUIDE',
+        desc:'Self-adjusting slide guide', unit:'ea', qty:1, price:p('XPSG-GUIDE')});
+      items.push({group:'Gate Hardware', sku:'XPSG-STOP',
+        desc:'Sliding gate bolt-down stop', unit:'ea', qty:1, price:p('XPSG-STOP')});
+      items.push({group:'Gate Hardware', sku:'XPSG-CATCH-U',
+        desc:'U-catch galvanised steel', unit:'ea', qty:1, price:p('XPSG-CATCH-U')});
+
+      const trackNeeded = gwidth * 2;
+      if (trackNeeded <= 3000) {
+        items.push({group:'Gate Hardware', sku:'XPSG-3000-TRACK-ST', desc:'Steel track 3000mm', unit:'ea', qty:1, price:p('XPSG-3000-TRACK-ST')});
+        items.push({group:'Gate Hardware', sku:'XPSG-ANCHOR', desc:'Track anchor pins (22 per 3m track)', unit:'ea', qty:22, price:p('XPSG-ANCHOR')});
+      } else {
+        const t6 = Math.ceil(trackNeeded / 6000);
+        items.push({group:'Gate Hardware', sku:'XPSG-6000-TRACK-ST', desc:`Steel track 6000mm ×${t6}`, unit:'ea', qty:t6, price:p('XPSG-6000-TRACK-ST')});
+        items.push({group:'Gate Hardware', sku:'XPSG-ANCHOR', desc:`Track anchor pins (42 per 6m track)`, unit:'ea', qty:42*t6, price:p('XPSG-ANCHOR')});
+      }
+      if (gmotor) items.push({group:'Gate Automation', sku:'XPSG-FILO-400', desc:'Linear gate motor kit — verify availability & rack length needed', unit:'kit', qty:1, price:726.55, verify:true});
+
+    } else {
+      // ── Pedestrian / Swing Gate ──
+      const kitBase = colSfx === 'M' ? 'XP-GKIT-LSET09-M' : 'XP-GKIT-LSET09';
+      const kitCode = `XP-GKIT-LSET09-${colSfx}`;
+      items.push({group:'Gate Components', sku:kitCode,
+        desc:`Gate lock box kit 9mm ${colSfx} · includes gate side frames, inserts, stops, caps, screw pack`,
+        unit:'kit', qty:leaves, price:p(kitBase)});
+
+      items.push({group:'Gate Components', sku:bladeCode,
+        desc:`65mm gate blade ${colSfx} 6100mm · ${blades} blades × ${leaves} leaf = ${blades*leaves} blades → ${bladeStocks} lengths`,
+        unit:'length', qty:bladeStocks, price:p('XP-6100-GB65')});
+
+      const hdCutLen = Math.round(gwidth / leaves);
+      const hdPerStock = Math.max(1, Math.floor(6100 / hdCutLen));
+      const hdStocks = Math.ceil((2 * leaves) / hdPerStock); // top + bottom per leaf
+      items.push({group:'Gate Components', sku:`XP-6100-HD6545-${colSfx}`,
+        desc:`HD gate rail 65×45mm ${colSfx} 6100mm · top + bottom per leaf → ${hdStocks} lengths`,
+        unit:'length', qty:hdStocks, price:p('XP-6100-HD6545')});
+
+      // Latch + hinge combo (Magna Latch + Kwik Fit — most common choice)
+      items.push({group:'Gate Hardware', sku:'ML-TL-KF-H-FT',
+        desc:'D&D Magna Latch (top pull lockable) + Kwik Fit hinge set — fixed tension pair',
+        unit:'set', qty:leaves, price:p('ML-TL-KF-H-FT')});
+      items.push({group:'Gate Hardware', sku:'XP-SCREWSGF-10PK',
+        desc:'Gate frame screws 12G×65mm 10-pack',
+        unit:'pk', qty:Math.max(1, Math.ceil(blades * leaves / 10)), price:p('XP-SCREWSGF-10PK')});
+
+      if (gmotor) items.push({group:'Gate Automation', sku:'GATE-MOTOR', desc:'Gate motor (consult supplier for model)', unit:'kit', qty:leaves, price:0, verify:true});
+    }
+  }
+
+  let subtotal = 0;
+  const tbody = document.getElementById('bom_body');
+  tbody.innerHTML = '';
+  let lastGroup = '';
+  items.forEach(it => {
+    const line = it.qty * it.price;
+    subtotal += line;
+    if (it.group !== lastGroup) {
+      lastGroup = it.group;
+      const gr = document.createElement('tr');
+      gr.className = 'group-row';
+      gr.innerHTML = `<td colspan="6">${it.group}</td>`;
+      tbody.appendChild(gr);
+    }
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td style="font-family:var(--font-mono);font-size:12px;">${it.sku}</td><td>${it.desc}${it.verify?'<span class="badge">verify</span>':''}</td><td>${it.unit}</td><td>${it.qty}</td><td>${fmt(it.price)}</td><td>${fmt(line)}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('bom_sub').textContent = fmt(subtotal);
+  let grand = subtotal;
+  const mrow = document.getElementById('bom_margin_row');
+  if (marginPct > 0) {
+    const ma = subtotal * marginPct / 100;
+    grand += ma;
+    document.getElementById('bom_margin_lbl').textContent = `Margin (${marginPct}%)`;
+    document.getElementById('bom_margin_amt').textContent = fmt(ma);
+    mrow.style.display = 'flex';
+  } else { mrow.style.display = 'none'; }
+  document.getElementById('bom_grand').textContent = fmt(grand);
+  document.getElementById('bom_title').textContent = document.getElementById('f_job').value || 'Fence quote';
+  document.getElementById('bom_meta').textContent = `${systemLabel} · ${lengthM}m · target ${heightMm}mm → actual ${achievedH}mm (${slatsPerPanel} slats) · ${colourLabel}`;
+
+  // Site plan from fence mapper (if used)
+  const sitePlanDiv = document.getElementById('bom-site-plan');
+  if (sitePlanDiv) {
+    const dataURL = (typeof fmGetSitePlanDataURL === 'function') ? fmGetSitePlanDataURL() : null;
+    if (dataURL) {
+      sitePlanDiv.innerHTML = `<img src="${dataURL}" alt="Fence layout diagram"><div class="fm-plan-label">Site plan (from fence layout mapper)</div>`;
+    } else {
+      sitePlanDiv.innerHTML = '';
+    }
+  }
+
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step3').classList.add('active');
+}
+
+function askClaude() {
+  const title = document.getElementById('bom_title').textContent;
+  const meta = document.getElementById('bom_meta').textContent;
+  const grand = document.getElementById('bom_grand').textContent;
+  sendPrompt(`Please review this QuickScreen BOM — ${title}: ${meta}, total ${grand}. Check quantities using the quickscreen-bom skill, flag anything missing, and confirm the calculations look right.`);
+}
+</script>
+<div id="fm-toast"></div>
+<script src="fence-mapper.js"></script>

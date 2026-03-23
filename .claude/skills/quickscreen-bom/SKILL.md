@@ -452,3 +452,29 @@ This section documents every fix applied to the BOM generator app. Update this i
 - Hardware: `ML-TL-KF-H-FT` ($61.48) replaces fake `XP-HINGE-TC` + `XP-LATCH-ML` codes
 - Gate frame screws: `XP-SCREWSGF-10PK` ($3.02) — correct product (12G×65mm)
 - Old `XP-4200-GSTOP` removed from pedestrian gate — now covered by gate kit
+
+### 2026-03-23 — Interactive fence layout mapper added
+
+**New files added**
+- `Desktop/fence-mapper.js` — `FM` module: canvas-based node/segment polyline, gate placement, run summary, apply-to-calculator, site plan export, serialisation
+- `Desktop/fence-mapper.css` — all mapper styles matching app CSS variable scheme
+
+**Changes to `quickscreen_bom_ai_intake.html`**
+- Added collapsible "Map Your Fence Layout" section in step1, between describe card and examples card
+  - HTML5 canvas with 50px grid, ghost preview overlay, responsive (min 700px)
+  - Toolbar: Draw / Gate / Move / Undo / Clear All modes
+  - Grid snap + scale control (mm per grid square, default 1000)
+  - Node labels (A, B, C…), segment length labels, corner angle display
+  - Gate placement on segments via click — dashed gap, double-arrow, width prompt
+  - Run summary table: segment, length, gates, net fence, corner angle
+  - Totals: total fence length, corner count, gate count
+  - "Use This Layout" button: sets `f_length`, `f_corners`, prepends layout note to `jobDesc`, adds gates, shows toast; warns before overwriting existing values
+  - Site plan PNG embedded in BOM output
+  - Touch support; Ctrl+Z undo; Esc cancels draw
+- Added `f_corners` field to step2 Job & system card (90° corners count)
+- `generateBOM()` now reads `f_corners` — adds 1 extra post per corner: `numPosts = numPanels + 1 + numCorners`
+- AI parse prompt now extracts `"corners"` field
+- `applyParsed()` now sets `f_corners` from parsed JSON
+- Added `resetGates()` helper (clears gate list before re-populating from mapper)
+- Added `<div id="bom-site-plan">` in step3 — populated with mapper PNG on BOM generation
+- Added `<div id="fm-toast">` for toast notifications
