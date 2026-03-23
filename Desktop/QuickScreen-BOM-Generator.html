@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuickScreen BOM Generator</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#222;font-size:14px}
+  h1{font-size:20px;font-weight:700;color:#fff}
+  h2{font-size:15px;font-weight:600;color:#1a4480;margin-bottom:10px}
+  .header{background:linear-gradient(135deg,#1a4480,#2563a8);padding:14px 24px;display:flex;align-items:center;gap:12px;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+  .header .logo{font-size:26px;line-height:1}
+  .header small{color:#c9dff5;font-size:12px;display:block;margin-top:2px}
+  .main{max-width:1100px;margin:0 auto;padding:20px 16px}
+  .card{background:#fff;border-radius:8px;border:1px solid #dde3ed;padding:18px 20px;margin-bottom:16px}
+  .nl-area{width:100%;min-height:70px;border:2px solid #c9dff5;border-radius:6px;padding:10px;font-size:14px;resize:vertical;line-height:1.5}
+  .nl-area:focus{outline:none;border-color:#2563a8}
+  .nl-hint{font-size:12px;color:#666;margin-top:6px;font-style:italic}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:6px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:.15s}
+  .btn-primary{background:#2563a8;color:#fff}.btn-primary:hover{background:#1a4480}
+  .btn-success{background:#16a34a;color:#fff}.btn-success:hover{background:#15803d}
+  .btn-outline{background:#fff;color:#2563a8;border:1.5px solid #2563a8}.btn-outline:hover{background:#eef4fc}
+  .btn-danger{background:#dc2626;color:#fff}.btn-danger:hover{background:#b91c1c}
+  .btn-sm{padding:5px 11px;font-size:12px}
+  .row{display:grid;gap:14px}
+  .row-2{grid-template-columns:1fr 1fr}
+  .row-3{grid-template-columns:1fr 1fr 1fr}
+  .row-4{grid-template-columns:1fr 1fr 1fr 1fr}
+  label{display:block;font-size:12px;font-weight:600;color:#444;margin-bottom:4px}
+  input[type=number],select,input[type=text]{width:100%;border:1.5px solid #ccd4e0;border-radius:5px;padding:7px 9px;font-size:13px;color:#222}
+  input:focus,select:focus{outline:none;border-color:#2563a8}
+  .form-note{font-size:11px;color:#888;margin-top:3px}
+  .calc-box{background:#f0f6ff;border:1px solid #bfd4f0;border-radius:6px;padding:12px 16px;margin:10px 0;font-size:13px}
+  .calc-row{display:flex;justify-content:space-between;padding:2px 0}
+  .calc-row strong{color:#1a4480}
+  .warn{background:#fff7ed;border:1px solid #f59e0b;border-radius:6px;padding:10px 14px;margin:8px 0;font-size:12px;color:#92400e}
+  .warn::before{content:'⚠ ';font-weight:700}
+  .bom-section{margin-bottom:10px}
+  .bom-section h3{font-size:12px;font-weight:700;color:#fff;background:#1a4480;padding:5px 12px;border-radius:4px 4px 0 0;letter-spacing:.5px;text-transform:uppercase}
+  table{width:100%;border-collapse:collapse}
+  th{background:#f3f6fc;font-size:11px;font-weight:700;color:#444;text-align:left;padding:7px 10px;border-bottom:2px solid #dde3ed}
+  td{padding:6px 10px;border-bottom:1px solid #eee;font-size:13px}
+  tr:last-child td{border-bottom:none}
+  .td-r{text-align:right}
+  .td-code{font-family:monospace;font-size:12px;color:#2563a8}
+  .total-row td{font-weight:700;font-size:14px;background:#f0f6ff;border-top:2px solid #2563a8}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .tier-tabs{display:flex;gap:4px;margin-bottom:12px}
+  .tier-tab{padding:5px 14px;border:1.5px solid #ccd4e0;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;color:#555;background:#fff}
+  .tier-tab.active{background:#2563a8;border-color:#2563a8;color:#fff}
+  .quote-header{display:none}
+  #bom-output{display:none}
+  .empty-state{text-align:center;padding:40px 20px;color:#888}
+  .empty-state div{font-size:40px;margin-bottom:8px}
+  .tag{display:inline-block;background:#e0edff;color:#1a4480;border-radius:3px;padding:1px 6px;font-size:11px;font-weight:600;margin-left:4px}
+  .highlight{background:#fffbe6}
+  select option[disabled]{color:#aaa}
+  .slat-calc{background:#1a4480;color:#fff;border-radius:6px;padding:12px 16px;font-family:monospace;font-size:13px;margin:10px 0;line-height:1.8}
+  .slat-calc .divider{border-top:1px solid #4a6fa5;margin:6px 0}
+  .slat-option{cursor:pointer;padding:3px 8px;border-radius:3px;margin:2px 0;display:flex;align-items:center;gap:8px}
+  .slat-option:hover{background:#2563a8}
+  .slat-option.selected{background:#16a34a}
+  .slat-option .badge{background:#16a34a;color:#fff;font-size:10px;padding:1px 5px;border-radius:2px}
+  .slat-option.closest .badge{background:#f59e0b;color:#000}
+
+  @media print {
+    body{background:#fff;font-size:12px}
+    .no-print,.header .logo,.nl-area,.btn,.tier-tabs,.actions{display:none!important}
+    .card{border:none;padding:0;margin:0}
+    .quote-header{display:block!important;margin-bottom:16px}
+    .main{max-width:100%;padding:0}
+    #bom-output{display:block!important}
+    .header{background:#1a4480!important;padding:10px 20px}
+    h1{font-size:16px}
+    table{font-size:11px}
+    th,td{padding:4px 8px}
+    .bom-section h3{font-size:10px;padding:3px 8px}
+    .warn{display:none}
+    @page{margin:15mm}
+  }
+  @media (max-width:700px){.row-3,.row-4{grid-template-columns:1fr 1fr}.row-2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">🏗</div>
+  <div>
+    <h1>QuickScreen BOM Generator</h1>
+    <small>Horizontal Slat Fence &amp; Screen — Live pricing from product list</small>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- NL INPUT -->
+  <div class="card no-print">
+    <h2>📝 Describe the Job</h2>
+    <textarea class="nl-area" id="nl-input" placeholder='e.g. "20 metres of 65mm slat fence, 1800mm high in Surfmist, 9mm gaps, concreted posts, freestanding post to post, no gates"'></textarea>
+    <div class="nl-hint">Plain English OK — I'll extract length, height, colour, slat size, gap, post type, and termination style.</div>
+    <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+      <button class="btn btn-primary" onclick="parseNL()">⚡ Parse Description</button>
+      <button class="btn btn-outline btn-sm" onclick="clearAll()">Clear</button>
+      <span id="parse-status" style="font-size:12px;color:#16a34a;font-weight:600"></span>
+    </div>
+  </div>
+
+  <!-- CONFIG FORM -->
+  <div class="card no-print">
+    <h2>⚙ Configuration</h2>
+
+    <div class="row row-3" style="margin-bottom:14px">
+      <div>
+        <label>Customer / Job Reference</label>
+        <input type="text" id="customer" placeholder="e.g. Smith Residence – Side Fence">
+      </div>
+      <div>
+        <label>Total Run Length (mm)</label>
+        <input type="number" id="runLength" value="20000" min="100" step="100" oninput="onConfigChange()">
+      </div>
+      <div>
+        <label>Target Height (mm)</label>
+        <input type="number" id="targetHeight" value="1800" min="300" step="1" oninput="onConfigChange()">
+      </div>
+    </div>
+
+    <div class="row row-4" style="margin-bottom:14px">
+      <div>
+        <label>Slat Size</label>
+        <select id="slatSize" onchange="onConfigChange()">
+          <option value="65">65mm (denser)</option>
+          <option value="90">90mm (more open)</option>
+        </select>
+      </div>
+      <div>
+        <label>Slat Gap</label>
+        <select id="slatGap" onchange="onConfigChange()">
+          <option value="5">5mm — near-privacy</option>
+          <option value="9" selected>9mm — standard</option>
+          <option value="20">20mm — open/decorative</option>
+        </select>
+      </div>
+      <div>
+        <label>Colour</label>
+        <select id="colour" onchange="onConfigChange()">
+          <option value="B">Black Satin</option>
+          <option value="MN">Monument Matt</option>
+          <option value="G">Woodland Grey Matt</option>
+          <option value="SM" selected>Surfmist Matt</option>
+          <option value="W">Pearl White Gloss</option>
+          <option value="BS">Basalt Satin</option>
+          <option value="D">Dune Satin</option>
+          <option value="M">Mill (raw aluminium)</option>
+          <option value="P">Primrose ⚠ Limited</option>
+          <option value="PB">Paperbark ⚠ Limited</option>
+          <option value="S">Palladium Silver Pearl</option>
+        </select>
+      </div>
+      <div>
+        <label>Max Panel Width (mm)</label>
+        <select id="maxPanel" onchange="onConfigChange()">
+          <option value="2600" selected>2600mm (standard)</option>
+          <option value="2000">2000mm (windy area)</option>
+        </select>
+        <div class="form-note">Windy/exposed sites use 2000mm max</div>
+      </div>
+    </div>
+
+    <div class="row row-4" style="margin-bottom:14px">
+      <div>
+        <label>Left End Termination</label>
+        <select id="leftTerm" onchange="onConfigChange()">
+          <option value="post">Post</option>
+          <option value="wall">Wall (F-section)</option>
+        </select>
+      </div>
+      <div>
+        <label>Right End Termination</label>
+        <select id="rightTerm" onchange="onConfigChange()">
+          <option value="post">Post</option>
+          <option value="wall">Wall (F-section)</option>
+        </select>
+      </div>
+      <div>
+        <label>Post Mounting</label>
+        <select id="postMount" onchange="onConfigChange()">
+          <option value="concreted">Concreted in ground</option>
+          <option value="baseplate">Base-plated to slab</option>
+          <option value="coredrilled">Core-drilled into concrete</option>
+        </select>
+      </div>
+      <div>
+        <label>90° Corners in Run</label>
+        <input type="number" id="corners" value="0" min="0" max="10" step="1" oninput="onConfigChange()">
+        <div class="form-note">Each corner adds 1 post</div>
+      </div>
+    </div>
+
+    <!-- Slat Calculator -->
+    <div id="slat-calc-box"></div>
+
+    <!-- Warnings -->
+    <div id="warnings"></div>
+
+    <div style="display:flex;gap:10px;align-items:center;margin-top:14px">
+      <button class="btn btn-success" onclick="generateBOM()">📋 Generate BOM</button>
+    </div>
+  </div>
+
+  <!-- BOM OUTPUT -->
+  <div id="bom-output">
+
+    <div class="quote-header">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-size:18px;font-weight:700;color:#1a4480">MATERIAL QUOTE</div>
+          <div id="q-customer" style="font-size:14px;margin-top:4px"></div>
+        </div>
+        <div style="text-align:right;font-size:12px;color:#666">
+          <div id="q-date"></div>
+          <div style="margin-top:2px">QuickScreen Horizontal Slat System</div>
+        </div>
+      </div>
+      <hr style="margin:10px 0;border-color:#dde3ed">
+    </div>
+
+    <div class="card" id="bom-config-summary" style="margin-bottom:10px;padding:12px 16px"></div>
+
+    <!-- Price Tier -->
+    <div class="no-print" style="margin-bottom:8px">
+      <div style="font-size:12px;font-weight:600;color:#444;margin-bottom:6px">Pricing Tier:</div>
+      <div class="tier-tabs">
+        <div class="tier-tab active" onclick="setTier(1,this)">Tier 1 — Standard</div>
+        <div class="tier-tab" onclick="setTier(2,this)">Tier 2 — Mid Volume</div>
+        <div class="tier-tab" onclick="setTier(3,this)">Tier 3 — Trade</div>
+      </div>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden">
+      <div id="bom-tables"></div>
+      <div style="padding:14px 16px;background:#f0f6ff;border-top:2px solid #2563a8;display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:13px;color:#444">All prices ex-GST &nbsp;|&nbsp; Tier <span id="tier-label">1</span></div>
+        <div style="font-size:20px;font-weight:700;color:#1a4480">TOTAL: $<span id="grand-total">0.00</span></div>
+      </div>
+    </div>
+
+    <div class="no-print actions" style="margin-top:12px">
+      <button class="btn btn-primary" onclick="window.print()">🖨 Print Quote</button>
+      <button class="btn btn-outline" onclick="exportCSV()">📥 Export CSV</button>
+      <button class="btn btn-outline" onclick="copyBOM()">📋 Copy to Clipboard</button>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+// ─── PRODUCT PRICE DATABASE ──────────────────────────────────────────────────
+// Format: code → [price1, price2, price3]
+const P = {
+  // 65mm slats
+  'XP-6100-S65-B':[37.29,34.65,32.95],'XP-6100-S65-BS':[37.29,34.65,32.95],
+  'XP-6100-S65-D':[37.29,34.65,32.95],'XP-6100-S65-G':[37.29,34.65,32.95],
+  'XP-6100-S65-M':[29.59,28.05,26.95],'XP-6100-S65-MN':[37.29,34.65,32.95],
+  'XP-6100-S65-P':[37.29,34.65,32.95],'XP-6100-S65-PB':[37.29,34.65,32.95],
+  'XP-6100-S65-S':[37.29,34.65,32.95],'XP-6100-S65-SM':[37.29,34.65,32.95],
+  'XP-6100-S65-W':[37.29,34.65,32.95],
+  // 90mm slats
+  'QS-6100-S90-B':[50.49,46.09,43.89],'QS-6100-S90-BS':[50.49,46.09,43.89],
+  'QS-6100-S90-D':[50.49,46.09,43.89],'QS-6100-S90-G':[50.49,46.09,43.89],
+  'QS-6100-S90-M':[41.69,39.05,35.09],'QS-6100-S90-MN':[50.49,46.09,43.89],
+  'QS-6100-S90-P':[50.49,41.9,39.9],'QS-6100-S90-PB':[50.49,41.9,39.9],
+  'QS-6100-S90-S':[50.49,46.09,43.89],'QS-6100-S90-SM':[50.49,46.09,43.89],
+  'QS-6100-S90-W':[50.49,46.09,43.89],
+  // Side Frames
+  'QS-5800-SF-B':[24.35,23.16,21.8],'QS-5800-SF-BS':[24.35,23.16,21.8],
+  'QS-5800-SF-D':[24.35,23.16,21.8],'QS-5800-SF-G':[24.35,23.16,21.8],
+  'QS-5800-SF-M':[19.78,19.02,17.91],'QS-5800-SF-MN':[24.35,23.16,21.8],
+  'QS-5800-SF-P':[24.35,23.16,21.8],'QS-5800-SF-PB':[24.35,23.16,21.8],
+  'QS-5800-SF-S':[24.35,23.16,21.8],'QS-5800-SF-SM':[24.35,23.16,21.8],
+  'QS-5800-SF-W':[24.35,23.16,21.8],
+  // CFC Cover
+  'QS-5800-CFC-B':[16.92,15.94,14.92],'QS-5800-CFC-BS':[16.92,15.94,14.92],
+  'QS-5800-CFC-D':[16.92,15.94,14.92],'QS-5800-CFC-G':[16.92,15.94,14.92],
+  'QS-5800-CFC-M':[12.54,11.77,11.02],'QS-5800-CFC-MN':[16.92,15.94,14.92],
+  'QS-5800-CFC-P':[16.92,15.94,14.92],'QS-5800-CFC-PB':[16.92,15.94,14.92],
+  'QS-5800-CFC-S':[16.92,15.94,14.92],'QS-5800-CFC-SM':[16.92,15.94,14.92],
+  'QS-5800-CFC-W':[16.92,15.94,14.92],
+  // F-Section
+  'QS-5800-F-B':[36.89,34.68,32.47],'QS-5800-F-BS':[36.89,34.68,32.47],
+  'QS-5800-F-D':[36.89,34.68,32.47],'QS-5800-F-G':[36.89,34.68,32.47],
+  'QS-5800-F-M':[25.5,23.97,22.43],'QS-5800-F-MN':[36.89,34.68,32.47],
+  'QS-5800-F-P':[36.89,34.68,32.47],'QS-5800-F-PB':[36.89,34.68,32.47],
+  'QS-5800-F-S':[36.89,34.68,32.47],'QS-5800-F-SM':[36.89,34.68,32.47],
+  'QS-5800-F-W':[36.89,34.68,32.47],
+  // CSR
+  'XP-5800-CSR-B':[43.48,39.56,34.79],'XP-5800-CSR-BS':[43.48,39.56,34.79],
+  'XP-5800-CSR-D':[43.48,39.56,34.79],'XP-5800-CSR-G':[43.48,39.56,34.79],
+  'XP-5800-CSR-M':[33.09,30.11,26.48],'XP-5800-CSR-MN':[43.48,39.56,34.79],
+  'XP-5800-CSR-P':[43.48,39.56,34.79],'XP-5800-CSR-PB':[43.48,39.56,34.79],
+  'XP-5800-CSR-S':[43.48,39.56,34.79],'XP-5800-CSR-SM':[43.48,39.56,34.79],
+  'XP-5800-CSR-W':[43.48,39.56,34.79],
+  // CSR Caps (limited colours — B used as fallback)
+  'XP-CSRC-B':[1.03,0.92,0.82],'XP-CSRC-G':[1.03,0.92,0.82],
+  'XP-CSRC-MN':[1.03,0.92,0.82],'XP-CSRC-S':[1.03,0.92,0.82],
+  'XP-CSRC-SM':[1.03,0.92,0.82],'XP-CSRC-W':[1.03,0.92,0.82],
+  // CSR Plates
+  'XP-BTP-B':[4.64,4.13,3.71],'XP-BTP-BS':[4.64,4.13,3.71],
+  'XP-BTP-D':[4.64,4.13,3.71],'XP-BTP-G':[4.64,4.13,3.71],
+  'XP-BTP-M':[4.06,3.61,3.23],'XP-BTP-MN':[4.64,4.13,3.71],
+  'XP-BTP-S':[4.64,4.13,3.71],'XP-BTP-SM':[4.64,4.13,3.71],
+  'XP-BTP-W':[4.46,3.97,3.57],
+  // SF Caps (black nylon only)
+  'QS-SFC-B':[0.86,0.81,0.74],
+  // 50mm Posts 2400mm
+  'XP-2400-FP-B':[38.55,36.25,34.32],'XP-2400-FP-BS':[38.55,36.25,34.32],
+  'XP-2400-FP-D':[38.55,36.25,34.32],'XP-2400-FP-G':[38.55,36.25,34.32],
+  'XP-2400-FP-M':[30.54,28.71,27.2],'XP-2400-FP-MN':[38.55,36.25,34.32],
+  'XP-2400-FP-P':[37.07,34.86,33],'XP-2400-FP-PB':[37.07,34.86,33],
+  'XP-2400-FP-S':[38.55,36.25,34.32],'XP-2400-FP-SM':[38.55,36.25,34.32],
+  'XP-2400-FP-W':[38.55,36.25,34.32],
+  // 65mm HD Posts 2400mm
+  'XP-2400-65HD-B':[56.71,53.8,50.94],'XP-2400-65HD-BS':[56.71,53.8,50.94],
+  'XP-2400-65HD-D':[56.71,53.8,50.94],'XP-2400-65HD-G':[56.71,53.8,50.94],
+  'XP-2400-65HD-M':[46.33,43.95,41.62],'XP-2400-65HD-MN':[56.71,53.8,50.94],
+  'XP-2400-65HD-S':[56.71,53.8,50.94],'XP-2400-65HD-SM':[56.71,53.8,50.94],
+  'XP-2400-65HD-W':[56.71,53.8,50.94],
+  // Base Plates 50mm
+  'XP-BP-SET-B':[9.79,8.7,7.83],'XP-BP-SET-BS':[9.79,8.7,7.83],
+  'XP-BP-SET-D':[9.79,8.7,7.83],'XP-BP-SET-G':[9.79,8.7,7.83],
+  'XP-BP-SET-M':[8.55,7.61,6.83],'XP-BP-SET-MN':[9.79,8.7,7.83],
+  'XP-BP-SET-P':[9.41,8.37,7.53],'XP-BP-SET-PB':[9.41,8.37,7.53],
+  'XP-BP-SET-S':[9.79,8.7,7.83],'XP-BP-SET-SM':[9.79,8.7,7.83],
+  'XP-BP-SET-W':[9.79,8.7,7.83],
+  // Base Plates 65mm
+  'XP-65BP-SET-B':[10.3,9.16,8.25],'XP-65BP-SET-BS':[10.3,9.16,8.25],
+  'XP-65BP-SET-D':[10.3,9.16,8.25],'XP-65BP-SET-G':[10.3,9.16,8.25],
+  'XP-65BP-SET-M':[9.26,8.24,7.4],'XP-65BP-SET-MN':[10.3,9.16,8.25],
+  'XP-65BP-SET-S':[10.3,9.16,8.25],'XP-65BP-SET-SM':[10.3,9.16,8.25],
+  'XP-65BP-SET-W':[10.3,9.16,8.25],
+  // Domical Cover 50mm
+  'XP-DC-2P-B':[5.11,4.56,4.09],'XP-DC-2P-BS':[5.11,4.56,4.09],
+  'XP-DC-2P-D':[5.11,4.56,4.09],'XP-DC-2P-G':[5.11,4.56,4.09],
+  'XP-DC-2P-M':[4.42,3.94,3.55],'XP-DC-2P-MN':[5.11,4.56,4.09],
+  'XP-DC-2P-S':[5.11,4.56,4.09],'XP-DC-2P-SM':[5.11,4.56,4.09],
+  'XP-DC-2P-W':[5.11,4.56,4.09],
+  // Domical Cover 65mm
+  'XP-65DC-2P-B':[5.51,4.95,4.41],'XP-65DC-2P-BS':[5.51,4.95,4.41],
+  'XP-65DC-2P-D':[5.51,4.95,4.41],'XP-65DC-2P-G':[5.51,4.95,4.41],
+  'XP-65DC-2P-M':[5.01,4.5,4],'XP-65DC-2P-MN':[5.51,4.95,4.41],
+  'XP-65DC-2P-S':[5.51,4.95,4.41],'XP-65DC-2P-SM':[5.51,4.95,4.41],
+  'XP-65DC-2P-W':[5.51,4.95,4.41],
+  // Dress Rings 50mm
+  'XP-DR-B':[2.35,2.11,2],'XP-DR-BS':[2.35,2.11,2],'XP-DR-D':[2.35,2.11,2],
+  'XP-DR-G':[2.35,2.11,2],'XP-DR-M':[1.98,1.78,1.7],'XP-DR-MN':[2.35,2.11,2],
+  'XP-DR-P':[2.35,2.11,2],'XP-DR-PB':[2.26,2.03,1.92],'XP-DR-S':[2.35,2.11,2],
+  'XP-DR-SM':[2.35,2.11,2],'XP-DR-W':[2.35,2.11,2],
+  // Dress Rings 65mm
+  'XP-65DR-B':[3.41,3.04,2.74],'XP-65DR-BS':[3.41,3.04,2.74],
+  'XP-65DR-D':[3.41,3.04,2.74],'XP-65DR-G':[3.41,3.04,2.74],
+  'XP-65DR-M':[2.59,2.32,2.08],'XP-65DR-MN':[3.41,3.04,2.74],
+  'XP-65DR-S':[3.41,3.04,2.74],'XP-65DR-SM':[3.41,3.04,2.74],
+  'XP-65DR-W':[3.41,3.04,2.74],
+  // Consumables
+  'XPL-SB-50PK-05MM':[3.01,2.9,2.41],
+  'XPL-SB-50PK-09MM':[3.01,2.9,2.41],
+  'XPL-SB-50PK-20MM':[3.56,3.43,2.85],
+  'XP-SCREWS-B':[6.06,5.7,4.91],'XP-SCREWS-BS':[6.06,5.7,4.91],
+  'XP-SCREWS-D':[6.06,5.7,4.91],'XP-SCREWS-G':[6.06,5.7,4.91],
+  'XP-SCREWS-M':[6.06,5.7,4.91],'XP-SCREWS-MN':[6.06,5.7,4.91],
+  'XP-SCREWS-P':[6.06,5.7,4.91],'XP-SCREWS-S':[6.06,5.7,4.91],
+  'XP-SCREWS-SM':[6.06,5.7,4.91],'XP-SCREWS-W':[6.06,5.7,4.91],
+};
+
+// ─── COLOUR NAMES ─────────────────────────────────────────────────────────────
+const COLOUR_NAMES = {
+  B:'Black Satin',BS:'Basalt Satin',D:'Dune Satin',G:'Woodland Grey Matt',
+  M:'Mill',MN:'Monument Matt',P:'Primrose',PB:'Paperbark',S:'Palladium Silver',
+  SM:'Surfmist Matt',W:'Pearl White Gloss'
+};
+
+// CSRC available colour suffixes
+const CSRC_COLOURS = ['B','G','MN','S','SM','W'];
+function csrcColour(col) { return CSRC_COLOURS.includes(col) ? col : 'B'; }
+
+// BTP not available for P, PB — use B fallback
+const BTP_COLOURS = ['B','BS','D','G','M','MN','S','SM','W'];
+function btpColour(col) { return BTP_COLOURS.includes(col) ? col : 'B'; }
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let currentBOM = [];
+let currentTier = 1;
+
+// ─── NATURAL LANGUAGE PARSER ─────────────────────────────────────────────────
+function parseNL() {
+  const txt = document.getElementById('nl-input').value.toLowerCase();
+  const status = document.getElementById('parse-status');
+  const found = [];
+
+  // Length
+  const lenM = txt.match(/(\d+(?:\.\d+)?)\s*(?:metres?|meters?|m)\b/);
+  const lenMM = txt.match(/(\d{3,6})\s*mm\s*(?:long|run|length|fence|screen)/);
+  if (lenM) { set('runLength', Math.round(parseFloat(lenM[1])*1000)); found.push('length'); }
+  else if (lenMM) { set('runLength', parseInt(lenMM[1])); found.push('length'); }
+
+  // Height
+  const htMM = txt.match(/(\d{3,4})\s*mm\s*(?:high|tall|height)/);
+  const htM  = txt.match(/(\d(?:\.\d+)?)\s*m\s*(?:high|tall|height)/);
+  if (htMM) { set('targetHeight', parseInt(htMM[1])); found.push('height'); }
+  else if (htM) { set('targetHeight', Math.round(parseFloat(htM[1])*1000)); found.push('height'); }
+
+  // Slat size
+  if (/\b65\s*mm\s*slat|slat.*\b65\b|\b65\s*mm\b/.test(txt)) { set('slatSize','65'); found.push('slat 65mm'); }
+  else if (/\b90\s*mm\s*slat|slat.*\b90\b|\b90\s*mm\b/.test(txt)) { set('slatSize','90'); found.push('slat 90mm'); }
+
+  // Gap
+  const gapM = txt.match(/(\d+)\s*mm\s*gap|gap\s*(?:of\s*)?(\d+)\s*mm|(\d+)\s*mm\s*spac/);
+  if (gapM) {
+    const g = parseInt(gapM[1]||gapM[2]||gapM[3]);
+    if ([5,9,20].includes(g)) { set('slatGap', String(g)); found.push(`${g}mm gap`); }
+  }
+
+  // Colour
+  const colours = [
+    ['surfmist','SM'],['monument','MN'],['woodland grey','G'],['woodland gray','G'],
+    ['pearl white','W'],['basalt','BS'],['dune','D'],['palladium silver','S'],
+    ['paperbark','PB'],['primrose','P'],['\\bmill\\b','M'],
+    ['black satin','B'],['\\bblack\\b','B'],['\\bwhite\\b','W'],
+  ];
+  for (const [pat,code] of colours) {
+    if (new RegExp(pat).test(txt)) { set('colour',code); found.push(COLOUR_NAMES[code]); break; }
+  }
+
+  // Post mounting
+  if (/concret|in.ground|in ground/.test(txt)) { set('postMount','concreted'); found.push('concreted in ground'); }
+  else if (/base.?plat|bolted|slab|concrete slab/.test(txt)) { set('postMount','baseplate'); found.push('base-plated'); }
+  else if (/core.?drill|core drill/.test(txt)) { set('postMount','coredrilled'); found.push('core-drilled'); }
+
+  // Termination
+  if (/post.to.post|freestand|both.*post|post.*both/.test(txt)) {
+    set('leftTerm','post'); set('rightTerm','post'); found.push('post-to-post');
+  } else if (/post.to.wall|wall.to.post/.test(txt)) {
+    set('leftTerm','post'); set('rightTerm','wall'); found.push('post-to-wall');
+  } else if (/wall.to.wall/.test(txt)) {
+    set('leftTerm','wall'); set('rightTerm','wall'); found.push('wall-to-wall');
+  }
+
+  // Windy/max panel
+  if (/wind|exposed|coastal/.test(txt)) { set('maxPanel','2000'); found.push('windy area 2000mm panels'); }
+
+  // Corners
+  const cornerM = txt.match(/(\d)\s*(?:90.degree|corner|turn|bend)/);
+  if (cornerM) { set('corners', parseInt(cornerM[1])); found.push(`${cornerM[1]} corner(s)`); }
+
+  if (found.length === 0) {
+    status.textContent = '⚠ Nothing detected — fill the form manually.';
+    status.style.color = '#dc2626';
+  } else {
+    status.textContent = `✓ Detected: ${found.join(', ')}`;
+    status.style.color = '#16a34a';
+  }
+  onConfigChange();
+}
+
+function set(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.value = val;
+}
+
+// ─── SLAT HEIGHT CALCULATOR ───────────────────────────────────────────────────
+function slatHeight(n, w, g) {
+  return Math.round(n * (w + g) - g + 3);
+}
+function slatCount(target, w, g) {
+  let n = 3;
+  while (true) {
+    if (slatHeight(n, w, g) > target) return n - 1;
+    n++;
+  }
+}
+
+// ─── LIVE PREVIEW (slat calc box) ────────────────────────────────────────────
+function onConfigChange() {
+  const w = parseInt(document.getElementById('slatSize').value);
+  const g = parseInt(document.getElementById('slatGap').value);
+  const t = parseInt(document.getElementById('targetHeight').value) || 1800;
+  const run = parseInt(document.getElementById('runLength').value) || 20000;
+  const maxP = parseInt(document.getElementById('maxPanel').value);
+
+  const n = slatCount(t, w, g);
+  const ha = slatHeight(n, w, g);
+  const na = n + 1;
+  const hb = slatHeight(na, w, g);
+
+  const numPanels = Math.ceil(run / maxP);
+  const panelW = Math.round(run / numPanels);
+  const needsCSR = panelW >= 2000;
+
+  let html = `<div class="slat-calc">
+    <div style="font-size:11px;opacity:.7;margin-bottom:4px">SLAT CALCULATOR — ${w}mm slat / ${g}mm gap</div>
+    <div class="divider"></div>
+    <div style="display:flex;gap:20px;flex-wrap:wrap">
+      <div>
+        <div style="font-size:11px;opacity:.7">Target Height</div>
+        <div style="font-size:18px;font-weight:700">${t}mm</div>
+      </div>
+      <div>
+        <div style="font-size:11px;opacity:.7">Panel Layout</div>
+        <div style="font-size:18px;font-weight:700">${numPanels} × ${panelW}mm</div>
+      </div>
+      <div>
+        <div style="font-size:11px;opacity:.7">Posts</div>
+        <div style="font-size:18px;font-weight:700">${numPanels + 1 + parseInt(document.getElementById('corners').value||0)}</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div style="font-size:11px;opacity:.7;margin-bottom:4px">Available heights — click to select:</div>
+    <div class="slat-option ${Math.abs(ha-t) <= Math.abs(hb-t)?'selected closest':''}" onclick="selectSlats(${n},${ha})">
+      <span>${n} slats → <strong>${ha}mm</strong></span>
+      <span class="badge">${ha < t ? '–'+(t-ha) : '+'+(ha-t)}mm ${Math.abs(ha-t) <= Math.abs(hb-t)?'closest':''}</span>
+    </div>
+    <div class="slat-option ${Math.abs(hb-t) < Math.abs(ha-t)?'selected closest':''}" onclick="selectSlats(${na},${hb})">
+      <span>${na} slats → <strong>${hb}mm</strong></span>
+      <span class="badge">${hb < t ? '–'+(t-hb) : '+'+(hb-t)}mm ${Math.abs(hb-t) < Math.abs(ha-t)?'closest':''}</span>
+    </div>
+  </div>`;
+
+  document.getElementById('slat-calc-box').innerHTML = html;
+
+  // Warnings
+  const warns = [];
+  if (panelW > 2600) warns.push(`Panel width ${panelW}mm exceeds recommended 2600mm max. Split into more panels.`);
+  if (needsCSR) warns.push(`Panels are ${panelW}mm wide (>2000mm) — Centre Support Rails will be included automatically.`);
+  if (panelW > 2000 && parseInt(document.getElementById('maxPanel').value) === 2000)
+    warns.push('Windy area selected but panels still exceed 2000mm — reduce run length or add panels.');
+
+  document.getElementById('warnings').innerHTML = warns.map(w => `<div class="warn">${w}</div>`).join('');
+
+  // Store chosen slat count
+  const closest = Math.abs(ha - t) <= Math.abs(hb - t) ? n : na;
+  document.getElementById('slat-calc-box').dataset.slats = closest;
+  document.getElementById('slat-calc-box').dataset.actualHeight = Math.abs(ha - t) <= Math.abs(hb - t) ? ha : hb;
+}
+
+let chosenSlats = null;
+let chosenHeight = null;
+
+function selectSlats(n, h) {
+  chosenSlats = n;
+  chosenHeight = h;
+  // Update UI
+  document.querySelectorAll('.slat-option').forEach(el => el.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+}
+
+// ─── BOM GENERATOR ───────────────────────────────────────────────────────────
+function generateBOM() {
+  const col = document.getElementById('colour').value;
+  const slatSize = parseInt(document.getElementById('slatSize').value);
+  const gap = parseInt(document.getElementById('slatGap').value);
+  const run = parseInt(document.getElementById('runLength').value);
+  const targetH = parseInt(document.getElementById('targetHeight').value);
+  const maxPanel = parseInt(document.getElementById('maxPanel').value);
+  const leftTerm = document.getElementById('leftTerm').value;
+  const rightTerm = document.getElementById('rightTerm').value;
+  const postMount = document.getElementById('postMount').value;
+  const corners = parseInt(document.getElementById('corners').value) || 0;
+
+  // Slat count
+  const calcBox = document.getElementById('slat-calc-box');
+  let numSlats = chosenSlats;
+  let actualHeight = chosenHeight;
+  if (!numSlats) {
+    // use closest
+    numSlats = parseInt(calcBox.dataset.slats) || slatCount(targetH, slatSize, gap);
+    actualHeight = slatHeight(numSlats, slatSize, gap);
+  }
+
+  // Panel layout
+  const numPanels = Math.ceil(run / maxPanel);
+  const panelWidth = Math.round(run / numPanels);
+
+  // Decide post size: > 1800mm or HD recommended → 65mm
+  const useHDPost = actualHeight > 1800;
+  const postCode = useHDPost ? `XP-2400-65HD-${col}` : `XP-2400-FP-${col}`;
+  const postDesc = useHDPost
+    ? `65×65mm HD Post 2400mm ${COLOUR_NAMES[col]} (incl. cap)`
+    : `50×50mm Full Post 2400mm ${COLOUR_NAMES[col]} (incl. cap)`;
+
+  // Posts = panels + 1 + corners
+  const numPosts = numPanels + 1 + corners;
+
+  // Side frames vs F-sections
+  // Each panel has 2 vertical sides. We tally SF and F-section
+  // For a straight run (no corners): left and right end each contribute 1 per-panel-edge
+  // Total side positions = numPanels * 2, but ends share posts with adjacent panels
+  // In side frame system: each panel needs 2 SFs regardless
+  const totalSFPcs = numPanels * 2; // total side frame pieces needed
+
+  // Allocate: wall ends use F-section instead of SF
+  // leftTerm wall: all panels on left share 1 F-section per panel height → but actually
+  // only the outermost panel on left gets F-section, inner joints are post-mounted SFs.
+  // Correction: for straight run, left side of leftmost panel = F if wall, else SF
+  //             right side of rightmost panel = F if wall, else SF
+  //             all internal panel sides = SF (attached to posts)
+  // Internal joints: (numPanels - 1) * 2 side frames (left+right of each internal post)
+  // Plus end sides: 2 (one per end), which may be SF or F
+
+  // So: total SF = (numPanels - 1)*2 + (leftTerm==='post'?1:0) + (rightTerm==='post'?1:0)
+  // total F = (leftTerm==='wall'?1:0) + (rightTerm==='wall'?1:0)
+  // Corner posts add 2 more SF (each side of the corner post counts as end→SF)
+  const totalSF = (numPanels - 1) * 2
+    + (leftTerm === 'post' ? 1 : 0)
+    + (rightTerm === 'post' ? 1 : 0)
+    + corners * 2;
+  const totalF = (leftTerm === 'wall' ? 1 : 0) + (rightTerm === 'wall' ? 1 : 0);
+
+  // SF stock lengths
+  const sfCut = actualHeight - 3;
+  const sfPerStock = Math.floor(5800 / sfCut);
+  const sfStocks = Math.ceil(totalSF / sfPerStock);
+
+  // CFC matches SF
+  const cfcStocks = sfStocks;
+
+  // F-section stocks
+  const fCut = actualHeight - 3;
+  const fPerStock = Math.floor(5800 / fCut);
+  const fStocks = totalF > 0 ? Math.ceil(totalF / fPerStock) : 0;
+
+  // CSR
+  const needCSR = panelWidth >= 2000;
+  const csrPerPanel = panelWidth < 2000 ? 0 : panelWidth < 4000 ? 1 : 2;
+  const totalCSR = needCSR ? numPanels * csrPerPanel : 0;
+  const csrCut = actualHeight - 6;
+  const csrPerStock = Math.floor(5800 / csrCut);
+  const csrStocks = totalCSR > 0 ? Math.ceil(totalCSR / csrPerStock) : 0;
+
+  // Slats
+  const slatPrefix = slatSize === 65 ? 'XP-6100-S65' : 'QS-6100-S90';
+  const slatCut = panelWidth - 15;
+  const slatsPerStock = Math.floor(6100 / slatCut);
+  const totalSlats = numSlats * numPanels;
+  const slatStocks = Math.ceil(totalSlats / slatsPerStock);
+
+  // Spacers (per panel: 2*(numSlats+1), 50-pack)
+  const spacerCode = `XPL-SB-50PK-${gap===5?'05':gap===9?'09':'20'}MM`;
+  const totalSpacers = numPanels * 2 * (numSlats + 1);
+  const spacerPacks = Math.ceil(totalSpacers / 50);
+
+  // Screws (100-pack) – SF screws + CSR screws
+  const sfScrews = numSlats * 2 * 1.01 * numPanels;
+  const csrScrews = numSlats * csrPerPanel * numPanels;
+  const totalScrews = sfScrews + csrScrews;
+  const screwPacks = Math.ceil(totalScrews / 100);
+
+  // SF Caps: 2 per SF piece (top+bottom)
+  const totalSFCaps = totalSF * 2;
+
+  // CSR caps and plates
+  const csrcCol = csrcColour(col);
+  const btpCol = btpColour(col);
+
+  // Post mounting accessories
+  const mountItems = [];
+  if (postMount === 'baseplate') {
+    const bpCode = useHDPost ? `XP-65BP-SET-${col}` : `XP-BP-SET-${col}`;
+    const dcCode = useHDPost ? `XP-65DC-2P-${col}` : `XP-DC-2P-${col}`;
+    const bpDesc = useHDPost
+      ? `Base Plate Set 115×100mm ${COLOUR_NAMES[col]} (65mm post)`
+      : `Base Plate Set 100×100mm ${COLOUR_NAMES[col]} (50mm post)`;
+    const dcDesc = useHDPost
+      ? `2-Part Domical Cover ${COLOUR_NAMES[col]} (65mm post)`
+      : `2-Part Domical Cover ${COLOUR_NAMES[col]} (50mm post)`;
+    mountItems.push({code:bpCode,desc:bpDesc,qty:numPosts});
+    mountItems.push({code:dcCode,desc:dcDesc,qty:numPosts});
+  } else if (postMount === 'coredrilled') {
+    const drCode = useHDPost ? `XP-65DR-${col}` : `XP-DR-${col}`;
+    const drDesc = useHDPost
+      ? `Dress Ring 115×115mm ${COLOUR_NAMES[col]} (65mm post)`
+      : `Dress Ring ${COLOUR_NAMES[col]} (50mm post)`;
+    mountItems.push({code:drCode,desc:drDesc,qty:numPosts});
+  }
+
+  // ─── Build BOM rows ─────────────────────────────────────────────────────
+  const bom = [];
+
+  // Section 1: Screening Materials
+  const s1 = [];
+  const slatCode = `${slatPrefix}-${col}`;
+  s1.push({
+    code: slatCode,
+    desc: `${slatSize}mm Slat ${COLOUR_NAMES[col]} 6100mm  (${slatsPerStock} cuts @ ${slatCut}mm — ${totalSlats} pcs total)`,
+    qty: slatStocks,
+    note: ''
+  });
+  bom.push({section:'1. Screening Materials', rows: s1});
+
+  // Section 2: Frames & Fixings
+  const s2 = [];
+  const sfCode = `QS-5800-SF-${col}`;
+  s2.push({
+    code: sfCode,
+    desc: `Side Frame ${COLOUR_NAMES[col]} 5800mm  (${sfPerStock} cuts @ ${sfCut}mm — ${totalSF} pcs)`,
+    qty: sfStocks
+  });
+  s2.push({
+    code: `QS-5800-CFC-${col}`,
+    desc: `CFC Concealed Fixing Cover ${COLOUR_NAMES[col]} 5800mm`,
+    qty: cfcStocks
+  });
+  if (totalF > 0) {
+    s2.push({
+      code: `QS-5800-F-${col}`,
+      desc: `F-Section ${COLOUR_NAMES[col]} 5800mm  (wall termination${totalF > 1 ? 's' : ''})`,
+      qty: fStocks
+    });
+  }
+  if (totalCSR > 0) {
+    s2.push({
+      code: `XP-5800-CSR-${col}`,
+      desc: `Centre Support Rail ${COLOUR_NAMES[col]} 5800mm  (${csrPerStock} cuts @ ${csrCut}mm — ${totalCSR} pcs)`,
+      qty: csrStocks
+    });
+  }
+  bom.push({section:'2. Frames & Fixings', rows: s2});
+
+  // Section 3: Posts & Mounting
+  const s3 = [];
+  const postNote = postMount === 'concreted'
+    ? `concreted in ground — ${actualHeight + 450}mm depth recommended`
+    : postMount === 'baseplate' ? 'base-plated to slab' : 'core-drilled';
+  s3.push({code: postCode, desc: `${postDesc}  (${postNote})`, qty: numPosts});
+  mountItems.forEach(m => s3.push({code:m.code, desc:m.desc, qty:m.qty}));
+  bom.push({section:'3. Posts & Mounting', rows: s3});
+
+  // Section 4: Accessories
+  const s4 = [];
+  s4.push({
+    code: 'QS-SFC-B',
+    desc: `Side Frame Cap — black nylon  (${totalSF} frames × 2 caps)`,
+    qty: totalSFCaps
+  });
+  if (totalCSR > 0) {
+    s4.push({
+      code: `XP-CSRC-${csrcCol}`,
+      desc: `CSR Cap ${COLOUR_NAMES[csrcCol]} nylon  (1 per CSR)${csrcCol !== col ? '  ⚠ nearest available colour' : ''}`,
+      qty: totalCSR
+    });
+    s4.push({
+      code: `XP-BTP-${btpCol}`,
+      desc: `CSR Top/Base Plate ${COLOUR_NAMES[btpCol]}  (2 per CSR = top + bottom)${btpCol !== col ? '  ⚠ nearest available colour' : ''}`,
+      qty: totalCSR * 2
+    });
+  }
+  s4.push({
+    code: spacerCode,
+    desc: `${gap}mm Spacer Block 50-pack  (${totalSpacers} spacers = ${numPanels} panels × 2 × (${numSlats}+1))`,
+    qty: spacerPacks
+  });
+  s4.push({
+    code: `XP-SCREWS-${col}`,
+    desc: `Screening Screws 100-pack ${COLOUR_NAMES[col]}  (${Math.ceil(totalScrews)} screws req.)`,
+    qty: screwPacks
+  });
+  bom.push({section:'4. Accessories & Consumables', rows: s4});
+
+  // ─── Price rows ──────────────────────────────────────────────────────────
+  currentBOM = [];
+  bom.forEach(sec => {
+    sec.rows.forEach(r => {
+      const prices = P[r.code];
+      currentBOM.push({
+        section: sec.section,
+        code: r.code,
+        desc: r.desc,
+        qty: r.qty,
+        p1: prices ? prices[0] : null,
+        p2: prices ? prices[1] : null,
+        p3: prices ? prices[2] : null,
+      });
+    });
+  });
+
+  // Save config summary
+  const cfg = {
+    run, numPanels, panelWidth, numSlats, actualHeight, targetH,
+    slatSize, gap, col, postMount, numPosts,
+    leftTerm, rightTerm, corners, maxPanel
+  };
+
+  renderBOM(cfg);
+  document.getElementById('bom-output').style.display = 'block';
+  document.getElementById('bom-output').scrollIntoView({behavior:'smooth'});
+
+  // Reset chosen slats for next run
+  chosenSlats = null;
+  chosenHeight = null;
+}
+
+function renderBOM(cfg) {
+  const tier = currentTier - 1;
+  const tierKey = ['p1','p2','p3'][tier];
+
+  // Config summary
+  const mount = {concreted:'Concreted in ground',baseplate:'Base-plated to slab',coredrilled:'Core-drilled'}[cfg.postMount];
+  const terms = {
+    'post-post':'Post to post (freestanding)',
+    'post-wall':'Post to wall',
+    'wall-post':'Wall to post',
+    'wall-wall':'Wall to wall'
+  }[`${cfg.leftTerm}-${cfg.rightTerm}`] || `${cfg.leftTerm} → ${cfg.rightTerm}`;
+
+  document.getElementById('bom-config-summary').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px 16px;font-size:12px">
+      <div><span style="color:#888">System:</span> <strong>Horizontal Slat Fence</strong></div>
+      <div><span style="color:#888">Run:</span> <strong>${(cfg.run/1000).toFixed(1)}m (${cfg.numPanels} panels × ${cfg.panelWidth}mm)</strong></div>
+      <div><span style="color:#888">Actual height:</span> <strong>${cfg.actualHeight}mm</strong> <span style="color:#888">(target ${cfg.targetH}mm)</span></div>
+      <div><span style="color:#888">Slats:</span> <strong>${cfg.numSlats} × ${cfg.slatSize}mm / ${cfg.gap}mm gap</strong></div>
+      <div><span style="color:#888">Colour:</span> <strong>${COLOUR_NAMES[cfg.col]}</strong></div>
+      <div><span style="color:#888">Posts:</span> <strong>${cfg.numPosts} posts — ${mount}</strong></div>
+      <div><span style="color:#888">Termination:</span> <strong>${terms}</strong></div>
+    </div>`;
+
+  // Quote header date
+  document.getElementById('q-date').textContent = new Date().toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'});
+  const cust = document.getElementById('customer').value;
+  document.getElementById('q-customer').textContent = cust || '';
+
+  // Group by section
+  const sections = {};
+  currentBOM.forEach(r => {
+    if (!sections[r.section]) sections[r.section] = [];
+    sections[r.section].push(r);
+  });
+
+  let grandTotal = 0;
+  let tablesHTML = '';
+
+  Object.entries(sections).forEach(([secName, rows]) => {
+    let secTotal = 0;
+    let rowsHTML = '';
+    rows.forEach(r => {
+      const price = r[tierKey];
+      const line = price != null ? price * r.qty : null;
+      if (line) { secTotal += line; grandTotal += line; }
+      const noPrice = price == null;
+      rowsHTML += `<tr${noPrice?' class="highlight"':''}>
+        <td class="td-code">${r.code}${noPrice?' <span class="tag">⚠ POA</span>':''}</td>
+        <td>${r.desc}</td>
+        <td class="td-r">${r.qty}</td>
+        <td class="td-r">${price != null ? '$'+price.toFixed(2) : '—'}</td>
+        <td class="td-r">${line != null ? '$'+line.toFixed(2) : 'POA'}</td>
+      </tr>`;
+    });
+    tablesHTML += `<div class="bom-section">
+      <h3>${secName}</h3>
+      <table>
+        <thead><tr><th style="width:160px">Code</th><th>Description</th><th class="td-r" style="width:55px">Qty</th><th class="td-r" style="width:80px">Unit $</th><th class="td-r" style="width:90px">Line $</th></tr></thead>
+        <tbody>${rowsHTML}</tbody>
+      </table>
+    </div>`;
+  });
+
+  document.getElementById('bom-tables').innerHTML = tablesHTML;
+  document.getElementById('grand-total').textContent = grandTotal.toFixed(2);
+  document.getElementById('tier-label').textContent = currentTier;
+}
+
+function setTier(t, el) {
+  currentTier = t;
+  document.querySelectorAll('.tier-tab').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+  // Re-render if BOM exists
+  if (currentBOM.length) {
+    const cfg = {}; // minimal re-render — just re-price
+    rerenderPrices();
+  }
+}
+
+function rerenderPrices() {
+  const tier = currentTier - 1;
+  const tierKey = ['p1','p2','p3'][tier];
+  let grandTotal = 0;
+
+  // Reprice all rows in existing tables
+  const sections = {};
+  currentBOM.forEach(r => {
+    if (!sections[r.section]) sections[r.section] = [];
+    sections[r.section].push(r);
+  });
+
+  let tablesHTML = '';
+  Object.entries(sections).forEach(([secName, rows]) => {
+    let rowsHTML = '';
+    rows.forEach(r => {
+      const price = r[tierKey];
+      const line = price != null ? price * r.qty : null;
+      if (line) grandTotal += line;
+      const noPrice = price == null;
+      rowsHTML += `<tr${noPrice?' class="highlight"':''}>
+        <td class="td-code">${r.code}${noPrice?' <span class="tag">⚠ POA</span>':''}</td>
+        <td>${r.desc}</td>
+        <td class="td-r">${r.qty}</td>
+        <td class="td-r">${price != null ? '$'+price.toFixed(2) : '—'}</td>
+        <td class="td-r">${line != null ? '$'+line.toFixed(2) : 'POA'}</td>
+      </tr>`;
+    });
+    tablesHTML += `<div class="bom-section">
+      <h3>${secName}</h3>
+      <table>
+        <thead><tr><th style="width:160px">Code</th><th>Description</th><th class="td-r" style="width:55px">Qty</th><th class="td-r" style="width:80px">Unit $</th><th class="td-r" style="width:90px">Line $</th></tr></thead>
+        <tbody>${rowsHTML}</tbody>
+      </table>
+    </div>`;
+  });
+
+  document.getElementById('bom-tables').innerHTML = tablesHTML;
+  document.getElementById('grand-total').textContent = grandTotal.toFixed(2);
+  document.getElementById('tier-label').textContent = currentTier;
+}
+
+// ─── EXPORT CSV ───────────────────────────────────────────────────────────────
+function exportCSV() {
+  const tier = currentTier - 1;
+  const tierKey = ['p1','p2','p3'][tier];
+  const cust = document.getElementById('customer').value || 'QuickScreen-Quote';
+  const date = new Date().toISOString().slice(0,10);
+
+  let csv = 'Category,Code,Description,Qty,Unit Price,Line Total\n';
+  let total = 0;
+  currentBOM.forEach(r => {
+    const price = r[tierKey];
+    const line = price != null ? (price * r.qty).toFixed(2) : '';
+    if (line) total += parseFloat(line);
+    const desc = r.desc.replace(/,/g,' ').replace(/"/g,"'");
+    csv += `"${r.section}","${r.code}","${desc}",${r.qty},${price != null ? price.toFixed(2) : ''},${line}\n`;
+  });
+  csv += `,,,,TOTAL,$${total.toFixed(2)}\n`;
+
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${cust.replace(/[^a-z0-9]/gi,'_')}-BOM-${date}.csv`;
+  a.click();
+}
+
+// ─── COPY TO CLIPBOARD ────────────────────────────────────────────────────────
+function copyBOM() {
+  const tier = currentTier - 1;
+  const tierKey = ['p1','p2','p3'][tier];
+  let text = `QUICKSCREEN MATERIAL QUOTE — Tier ${currentTier}\n`;
+  text += `Date: ${new Date().toLocaleDateString('en-AU')}\n`;
+  const cust = document.getElementById('customer').value;
+  if (cust) text += `Job: ${cust}\n`;
+  text += '\n';
+
+  let lastSec = '';
+  let total = 0;
+  currentBOM.forEach(r => {
+    if (r.section !== lastSec) { text += `\n${r.section.toUpperCase()}\n`; lastSec = r.section; }
+    const price = r[tierKey];
+    const line = price != null ? price * r.qty : null;
+    if (line) total += line;
+    const shortDesc = r.desc.split('(')[0].trim();
+    text += `  ${r.qty.toString().padStart(4)}  ${r.code.padEnd(22)}  ${shortDesc.slice(0,45).padEnd(45)}  ${line != null ? '$'+line.toFixed(2) : 'POA'}\n`;
+  });
+  text += `\n${'─'.repeat(70)}\nTOTAL (ex-GST): $${total.toFixed(2)}\n`;
+
+  navigator.clipboard.writeText(text).then(() => {
+    alert('BOM copied to clipboard!');
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    alert('BOM copied to clipboard!');
+  });
+}
+
+function clearAll() {
+  document.getElementById('nl-input').value = '';
+  document.getElementById('parse-status').textContent = '';
+  document.getElementById('bom-output').style.display = 'none';
+  chosenSlats = null;
+  chosenHeight = null;
+  currentBOM = [];
+}
+
+// Init
+onConfigChange();
+</script>
+</body>
+</html>

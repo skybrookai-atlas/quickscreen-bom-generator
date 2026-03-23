@@ -1,0 +1,570 @@
+{
+  "side_frame": {
+    "catalogue_ref": "QS-5800-SF",
+    "description": "QuickScreen Side Frame channel - 5800mm long",
+    "price_list_base": "QS-5800-SF",
+    "colour_suffix": true,
+    "notes": "Patented friction fit channel. Used for both horizontal and vertical slat systems.",
+    "unit": "each (5800mm length)"
+  },
+  "cfc_cover": {
+    "catalogue_ref": "QS-CFC (QS-5800-CFC)",
+    "description": "Concealed Fixing Cover - snap-on C-channel for side frame - 5800mm",
+    "price_list_base": "QS-5800-CFC",
+    "colour_suffix": true,
+    "notes": "Snaps onto side frame to conceal fixings. 1 per side frame.",
+    "unit": "each (5800mm length)"
+  },
+  "slat_90mm": {
+    "catalogue_ref": "QS-6100-S90",
+    "description": "QuickScreen 90mm Slat with centre web - 6100mm long",
+    "price_list_base": "QS-6100-S90",
+    "colour_suffix": true,
+    "notes": "90x16.5mm slat. Height formula: ((90 + gap) * num_slats) - gap + 3",
+    "unit": "each (6100mm length)"
+  },
+  "slat_65mm": {
+    "catalogue_ref": "XP-6100-S65",
+    "description": "XPRESS 65mm Slat with centre web - 6100mm long",
+    "price_list_base": "XP-6100-S65",
+    "colour_suffix": true,
+    "notes": "65x16.5mm slat. Height formula: ((65 + gap) * num_slats) - gap + 3",
+    "unit": "each (6100mm length)"
+  },
+  "f_section": {
+    "catalogue_ref": "QS-5800-F",
+    "description": "F-section for void/wall situations - 5800mm",
+    "price_list_base": "QS-5800-F",
+    "colour_suffix": true,
+    "notes": "Used instead of side frame where screen meets wall or void. One arm captures slat, other fixes to wall.",
+    "unit": "each (5800mm length)"
+  },
+  "horizontal_u_channel": {
+    "catalogue_ref": "QS-5000-HORIZ",
+    "description": "U-channel horizontal rail for vertical slat system - 5000mm",
+    "price_list_base": "QS-5000-HORIZ",
+    "colour_suffix": true,
+    "notes": "Used as top and bottom rail in vertical slat configuration.",
+    "unit": "each (5000mm length)"
+  },
+  "centre_support_rail": {
+    "catalogue_ref": "QS-5800-CS",
+    "description": "Centre Support Rail - 40x13mm - 5800mm long (includes CFC)",
+    "price_list_base": "XP-5800-CSR",
+    "colour_suffix": true,
+    "notes": "Required for panels wider than 2000mm. Includes snap-on concealed fixing cover. Price list code is XP-5800-CSR, not QS-5800-CS.",
+    "unit": "each (5800mm length)"
+  },
+  "centre_support_cap": {
+    "catalogue_ref": "QS-CS-CAP",
+    "description": "Centre Support Rail End Cap (nylon)",
+    "price_list_base": "XP-CSRC",
+    "colour_suffix": true,
+    "notes": "Nylon end cap for centre support rail. Price list code is XP-CSRC. Limited colours: B, G, MN, S, SM, W.",
+    "unit": "each"
+  },
+  "centre_support_plate": {
+    "catalogue_ref": "QS-CS-PLATE",
+    "description": "Centre Support Rail Base/Top Plate",
+    "price_list_base": "XP-BTP",
+    "colour_suffix": true,
+    "notes": "Includes 2x countersunk screws. Used to fix centre support to floor/overhead. Price list code is XP-BTP.",
+    "unit": "each"
+  },
+  "adapter_135deg": {
+    "catalogue_ref": "QS-135DEG",
+    "description": "135 degree adapter for angled screen runs",
+    "price_list_base": "NEEDS_VERIFICATION",
+    "colour_suffix": false,
+    "notes": "NOT FOUND in price list as separate SKU. May be a custom/special order item or included as part of an assembly. Flag for manual verification.",
+    "unit": "each"
+  },
+  "side_frame_cap": {
+    "catalogue_ref": "QS-SFCAP",
+    "description": "QuickScreen Side Frame End Cap (nylon)",
+    "price_list_base": "QS-SFC",
+    "colour_suffix": true,
+    "notes": "Only BLACK found in price list (QS-SFC-B at $0.86). Other colours may need verification.",
+    "unit": "each"
+  },
+  "post_50_2400": {
+    "catalogue_ref": "XP-2400-FP",
+    "description": "50x50mm Full Post - 2400mm (includes flat top cap)",
+    "price_list_base": "XP-2400-FP",
+    "colour_suffix": true,
+    "notes": "2400mm posts include aluminium flat top cap. Standard post for most installations.",
+    "unit": "each"
+  },
+  "post_50_6000": {
+    "catalogue_ref": "XP-6000-FP",
+    "description": "50x50mm Full Post - 6000mm (no cap included)",
+    "price_list_base": "XP-6000-FP",
+    "colour_suffix": true,
+    "notes": "6000mm posts do NOT include cap - order separately. Used for tall screens or cut-to-length.",
+    "unit": "each"
+  },
+  "post_65_2400": {
+    "catalogue_ref": "XP-2400-65HD",
+    "description": "65x65mm Heavy Duty Post - 2400mm (includes flat top cap)",
+    "price_list_base": "XP-2400-65HD",
+    "colour_suffix": true,
+    "notes": "Heavy duty for taller/wider screens, sliding gates. Includes flat top cap.",
+    "unit": "each"
+  },
+  "post_65_6000": {
+    "catalogue_ref": "XP-6000-65HD",
+    "description": "65x65mm Heavy Duty Post - 6000mm (no cap included)",
+    "price_list_base": "XP-6000-65HD",
+    "colour_suffix": true,
+    "notes": "Heavy duty long post. Cap NOT included.",
+    "unit": "each"
+  },
+  "base_plate_50": {
+    "catalogue_ref": "XP-BP-50",
+    "description": "Base Plate Set for 50x50mm post - 100x100mm",
+    "price_list_base": "XP-BP-SET",
+    "colour_suffix": true,
+    "notes": "Includes 4x countersunk screws. For surface-mounted posts. Price list code is XP-BP-SET (not XP-BP-50).",
+    "unit": "each"
+  },
+  "base_plate_65": {
+    "catalogue_ref": "XP-BP-65",
+    "description": "Base Plate Set for 65x65mm post - 115x100mm",
+    "price_list_base": "XP-65BP-SET",
+    "colour_suffix": true,
+    "notes": "Includes 4x countersunk screws. For surface-mounted 65mm HD posts. Price list code is XP-65BP-SET.",
+    "unit": "each"
+  },
+  "domical_cover_50": {
+    "catalogue_ref": "XP-BP-DC50",
+    "description": "2-Part Domical Cover for 50mm post base plate",
+    "price_list_base": "XP-DC-2P",
+    "colour_suffix": true,
+    "notes": "Covers base plate for aesthetic finish. Price list code is XP-DC-2P.",
+    "unit": "each"
+  },
+  "domical_cover_65": {
+    "catalogue_ref": "XP-BP-DC65",
+    "description": "2-Part Domical Cover for 65mm post base plate",
+    "price_list_base": "XP-65DC-2P",
+    "colour_suffix": true,
+    "notes": "Covers 65mm HD base plate. Price list code is XP-65DC-2P.",
+    "unit": "each"
+  },
+  "dress_ring_50": {
+    "catalogue_ref": "XP-DRESS-50",
+    "description": "Dress Ring for 50mm post (core drilled installation)",
+    "price_list_base": "XP-DR",
+    "colour_suffix": true,
+    "notes": "Covers the hole where post enters concrete. Price list code is XP-DR.",
+    "unit": "each"
+  },
+  "dress_ring_65": {
+    "catalogue_ref": "XP-DRESS-65",
+    "description": "Dress Ring for 65mm post (core drilled installation) - 115x115mm",
+    "price_list_base": "XP-65DR",
+    "colour_suffix": true,
+    "notes": "Covers hole for 65mm HD posts. Price list code is XP-65DR.",
+    "unit": "each"
+  },
+  "flat_top_cap_50": {
+    "catalogue_ref": "XP-FLAT-TC50",
+    "description": "Aluminium Flat Top Cap for 50mm post",
+    "price_list_base": "INCLUDED_WITH_2400",
+    "colour_suffix": false,
+    "notes": "Included with 2400mm posts. For 6000mm posts cut to length, cap may need to be sourced. Check if sold separately.",
+    "unit": "each"
+  },
+  "flat_top_cap_65": {
+    "catalogue_ref": "XP-FLAT-TC65",
+    "description": "Aluminium Flat Top Cap for 65mm post",
+    "price_list_base": "INCLUDED_WITH_2400",
+    "colour_suffix": false,
+    "notes": "Included with 2400mm posts. For cut-to-length posts from 6000mm stock, may need separate sourcing.",
+    "unit": "each"
+  },
+  "adjustable_foot": {
+    "catalogue_ref": "XP-FOOT-ADJ",
+    "description": "Adjustable Foot for vertical slat panels wider than 1800mm",
+    "price_list_base": "XP-FOOT-ADJ",
+    "colour_suffix": false,
+    "notes": "Single product, no colour variants. Used for vertical slat panels over 1800mm wide.",
+    "unit": "each"
+  },
+  "gate_side_frame_50": {
+    "catalogue_ref": "QSG-4200-GSF50",
+    "description": "Gate Side Frame 50mm - 4200mm long",
+    "price_list_base": "XP-4200-GSF09|XP-4200-GSF20",
+    "colour_suffix": true,
+    "notes": "Price list has TWO variants: GSF09 (9mm gap) and GSF20 (20mm gap). Choose based on slat spacing. Codes are XP-4200-GSF09 and XP-4200-GSF20. Also available as kits: XP-GKIT-LSET09 and XP-GKIT-LSET20.",
+    "unit": "each (4200mm length)"
+  },
+  "gate_side_frame_65": {
+    "catalogue_ref": "QSG-4200-GSF65",
+    "description": "Gate Side Frame 65mm - 4200mm (for HD gates)",
+    "price_list_base": "XP-4200-GSF65-09|XP-4200-GSF65-20",
+    "colour_suffix": true,
+    "notes": "65mm HD gate frame. Check price list for 65mm-specific GSF codes. May also be XP-4200-65GSF09/20.",
+    "unit": "each (4200mm length)"
+  },
+  "gate_rail_65": {
+    "catalogue_ref": "QSG-4800-RAIL65",
+    "description": "Gate Rail for 65mm slat - 4800mm",
+    "price_list_base": "NEEDS_VERIFICATION",
+    "colour_suffix": true,
+    "notes": "Not found as separate SKU in price list. Gate rails may be part of gate kit assemblies or custom-cut. The HD rail is XP-6100-HD6545 (65x45mm Heavy Duty RAIL with screw flutes - 6100mm).",
+    "unit": "each (4800mm length)"
+  },
+  "gate_rail_90": {
+    "catalogue_ref": "QSG-4800-RAIL90",
+    "description": "Gate Rail for 90mm slat - 4800mm",
+    "price_list_base": "NEEDS_VERIFICATION",
+    "colour_suffix": true,
+    "notes": "Not found as separate SKU. May be part of gate kit or custom order.",
+    "unit": "each (4800mm length)"
+  },
+  "gate_lock_box_kit_9mm": {
+    "catalogue_ref": "Gate Lock Box Kit 9mm",
+    "description": "Gate Lock Box Kit with 9mm spaced side frames, inserts, stops, rubber, caps, screws",
+    "price_list_base": "XP-GKIT-LSET09",
+    "colour_suffix": true,
+    "notes": "Complete kit includes: 2x gate side frames (9mm), 2x gate inserts, 3x gate stops (L/R/hinge), 2x rubber, 2x gate frame caps, 1x screw pack. Lock box and lock sold separately.",
+    "unit": "kit"
+  },
+  "gate_lock_box_kit_20mm": {
+    "catalogue_ref": "Gate Lock Box Kit 20mm",
+    "description": "Gate Lock Box Kit with 20mm spaced side frames, inserts, stops, rubber, caps, screws",
+    "price_list_base": "XP-GKIT-LSET20",
+    "colour_suffix": true,
+    "notes": "Same as 9mm kit but with 20mm spacing on side frames.",
+    "unit": "kit"
+  },
+  "gate_joiner_block": {
+    "catalogue_ref": "QSG-JBLOCK-50 / QSG-JBLOCK-65",
+    "description": "Joiner Block for gate frame corners",
+    "price_list_base": "NEEDS_VERIFICATION",
+    "colour_suffix": false,
+    "notes": "Not found as separate SKU. May be included in gate kits (XP-GKIT) or sold as hardware accessory. Check with supplier.",
+    "unit": "each"
+  },
+  "gate_rail_screws": {
+    "catalogue_ref": "QSG-RS-10PK",
+    "description": "Gate Rail Screws 10 pack",
+    "price_list_base": "NEEDS_VERIFICATION",
+    "colour_suffix": false,
+    "notes": "Specific gate rail screw pack not found. May be included in gate kits. General screening screws available under FIXINGS & TOOLS group.",
+    "unit": "pack"
+  },
+  "gate_screw_covers": {
+    "catalogue_ref": "QSG-SC-10PK",
+    "description": "Gate Screw Covers 10 pack",
+    "price_list_base": "NEEDS_VERIFICATION",
+    "colour_suffix": false,
+    "notes": "Not found as separate SKU. May be included in gate kits or need manual ordering.",
+    "unit": "pack"
+  },
+  "gate_flat_top_cap_50": {
+    "catalogue_ref": "QSG-FTC-50",
+    "description": "Flat Top Cap for 50mm gate frame",
+    "price_list_base": "INCLUDED_IN_GKIT",
+    "colour_suffix": false,
+    "notes": "Gate frame caps are included in gate kits (XP-GKIT-LSET09/20). 2x caps per kit.",
+    "unit": "each"
+  },
+  "gate_flat_top_cap_65": {
+    "catalogue_ref": "QSG-FTC-65",
+    "description": "Flat Top Cap for 65mm gate frame",
+    "price_list_base": "NEEDS_VERIFICATION",
+    "colour_suffix": false,
+    "notes": "65mm gate frame cap - not found separately. May need manual sourcing for HD gates.",
+    "unit": "each"
+  },
+  "gate_infill": {
+    "catalogue_ref": "QSG-INFILL",
+    "description": "Gate Infill strip for gate side frame",
+    "price_list_base": "XP-XBAT-4200-INF",
+    "colour_suffix": true,
+    "notes": "31x19mm non-punched infill for gate side frame - 4200mm long. Price list code is XP-XBAT-4200-INF.",
+    "unit": "each (4200mm length)"
+  },
+  "gate_insert": {
+    "catalogue_ref": "Gate Insert",
+    "description": "Gate Insert - 26x12mm - 4200mm long",
+    "price_list_base": "XP-4200-GI",
+    "colour_suffix": true,
+    "notes": "Gate insert that sits inside gate side frame. Price list code is XP-4200-GI.",
+    "unit": "each (4200mm length)"
+  },
+  "hinge_butt": {
+    "catalogue_ref": "QSG-HINGE-BT",
+    "description": "Butt Hinge pair for pedestrian gates",
+    "price_list_base": "NEEDS_VERIFICATION",
+    "colour_suffix": false,
+    "notes": "Specific butt hinge for screening gates not found as separate SKU. Hinges may be: D&D brand (KF series) or similar. Check XP-GKIT kits which include fixings but NOT hinges.",
+    "unit": "pair"
+  },
+  "hinge_adjustable": {
+    "catalogue_ref": "QSG-HINGE-ADJ",
+    "description": "Adjustable Hinge pair for pedestrian gates",
+    "price_list_base": "NEEDS_VERIFICATION",
+    "colour_suffix": false,
+    "notes": "Adjustable hinge for gates. Not found as separate code. May be sourced from D&D Technologies range.",
+    "unit": "pair"
+  },
+  "d_latch": {
+    "catalogue_ref": "QSG-DLATCH",
+    "description": "D-Latch key lockable gate latch",
+    "price_list_base": "NEEDS_VERIFICATION",
+    "colour_suffix": false,
+    "notes": "The price list has lock boxes (XP-LBOX-DL series) which hold a Lockwood 001 Dead Latch. The D-Latch itself may need separate sourcing. Lock boxes available in all colours.",
+    "unit": "each"
+  },
+  "magna_latch": {
+    "catalogue_ref": "QSG-MAGNA-LATCH",
+    "description": "D&D Magna Latch - Top Pull Lockable",
+    "price_list_base": "ML-TL",
+    "colour_suffix": false,
+    "notes": "D&D Magna Latch Top Pull Lockable. Also available as combo kits: ML-TL-KF-H-FT (with Kwik Fit hinge set, fixed tension). Bulk buy versions: BB-ML-TL.",
+    "unit": "each"
+  },
+  "lock_box": {
+    "catalogue_ref": "Gate Lock Box",
+    "description": "Patented non-weld Lock Box for Lockwood 001 Dead Latch",
+    "price_list_base": "XP-LBOX-DL",
+    "colour_suffix": true,
+    "notes": "Fits Lockwood 001 Dead Latch. Lock sold separately. Available in all screening colours.",
+    "unit": "each"
+  },
+  "gate_stop": {
+    "catalogue_ref": "Gate Stop",
+    "description": "Gate Stop - 25x28mm - 4200mm long",
+    "price_list_base": "XP-4200-GSTOP",
+    "colour_suffix": true,
+    "notes": "Gate stop extrusion. Rubber sold separately. 3 needed per gate (left machined, right machined, hinge side non-machined). Included in XP-GKIT kits.",
+    "unit": "each (4200mm length)"
+  },
+  "gate_stop_rubber": {
+    "catalogue_ref": "Gate Stop Rubber",
+    "description": "Rubber strip for gate stop",
+    "price_list_base": "XP-GSTOP-RUB",
+    "colour_suffix": false,
+    "notes": "Check exact code - may be XP-GSTOP-RUB or similar. Sold separately from gate stop.",
+    "unit": "each"
+  },
+  "sliding_top_rail_65": {
+    "catalogue_ref": "QSG-S-6100-TR65",
+    "description": "Sliding Gate Top Rail (65mm profile) - 6100mm",
+    "price_list_base": "XPSG-6100-TR",
+    "colour_suffix": true,
+    "notes": "65x82mm patented sliding gate top rail. Price list code is XPSG-6100-TR (not QSG-S-6100-TR65). Same extrusion for 65mm and 90mm slats.",
+    "unit": "each (6100mm length)"
+  },
+  "sliding_top_rail_90": {
+    "catalogue_ref": "QSG-S-6100-TR90",
+    "description": "Sliding Gate Top Rail (90mm profile) - 6100mm",
+    "price_list_base": "XPSG-6100-TR",
+    "colour_suffix": true,
+    "notes": "Same top rail extrusion as 65mm version. Code is XPSG-6100-TR.",
+    "unit": "each (6100mm length)"
+  },
+  "sliding_bottom_rail": {
+    "catalogue_ref": "QSG-S-6100-BR",
+    "description": "Sliding Gate Bottom Rail - 120x45mm - 6100mm",
+    "price_list_base": "XPSG-6100-BR",
+    "colour_suffix": true,
+    "notes": "120x45mm bottom rail. Code is XPSG-6100-BR.",
+    "unit": "each (6100mm length)"
+  },
+  "sliding_wheel": {
+    "catalogue_ref": "QSG-S-WHEEL",
+    "description": "Sliding Gate Wheel - 80mm diameter, 20mm groove",
+    "price_list_base": "XPSG-WHEEL",
+    "colour_suffix": false,
+    "notes": "Single wheel. 2 wheels needed per gate. Comes with M8 threaded block for bottom rail. Code is XPSG-WHEEL.",
+    "unit": "each"
+  },
+  "sliding_wheel_clamp": {
+    "catalogue_ref": "QSG-S-CLAMP",
+    "description": "Sliding Gate Wheel Clamping Set",
+    "price_list_base": "XPSG-WHEEL-CS",
+    "colour_suffix": false,
+    "notes": "M8 threaded block and fasteners for clamping wheel to bottom rail. Code is XPSG-WHEEL-CS.",
+    "unit": "set"
+  },
+  "sliding_track_steel_3m": {
+    "catalogue_ref": "QSG-S-TRACK (3m steel)",
+    "description": "Sliding Gate Steel Track - 3000mm galvanised",
+    "price_list_base": "XPSG-3000-TRACK-ST",
+    "colour_suffix": false,
+    "notes": "Bolt-down galvanised steel track. 3m length.",
+    "unit": "each (3000mm)"
+  },
+  "sliding_track_steel_6m": {
+    "catalogue_ref": "QSG-S-TRACK (6m steel)",
+    "description": "Sliding Gate Steel Track - 6000mm galvanised",
+    "price_list_base": "XPSG-6000-TRACK-ST",
+    "colour_suffix": false,
+    "notes": "Bolt-down galvanised steel track. 6m length.",
+    "unit": "each (6000mm)"
+  },
+  "sliding_track_aluminium_6m": {
+    "catalogue_ref": "QSG-S-TRACK (6m aluminium)",
+    "description": "Sliding Gate Aluminium Track - 6000mm",
+    "price_list_base": "XPSG-6000-TRACK-AL",
+    "colour_suffix": false,
+    "notes": "Bolt-down aluminium track. 6m length.",
+    "unit": "each (6000mm)"
+  },
+  "sliding_track_anchor": {
+    "catalogue_ref": "Track Anchor Pin",
+    "description": "Track Anchor Pin - 6.5mm x 38mm galvanised steel",
+    "price_list_base": "XPSG-ANCHOR",
+    "colour_suffix": false,
+    "notes": "For anchoring track to concrete.",
+    "unit": "each"
+  },
+  "sliding_guide": {
+    "catalogue_ref": "QSG-S-GUIDE",
+    "description": "Sliding Gate self-adjusting Slide Guide",
+    "price_list_base": "XPSG-GUIDE",
+    "colour_suffix": false,
+    "notes": "Self-adjusting guide. Includes black nylon guide and mounting bracket. Code is XPSG-GUIDE.",
+    "unit": "each"
+  },
+  "sliding_top_rollers": {
+    "catalogue_ref": "Sliding Gate Top Rollers",
+    "description": "Sliding Gate Nylon Roller pair (left + right)",
+    "price_list_base": "XPSG-TOPROLL-2PK",
+    "colour_suffix": false,
+    "notes": "Pack of 2 (1 left, 1 right). Code is XPSG-TOPROLL-2PK.",
+    "unit": "pair"
+  },
+  "sliding_stop": {
+    "catalogue_ref": "QSG-S-STOP",
+    "description": "Sliding Gate Stop/Catch",
+    "price_list_base": "NEEDS_VERIFICATION",
+    "colour_suffix": false,
+    "notes": "Gate stop for sliding gates. May use standard gate stop (XP-4200-GSTOP) or specific sliding gate stop. Check with supplier.",
+    "unit": "each"
+  },
+  "sliding_gate_post_steel": {
+    "catalogue_ref": "Sliding Gate Steel Post",
+    "description": "65x65mm Galvanised Steel Post - 2700mm (includes base plate & cap)",
+    "price_list_base": "XPSG-2700-ST65",
+    "colour_suffix": true,
+    "notes": "Steel post specifically for sliding gates. Includes top cap and base plate. 2700mm long.",
+    "unit": "each"
+  },
+  "spacer_5mm": {
+    "catalogue_ref": "QS-SPACER-5MM",
+    "description": "5mm Spacer Block - 50 pack",
+    "price_list_base": "XPL-SB-50PK-05MM",
+    "colour_suffix": false,
+    "notes": "UV stabilised ASA plastic. BLACK. 50 pack. Code is XPL-SB-50PK-05MM.",
+    "unit": "pack of 50"
+  },
+  "spacer_9mm": {
+    "catalogue_ref": "QS-SPACER-9MM",
+    "description": "9mm Spacer Block - 50 pack",
+    "price_list_base": "XPL-SB-50PK-09MM",
+    "colour_suffix": false,
+    "notes": "UV stabilised ASA plastic. Also available: SM-H9-50PK-B/W (H-spacer for Australis post). Code is XPL-SB-50PK-09MM.",
+    "unit": "pack of 50"
+  },
+  "spacer_20mm": {
+    "catalogue_ref": "QS-SPACER-20MM",
+    "description": "20mm Spacer Block - 50 pack",
+    "price_list_base": "XPL-SB-50PK-20MM",
+    "colour_suffix": false,
+    "notes": "UV stabilised ASA plastic. BLACK. Actual spacer is 21mm. Code is XPL-SB-50PK-20MM.",
+    "unit": "pack of 50"
+  },
+  "screening_screws": {
+    "catalogue_ref": "QS-SCREWS-50PK",
+    "description": "Screening screws pack",
+    "price_list_base": "NEEDS_VERIFICATION",
+    "colour_suffix": false,
+    "notes": "Generic screening screw pack not found in price list. Various screw types in FIXINGS & TOOLS group. Specific screws depend on application - check catalogue installation guide for screw specs.",
+    "unit": "pack"
+  },
+  "gate_blade_65": {
+    "catalogue_ref": "XP-6100-GB65",
+    "description": "65mm Gate Blade with screw flutes - 6100mm",
+    "price_list_base": "XP-6100-GB65",
+    "colour_suffix": true,
+    "notes": "65x16mm slat with 2x screw flutes and centre web. For gates where slats are screw-fixed to rails.",
+    "unit": "each (6100mm length)"
+  },
+  "hd_rail_6545": {
+    "catalogue_ref": "Heavy Duty Rail 65x45mm",
+    "description": "65x45mm Heavy Duty Rail with screw flutes - 6100mm",
+    "price_list_base": "XP-6100-HD6545",
+    "colour_suffix": true,
+    "notes": "Used as gate top/bottom rail for screw-fixed gate blade slats.",
+    "unit": "each (6100mm length)"
+  },
+  "posta_letterbox": {
+    "catalogue_ref": "POSTA",
+    "description": "POSTA Fence-Mount Letterbox",
+    "price_list_base": "NEEDS_VERIFICATION",
+    "colour_suffix": false,
+    "notes": "POSTA letterbox not found in price list. May be a third-party product stocked separately or ordered on request. Mounts between 50x50mm posts at 600mm centres.",
+    "unit": "each"
+  },
+  "gate_frame_cut_to_size": {
+    "catalogue_ref": "ZLM-FRAME",
+    "description": "QuickScreen Gate Perimeter Frame - per lineal metre cut to size",
+    "price_list_base": "ZLM-FRAME",
+    "colour_suffix": false,
+    "notes": "Service charge for custom cutting gate frames to size.",
+    "unit": "per lineal metre"
+  },
+  "sliding_gate_frame_cts_horiz": {
+    "catalogue_ref": "ZLM-FRAME-HSSG",
+    "description": "Horizontal Slat Sliding Gate Frame - per LM cut to size",
+    "price_list_base": "ZLM-FRAME-HSSG",
+    "colour_suffix": false,
+    "notes": "Cut to size service for horizontal slat sliding gate frames.",
+    "unit": "per lineal metre"
+  },
+  "sliding_gate_frame_cts_vert": {
+    "catalogue_ref": "ZLM-FRAME-VSSG",
+    "description": "Vertical Slat Sliding Gate Frame - per LM cut to size",
+    "price_list_base": "ZLM-FRAME-VSSG",
+    "colour_suffix": false,
+    "notes": "Cut to size service for vertical slat sliding gate frames.",
+    "unit": "per lineal metre"
+  },
+  "slat_end_cap_65": {
+    "catalogue_ref": "Slat End Cap 65mm",
+    "description": "Aluminium End Cap for 65mm slat - 4 pack",
+    "price_list_base": "XP-EC65",
+    "colour_suffix": true,
+    "notes": "Suffix pattern: XP-EC65-{colour}-4PK. Powder coated aluminium. 4 pack.",
+    "unit": "pack of 4"
+  },
+  "slat_end_cap_90": {
+    "catalogue_ref": "Slat End Cap 90mm",
+    "description": "Aluminium End Cap for 90mm slat - 4 pack",
+    "price_list_base": "XP-EC90",
+    "colour_suffix": true,
+    "notes": "Suffix pattern: XP-EC90-{colour}-4PK. Powder coated aluminium. 4 pack.",
+    "unit": "pack of 4"
+  },
+  "magna_latch_hinge_combo": {
+    "catalogue_ref": "Magna Latch + Hinge Kit",
+    "description": "D&D Magna Latch Top Pull + Kwik Fit Hinge Set",
+    "price_list_base": "ML-TL-KF-H-FT",
+    "colour_suffix": false,
+    "notes": "Combo kit: Magna Latch + Kwik Fit Hinge set with Fixed Tension. All-in-one gate hardware solution.",
+    "unit": "kit"
+  },
+  "truclose_hinge": {
+    "catalogue_ref": "TruClose Hinge",
+    "description": "D&D TruClose Self-Closing Hinge",
+    "price_list_base": "TC-H",
+    "colour_suffix": false,
+    "notes": "D&D TruClose heavy duty self-closing hinge. Various models available. Check FIXINGS & TOOLS / GATE HARDWARE group.",
+    "unit": "pair"
+  }
+}

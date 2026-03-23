@@ -1,0 +1,16 @@
+# Ignore everything in the home directory by default
+*
+
+# Except this file itself
+!.gitignore
+
+# App file
+!Desktop/
+Desktop/*
+!Desktop/QuickScreen-BOM-Generator.html
+
+# Skill folder
+!.claude/
+!.claude/skills/
+!.claude/skills/quickscreen-bom/
+!.claude/skills/quickscreen-bom/**
