@@ -453,6 +453,32 @@ This section documents every fix applied to the BOM generator app. Update this i
 - Gate frame screws: `XP-SCREWSGF-10PK` ($3.02) — correct product (12G×65mm)
 - Old `XP-4200-GSTOP` removed from pedestrian gate — now covered by gate kit
 
+### 2026-03-24 — Merged apps + fence mapper v2 (zoom/pan/scale calibration)
+
+**Apps merged into single file**
+- `QuickScreen-BOM-Generator.html` is now the definitive app — combines:
+  - Generator's complete BOM logic, per-colour price DB `P{}`, F-section/dress ring/CSR cap support, 3-tier pricing, print/CSV/copy/Ask Claude export
+  - AI intake's Claude API integration (calls `claude-sonnet-4-20250514`, falls back to regex parser)
+  - Fence mapper (collapsible section, external `fence-mapper.js` + `fence-mapper.css`)
+- `quickscreen_bom_ai_intake.html` preserved as-is for reference
+
+**`fence-mapper.js` — full rewrite (v2)**
+- **Viewport transform**: `w2s(wx,wy)` world→screen, `s2w(sx,sy)` screen→world applied throughout all render and hit-test functions
+- **Scroll wheel zoom**: centered on mouse position — world point under cursor stays fixed during zoom
+- **Pan**: right-click drag, middle-mouse drag, or left-drag on empty space in Move mode
+- **Pinch-to-zoom**: two-finger touch distance ratio applied, centered on finger midpoint
+- **Scale calibration**: double-click any segment → prompt real length in mm → global `S.scale` updates → all segment labels recalculate; grid adjusts to match
+- **Reset View button** (`fm-reset-view`): restores zoom=1, pan=0,0
+- **`applyToCalculator()`**: writes to `runLength` (mm) and `corners` — Generator field IDs (not AI intake IDs)
+- Grid redraws correctly at any zoom/pan level
+
+**`QuickScreen-BOM-Generator.html` — merged structure**
+- Blue header → fence mapper section → describe job card (AI + local) → config form → slat calc → BOM output
+- API key: collapsible section in describe card, saved to `localStorage('qs_anthropic_key')`
+- `parseWithAI()`: injects stored key as `x-api-key` + `anthropic-version` headers; falls back to `parseNL()` on error
+- BOM output includes site plan PNG from `fmGetSitePlanDataURL()`
+- Config form field IDs unchanged from Generator (`runLength`, `corners`, `targetHeight`, etc.)
+
 ### 2026-03-23 — Interactive fence layout mapper added
 
 **New files added**

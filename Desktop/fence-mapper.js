@@ -1,41 +1,83 @@
-/* ── Fence Layout Mapper (FM) module ── */
+/* ── Fence Layout Mapper (FM) v2 — zoom/pan + segment scale calibration ── */
 (function () {
   'use strict';
 
   // ─── Constants ───────────────────────────────────────────────────────────
-  const GRID = 50;          // px per grid square
-  const NODE_R = 7;         // node circle radius px
+  const GRID        = 50;
+  const NODE_R      = 7;
   const GATE_COLOUR = '#f59e0b';
   const SEG_COLOUR  = '#2563eb';
   const NODE_COLOUR = '#2563eb';
   const GRID_COLOUR = '#e5e7eb';
   const AXIS_COLOUR = '#d1d5db';
-  const LABEL_FONT  = '11px sans-serif';
-  const ANGLE_FONT  = '10px sans-serif';
-  const HINT_MODES  = {
-    draw : 'Click to place nodes — double-click or press Enter to finish a run. Press Esc to cancel.',
-    gate : 'Click on a fence segment to place a gate. You\'ll be prompted for the gate width.',
-    move : 'Drag nodes to reposition them.',
+
+  const HINT = {
+    draw : 'Click to place nodes. Double-click last node or press Enter to finish. Esc to cancel.',
+    gate : 'Click on a fence segment to place a gate.',
+    move : 'Drag nodes to reposition. Right-drag or middle-mouse to pan. Scroll to zoom.',
     none : ''
   };
 
   // ─── State ────────────────────────────────────────────────────────────────
   const S = {
-    nodes : [],      // [{x, y, label}]  — pixel coords on canvas
-    gates : [],      // [{seg, t, widthMm}]  seg = index into segments()
-    mode  : 'draw',
-    scale : 1000,    // mm per grid square
-    snap  : true,
-    drawing : false, // true while placing nodes
-    pendingNode : null,  // {x,y} ghost while mouse moves in draw mode
-    dragging : null,     // index of node being dragged
-    dragOffset : {x:0, y:0},
-    applied : false,     // has "Use This Layout" been pressed?
+    nodes   : [],   // [{x, y, label}]  — world coords
+    gates   : [],   // [{seg, t, widthMm}]
+    mode    : 'draw',
+    scale   : 1000, // mm per GRID world units
+    snap    : true,
+    drawing : false,
+    // drag
+    dragging   : null,
+    dragOffset : { x: 0, y: 0 },
+    // pan
+    panning   : false,
+    panStart  : { x: 0, y: 0 },
+    panOrigin : { x: 0, y: 0 },
+    // viewport
+    zoom : 1,
+    panX : 0,
+    panY : 0,
+    applied : false,
   };
 
   let canvas, overlay, ctx, octx, wrap;
   let W = 0, H = 0;
   let labelCounter = 0;
+
+  // ─── Viewport helpers ─────────────────────────────────────────────────────
+  // world coords → screen px
+  function w2s(wx, wy) {
+    return { x: (wx - S.panX) * S.zoom, y: (wy - S.panY) * S.zoom };
+  }
+  // screen px → world coords
+  function s2w(sx, sy) {
+    return { x: sx / S.zoom + S.panX, y: sy / S.zoom + S.panY };
+  }
+
+  function evtScreen(e) {
+    const r = overlay.getBoundingClientRect();
+    const src = e.touches ? e.touches[0] : e;
+    return { x: src.clientX - r.left, y: src.clientY - r.top };
+  }
+
+  function evtWorld(e) {
+    const s = evtScreen(e);
+    return s2w(s.x, s.y);
+  }
+
+  function snapWorld(wx, wy) {
+    if (!S.snap) return { x: wx, y: wy };
+    return { x: Math.round(wx / GRID) * GRID, y: Math.round(wy / GRID) * GRID };
+  }
+
+  function distWorld(a, b) {
+    const dx = b.x - a.x, dy = b.y - a.y;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  function pxToMm(worldPx) {
+    return Math.round((worldPx / GRID) * S.scale);
+  }
 
   // ─── Init ─────────────────────────────────────────────────────────────────
   function init() {
@@ -45,7 +87,6 @@
     if (!canvas) return;
     ctx  = canvas.getContext('2d');
     octx = overlay.getContext('2d');
-
     resize();
     bindEvents();
     render();
@@ -63,48 +104,26 @@
     render();
   }
 
-  // ─── Toggle (collapse / expand) ──────────────────────────────────────────
+  // ─── Toggle ───────────────────────────────────────────────────────────────
   window.toggleFenceMapper = function () {
     const bar  = document.getElementById('fm-toggle-bar');
     const body = document.getElementById('fm-body');
     const open = body.classList.toggle('open');
     bar.classList.toggle('open', open);
-    if (open) {
-      setTimeout(() => { resize(); render(); }, 50);
-    }
+    if (open) setTimeout(() => { resize(); render(); }, 50);
   };
-
-  // ─── Coordinate helpers ───────────────────────────────────────────────────
-  function snapPx(v) {
-    return S.snap ? Math.round(v / GRID) * GRID : v;
-  }
-
-  function evtPx(e) {
-    const r = canvas.getBoundingClientRect();
-    const touch = e.touches ? e.touches[0] : e;
-    return { x: touch.clientX - r.left, y: touch.clientY - r.top };
-  }
-
-  function pxToMm(px) {
-    return Math.round((px / GRID) * S.scale);
-  }
-
-  function distPx(a, b) {
-    const dx = b.x - a.x, dy = b.y - a.y;
-    return Math.sqrt(dx * dx + dy * dy);
-  }
 
   // ─── Geometry ─────────────────────────────────────────────────────────────
   function segments() {
-    const segs = [];
+    const out = [];
     for (let i = 0; i < S.nodes.length - 1; i++) {
-      segs.push({ a: S.nodes[i], b: S.nodes[i + 1] });
+      out.push({ a: S.nodes[i], b: S.nodes[i + 1], idx: i });
     }
-    return segs;
+    return out;
   }
 
   function segLenMm(seg) {
-    return pxToMm(distPx(seg.a, seg.b));
+    return pxToMm(distWorld(seg.a, seg.b));
   }
 
   function angleDeg(prev, cur, next) {
@@ -112,8 +131,30 @@
     const bx = next.x - cur.x, by = next.y - cur.y;
     const dot = ax * bx + ay * by;
     const cross = ax * by - ay * bx;
-    let deg = Math.atan2(Math.abs(cross), dot) * 180 / Math.PI;
-    return Math.round(deg);
+    return Math.round(Math.atan2(Math.abs(cross), dot) * 180 / Math.PI);
+  }
+
+  // Project screen point onto segment; returns {t, dist} in screen space
+  function projectOnSegScreen(sx, sy, seg) {
+    const sa = w2s(seg.a.x, seg.a.y);
+    const sb = w2s(seg.b.x, seg.b.y);
+    const dx = sb.x - sa.x, dy = sb.y - sa.y;
+    const lenSq = dx * dx + dy * dy;
+    if (lenSq === 0) {
+      const d = Math.hypot(sx - sa.x, sy - sa.y);
+      return { t: 0, dist: d };
+    }
+    const t = Math.max(0, Math.min(1, ((sx - sa.x) * dx + (sy - sa.y) * dy) / lenSq));
+    const cx = sa.x + t * dx, cy = sa.y + t * dy;
+    return { t, dist: Math.hypot(sx - cx, sy - cy) };
+  }
+
+  function hitTestNode(sx, sy) {
+    for (let i = S.nodes.length - 1; i >= 0; i--) {
+      const s = w2s(S.nodes[i].x, S.nodes[i].y);
+      if (Math.hypot(sx - s.x, sy - s.y) <= NODE_R + 5) return i;
+    }
+    return -1;
   }
 
   // ─── Rendering ────────────────────────────────────────────────────────────
@@ -126,11 +167,11 @@
     drawNodes();
   }
 
-  function renderOverlay(mx, my) {
+  function renderOverlay(sx, sy) {
     if (!octx) return;
     octx.clearRect(0, 0, W, H);
-    if (S.mode === 'draw' && S.drawing && S.nodes.length > 0 && mx != null) {
-      const last = S.nodes[S.nodes.length - 1];
+    if (S.mode === 'draw' && S.drawing && S.nodes.length > 0 && sx != null) {
+      const last  = w2s(S.nodes[S.nodes.length - 1].x, S.nodes[S.nodes.length - 1].y);
       octx.save();
       octx.strokeStyle = SEG_COLOUR;
       octx.lineWidth = 2;
@@ -138,16 +179,18 @@
       octx.globalAlpha = 0.5;
       octx.beginPath();
       octx.moveTo(last.x, last.y);
-      octx.lineTo(mx, my);
+      octx.lineTo(sx, sy);
       octx.stroke();
       octx.restore();
-      // distance label on ghost segment
-      const lenMm = pxToMm(distPx(last, { x: mx, y: my }));
+      // Distance label
+      const wEnd = s2w(sx, sy);
+      const wLast = S.nodes[S.nodes.length - 1];
+      const lenMm = pxToMm(distWorld(wLast, wEnd));
       if (lenMm > 0) {
         octx.save();
         octx.font = '11px sans-serif';
         octx.fillStyle = '#64748b';
-        octx.fillText(lenMm.toLocaleString() + ' mm', (last.x + mx) / 2 + 6, (last.y + my) / 2 - 4);
+        octx.fillText(lenMm.toLocaleString() + ' mm', (last.x + sx) / 2 + 6, (last.y + sy) / 2 - 4);
         octx.restore();
       }
     }
@@ -157,23 +200,29 @@
     ctx.save();
     ctx.strokeStyle = GRID_COLOUR;
     ctx.lineWidth = 0.5;
-    for (let x = 0; x <= W; x += GRID) {
-      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+    // Determine world bounds
+    const wl = s2w(0, 0).x, wr = s2w(W, 0).x;
+    const wt = s2w(0, 0).y, wb = s2w(0, H).y;
+    const sx0 = Math.floor(wl / GRID) * GRID;
+    const sy0 = Math.floor(wt / GRID) * GRID;
+    for (let wx = sx0; wx <= wr; wx += GRID) {
+      const p = w2s(wx, 0);
+      ctx.beginPath(); ctx.moveTo(p.x, 0); ctx.lineTo(p.x, H); ctx.stroke();
     }
-    for (let y = 0; y <= H; y += GRID) {
-      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    for (let wy = sy0; wy <= wb; wy += GRID) {
+      const p = w2s(0, wy);
+      ctx.beginPath(); ctx.moveTo(0, p.y); ctx.lineTo(W, p.y); ctx.stroke();
     }
-    // Axis lines
+    // Axes
     ctx.strokeStyle = AXIS_COLOUR;
     ctx.lineWidth = 1;
-    const ox = Math.round(W / 2 / GRID) * GRID;
-    const oy = Math.round(H / 2 / GRID) * GRID;
-    ctx.beginPath(); ctx.moveTo(ox, 0); ctx.lineTo(ox, H); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(0, oy); ctx.lineTo(W, oy); ctx.stroke();
-    // Scale indicator
+    const ax0 = w2s(0, 0);
+    ctx.beginPath(); ctx.moveTo(ax0.x, 0); ctx.lineTo(ax0.x, H); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, ax0.y); ctx.lineTo(W, ax0.y); ctx.stroke();
+    // Scale label
     ctx.font = '10px sans-serif';
     ctx.fillStyle = '#9ca3af';
-    ctx.fillText('1 sq = ' + S.scale.toLocaleString() + 'mm', 8, H - 8);
+    ctx.fillText('1 sq = ' + S.scale.toLocaleString() + ' mm  |  zoom ' + S.zoom.toFixed(2) + '×', 8, H - 8);
     ctx.restore();
   }
 
@@ -181,41 +230,38 @@
     const segs = segments();
     segs.forEach((seg, i) => {
       const gatesOnSeg = S.gates.filter(g => g.seg === i);
-      // Build draw intervals excluding gate gaps
-      const intervals = computeIntervals(seg, gatesOnSeg);
+      const intervals  = computeIntervals(seg, gatesOnSeg);
+      const sa = w2s(seg.a.x, seg.a.y);
+      const sb = w2s(seg.b.x, seg.b.y);
       ctx.save();
       ctx.strokeStyle = SEG_COLOUR;
       ctx.lineWidth = 2.5;
       intervals.forEach(([t0, t1]) => {
-        const ax = seg.a.x + (seg.b.x - seg.a.x) * t0;
-        const ay = seg.a.y + (seg.b.y - seg.a.y) * t0;
-        const bx = seg.a.x + (seg.b.x - seg.a.x) * t1;
-        const by = seg.a.y + (seg.b.y - seg.a.y) * t1;
-        ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(sa.x + (sb.x - sa.x) * t0, sa.y + (sb.y - sa.y) * t0);
+        ctx.lineTo(sa.x + (sb.x - sa.x) * t1, sa.y + (sb.y - sa.y) * t1);
+        ctx.stroke();
       });
       ctx.restore();
-
       // Length label
-      const mx = (seg.a.x + seg.b.x) / 2;
-      const my = (seg.a.y + seg.b.y) / 2;
-      const lenMm = segLenMm(seg);
+      const mx = (sa.x + sb.x) / 2, my = (sa.y + sb.y) / 2;
       ctx.save();
-      ctx.font = LABEL_FONT;
+      ctx.font = '11px sans-serif';
       ctx.fillStyle = SEG_COLOUR;
       ctx.textAlign = 'center';
-      ctx.fillText(lenMm.toLocaleString() + ' mm', mx, my - 7);
+      ctx.fillText(segLenMm(seg).toLocaleString() + ' mm', mx, my - 8);
       ctx.restore();
     });
-
     // Corner angles
     for (let i = 1; i < S.nodes.length - 1; i++) {
       const deg = angleDeg(S.nodes[i - 1], S.nodes[i], S.nodes[i + 1]);
-      if (deg > 0 && deg < 175) {
+      if (deg > 2 && deg < 175) {
+        const sp = w2s(S.nodes[i].x, S.nodes[i].y);
         ctx.save();
-        ctx.font = ANGLE_FONT;
+        ctx.font = '10px sans-serif';
         ctx.fillStyle = '#7c3aed';
         ctx.textAlign = 'center';
-        ctx.fillText(deg + '°', S.nodes[i].x + 12, S.nodes[i].y - 10);
+        ctx.fillText(deg + '°', sp.x + 14, sp.y - 12);
         ctx.restore();
       }
     }
@@ -223,57 +269,48 @@
 
   function computeIntervals(seg, gatesOnSeg) {
     if (!gatesOnSeg.length) return [[0, 1]];
-    const segLenPx = distPx(seg.a, seg.b);
-    const cuts = [];
-    gatesOnSeg.forEach(g => {
-      const halfPx = (g.widthMm / S.scale) * GRID / 2;
-      const halfT  = segLenPx > 0 ? halfPx / segLenPx : 0;
-      cuts.push([Math.max(0, g.t - halfT), Math.min(1, g.t + halfT)]);
-    });
-    cuts.sort((a, b) => a[0] - b[0]);
-    const intervals = [];
+    const segLenPx = distWorld(seg.a, seg.b);
+    const cuts = gatesOnSeg.map(g => {
+      const halfPx  = (g.widthMm / S.scale) * GRID / 2;
+      const halfT   = segLenPx > 0 ? halfPx / segLenPx : 0;
+      return [Math.max(0, g.t - halfT), Math.min(1, g.t + halfT)];
+    }).sort((a, b) => a[0] - b[0]);
+    const out = [];
     let pos = 0;
-    cuts.forEach(([s, e]) => {
-      if (s > pos) intervals.push([pos, s]);
-      pos = e;
-    });
-    if (pos < 1) intervals.push([pos, 1]);
-    return intervals;
+    cuts.forEach(([s, e]) => { if (s > pos) out.push([pos, s]); pos = e; });
+    if (pos < 1) out.push([pos, 1]);
+    return out;
   }
 
   function drawGates() {
     const segs = segments();
     S.gates.forEach(g => {
       if (g.seg >= segs.length) return;
-      const seg = segs[g.seg];
-      const gx  = seg.a.x + (seg.b.x - seg.a.x) * g.t;
-      const gy  = seg.a.y + (seg.b.y - seg.a.y) * g.t;
-      const segLenPx = distPx(seg.a, seg.b);
-      const halfPx = (g.widthMm / S.scale) * GRID / 2;
-      const halfT  = segLenPx > 0 ? halfPx / segLenPx : 0;
-      const ax = seg.a.x + (seg.b.x - seg.a.x) * (g.t - halfT);
-      const ay = seg.a.y + (seg.b.y - seg.a.y) * (g.t - halfT);
-      const bx = seg.a.x + (seg.b.x - seg.a.x) * (g.t + halfT);
-      const by = seg.a.y + (seg.b.y - seg.a.y) * (g.t + halfT);
-
-      // Dashed gap line
+      const seg     = segs[g.seg];
+      const sa      = w2s(seg.a.x, seg.a.y);
+      const sb      = w2s(seg.b.x, seg.b.y);
+      const gsx     = sa.x + (sb.x - sa.x) * g.t;
+      const gsy     = sa.y + (sb.y - sa.y) * g.t;
+      const segLenPx = distWorld(seg.a, seg.b);
+      const halfPx  = (g.widthMm / S.scale) * GRID / 2;
+      const halfT   = segLenPx > 0 ? halfPx / segLenPx : 0;
+      const ax = sa.x + (sb.x - sa.x) * (g.t - halfT);
+      const ay = sa.y + (sb.y - sa.y) * (g.t - halfT);
+      const bx = sa.x + (sb.x - sa.x) * (g.t + halfT);
+      const by = sa.y + (sb.y - sa.y) * (g.t + halfT);
       ctx.save();
       ctx.strokeStyle = GATE_COLOUR;
       ctx.lineWidth = 2;
       ctx.setLineDash([5, 4]);
       ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
       ctx.restore();
-
-      // Double-arrow heads
       drawArrow(ctx, ax, ay, bx, by, GATE_COLOUR);
       drawArrow(ctx, bx, by, ax, ay, GATE_COLOUR);
-
-      // Width label
       ctx.save();
       ctx.font = '11px sans-serif';
       ctx.fillStyle = GATE_COLOUR;
       ctx.textAlign = 'center';
-      ctx.fillText(g.widthMm.toLocaleString() + ' mm gate', gx, gy + 16);
+      ctx.fillText(g.widthMm.toLocaleString() + ' mm gate', gsx, gsy + 18);
       ctx.restore();
     });
   }
@@ -282,9 +319,7 @@
     const angle = Math.atan2(y2 - y1, x2 - x1);
     const size  = 8;
     c.save();
-    c.strokeStyle = colour;
-    c.fillStyle   = colour;
-    c.lineWidth   = 1.5;
+    c.fillStyle = colour;
     c.beginPath();
     c.moveTo(x2, y2);
     c.lineTo(x2 - size * Math.cos(angle - 0.4), y2 - size * Math.sin(angle - 0.4));
@@ -295,34 +330,38 @@
   }
 
   function drawNodes() {
-    S.nodes.forEach((n, i) => {
+    S.nodes.forEach(n => {
+      const s = w2s(n.x, n.y);
       ctx.save();
       ctx.beginPath();
-      ctx.arc(n.x, n.y, NODE_R, 0, Math.PI * 2);
+      ctx.arc(s.x, s.y, NODE_R, 0, Math.PI * 2);
       ctx.fillStyle = '#fff';
       ctx.fill();
       ctx.strokeStyle = NODE_COLOUR;
       ctx.lineWidth = 2;
       ctx.stroke();
       ctx.restore();
-
       ctx.save();
       ctx.font = 'bold 11px sans-serif';
       ctx.fillStyle = NODE_COLOUR;
       ctx.textAlign = 'center';
-      ctx.fillText(n.label, n.x, n.y - 11);
+      ctx.fillText(n.label, s.x, s.y - 12);
       ctx.restore();
     });
   }
 
   // ─── Event binding ────────────────────────────────────────────────────────
   function bindEvents() {
-    // Toolbar buttons
     document.getElementById('fm-mode-draw').addEventListener('click', () => setMode('draw'));
     document.getElementById('fm-mode-gate').addEventListener('click', () => setMode('gate'));
     document.getElementById('fm-mode-move').addEventListener('click', () => setMode('move'));
     document.getElementById('fm-undo').addEventListener('click', doUndo);
     document.getElementById('fm-clear').addEventListener('click', doClear);
+
+    const resetBtn = document.getElementById('fm-reset-view');
+    if (resetBtn) resetBtn.addEventListener('click', () => {
+      S.zoom = 1; S.panX = 0; S.panY = 0; render();
+    });
 
     document.getElementById('fm-scale').addEventListener('change', function () {
       const v = parseInt(this.value);
@@ -333,13 +372,15 @@
       S.snap = this.checked;
     });
 
-    // Canvas mouse events
+    // Mouse events
     overlay.addEventListener('mousedown',  onMouseDown);
     overlay.addEventListener('mousemove',  onMouseMove);
     overlay.addEventListener('mouseup',    onMouseUp);
     overlay.addEventListener('dblclick',   onDblClick);
+    overlay.addEventListener('wheel',      onWheel, { passive: false });
+    overlay.addEventListener('contextmenu', e => e.preventDefault());
 
-    // Touch events
+    // Touch
     overlay.addEventListener('touchstart', onTouchStart, { passive: false });
     overlay.addEventListener('touchmove',  onTouchMove,  { passive: false });
     overlay.addEventListener('touchend',   onTouchEnd,   { passive: false });
@@ -347,110 +388,214 @@
     // Keyboard
     document.addEventListener('keydown', onKeyDown);
 
-    // Apply button
     document.getElementById('fm-apply-btn').addEventListener('click', applyToCalculator);
-
-    // Window resize
-    window.addEventListener('resize', () => { resize(); });
+    window.addEventListener('resize', () => resize());
   }
 
   function setMode(m) {
     S.mode = m;
-    if (m !== 'draw') { S.drawing = false; S.pendingNode = null; }
-    wrap.className = 'mode-' + m;
+    if (m !== 'draw') { S.drawing = false; octx.clearRect(0, 0, W, H); }
     document.getElementById('fm-canvas-wrap').className = 'mode-' + m;
     ['draw','gate','move'].forEach(id => {
       const btn = document.getElementById('fm-mode-' + id);
       if (btn) btn.classList.toggle('active', id === m);
     });
-    document.getElementById('fm-hint').textContent = HINT_MODES[m] || '';
-    octx.clearRect(0, 0, W, H);
+    const hint = document.getElementById('fm-hint');
+    if (hint) hint.textContent = HINT[m] || '';
   }
 
-  // ─── Mouse handlers ───────────────────────────────────────────────────────
+  // ─── Wheel zoom ───────────────────────────────────────────────────────────
+  function onWheel(e) {
+    e.preventDefault();
+    const s = evtScreen(e);
+    // World pos under mouse before zoom
+    const wx = s.x / S.zoom + S.panX;
+    const wy = s.y / S.zoom + S.panY;
+    const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
+    S.zoom = Math.max(0.1, Math.min(10, S.zoom * factor));
+    // Keep wx,wy under mouse after zoom
+    S.panX = wx - s.x / S.zoom;
+    S.panY = wy - s.y / S.zoom;
+    render();
+  }
+
+  // ─── Mouse ────────────────────────────────────────────────────────────────
   function onMouseDown(e) {
-    const {x, y} = evtPx(e);
-    const sx = snapPx(x), sy = snapPx(y);
+    const s  = evtScreen(e);
+    const wp = s2w(s.x, s.y);
+    const snapped = snapWorld(wp.x, wp.y);
+
+    // Middle or right button → pan
+    if (e.button === 1 || e.button === 2) {
+      S.panning   = true;
+      S.panStart  = s;
+      S.panOrigin = { x: S.panX, y: S.panY };
+      e.preventDefault();
+      return;
+    }
 
     if (S.mode === 'draw') {
       S.drawing = true;
-      placeNode(sx, sy);
+      placeNode(snapped.x, snapped.y);
     } else if (S.mode === 'gate') {
-      tryPlaceGate(x, y);
+      tryPlaceGate(s.x, s.y);
     } else if (S.mode === 'move') {
-      const idx = hitTestNode(x, y);
+      const idx = hitTestNode(s.x, s.y);
       if (idx !== -1) {
-        S.dragging = idx;
-        S.dragOffset = { x: S.nodes[idx].x - x, y: S.nodes[idx].y - y };
+        S.dragging   = idx;
+        S.dragOffset = { x: S.nodes[idx].x - wp.x, y: S.nodes[idx].y - wp.y };
+      } else {
+        // Start pan in move mode via left-drag on empty space
+        S.panning   = true;
+        S.panStart  = s;
+        S.panOrigin = { x: S.panX, y: S.panY };
       }
     }
     e.preventDefault();
   }
 
   function onMouseMove(e) {
-    const {x, y} = evtPx(e);
-    const sx = snapPx(x), sy = snapPx(y);
+    const s  = evtScreen(e);
+    const wp = s2w(s.x, s.y);
+
+    if (S.panning) {
+      S.panX = S.panOrigin.x - (s.x - S.panStart.x) / S.zoom;
+      S.panY = S.panOrigin.y - (s.y - S.panStart.y) / S.zoom;
+      render();
+      return;
+    }
 
     if (S.mode === 'move' && S.dragging !== null) {
-      S.nodes[S.dragging].x = sx + S.dragOffset.x;
-      S.nodes[S.dragging].y = sy + S.dragOffset.y;
-      // snap dragged node
-      S.nodes[S.dragging].x = snapPx(S.nodes[S.dragging].x);
-      S.nodes[S.dragging].y = snapPx(S.nodes[S.dragging].y);
+      const snapped = snapWorld(wp.x + S.dragOffset.x, wp.y + S.dragOffset.y);
+      S.nodes[S.dragging].x = snapped.x;
+      S.nodes[S.dragging].y = snapped.y;
       render();
       updateSummary();
+      return;
     }
 
     if (S.mode === 'draw' && S.drawing) {
-      S.pendingNode = { x: sx, y: sy };
-      renderOverlay(sx, sy);
+      const snapped = snapWorld(wp.x, wp.y);
+      renderOverlay(w2s(snapped.x, snapped.y).x, w2s(snapped.x, snapped.y).y);
     }
     e.preventDefault();
   }
 
   function onMouseUp(e) {
-    if (S.mode === 'move' && S.dragging !== null) {
-      S.dragging = null;
-      updateSummary();
-    }
+    S.panning  = false;
+    S.dragging = null;
     e.preventDefault();
   }
 
   function onDblClick(e) {
+    const s = evtScreen(e);
+    // Check if double-clicking on a segment → calibrate scale
+    const segs = segments();
+    for (let i = 0; i < segs.length; i++) {
+      const { dist } = projectOnSegScreen(s.x, s.y, segs[i]);
+      if (dist < 12) {
+        calibrateScale(segs[i]);
+        e.preventDefault();
+        return;
+      }
+    }
+    // Double-click not on a segment → finish run if drawing
     if (S.mode === 'draw' && S.drawing && S.nodes.length >= 2) {
       finishRun();
     }
     e.preventDefault();
   }
 
-  // ─── Touch handlers ───────────────────────────────────────────────────────
+  // ─── Scale calibration ────────────────────────────────────────────────────
+  function calibrateScale(seg) {
+    const currentMm = segLenMm(seg);
+    const raw = prompt(
+      'What is the real length of this segment in mm?\n' +
+      '(Currently showing ' + currentMm.toLocaleString() + ' mm at this scale)\n\n' +
+      'Enter the actual length to recalibrate the entire map:',
+      currentMm
+    );
+    if (raw === null) return;
+    const realMm = parseFloat(raw);
+    if (!realMm || realMm <= 0) { alert('Invalid length.'); return; }
+    const worldPx = distWorld(seg.a, seg.b);
+    if (worldPx === 0) { alert('Segment has zero length — drag nodes apart first.'); return; }
+    S.scale = Math.round(realMm / (worldPx / GRID));
+    const scaleEl = document.getElementById('fm-scale');
+    if (scaleEl) scaleEl.value = S.scale;
+    render();
+    updateSummary();
+    showToast('Scale set: 1 grid sq = ' + S.scale.toLocaleString() + ' mm');
+  }
+
+  // ─── Touch ────────────────────────────────────────────────────────────────
+  let lastTouchDist = null;
+
   function onTouchStart(e) {
     e.preventDefault();
-    const {x, y} = evtPx(e);
-    const sx = snapPx(x), sy = snapPx(y);
+    if (e.touches.length === 2) {
+      lastTouchDist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      return;
+    }
+    const s  = evtScreen(e);
+    const wp = s2w(s.x, s.y);
+    const snapped = snapWorld(wp.x, wp.y);
 
     if (S.mode === 'draw') {
       S.drawing = true;
-      placeNode(sx, sy);
+      placeNode(snapped.x, snapped.y);
     } else if (S.mode === 'gate') {
-      tryPlaceGate(x, y);
+      tryPlaceGate(s.x, s.y);
     } else if (S.mode === 'move') {
-      const idx = hitTestNode(x, y);
+      const idx = hitTestNode(s.x, s.y);
       if (idx !== -1) {
-        S.dragging = idx;
-        S.dragOffset = { x: S.nodes[idx].x - x, y: S.nodes[idx].y - y };
+        S.dragging   = idx;
+        S.dragOffset = { x: S.nodes[idx].x - wp.x, y: S.nodes[idx].y - wp.y };
+      } else {
+        S.panning   = true;
+        S.panStart  = s;
+        S.panOrigin = { x: S.panX, y: S.panY };
       }
     }
   }
 
   function onTouchMove(e) {
     e.preventDefault();
-    const {x, y} = evtPx(e);
-    const sx = snapPx(x), sy = snapPx(y);
+    if (e.touches.length === 2) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      if (lastTouchDist) {
+        const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - overlay.getBoundingClientRect().left;
+        const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - overlay.getBoundingClientRect().top;
+        const wx = midX / S.zoom + S.panX;
+        const wy = midY / S.zoom + S.panY;
+        S.zoom = Math.max(0.1, Math.min(10, S.zoom * dist / lastTouchDist));
+        S.panX = wx - midX / S.zoom;
+        S.panY = wy - midY / S.zoom;
+        render();
+      }
+      lastTouchDist = dist;
+      return;
+    }
+    lastTouchDist = null;
+    const s  = evtScreen(e);
+    const wp = s2w(s.x, s.y);
 
+    if (S.panning) {
+      S.panX = S.panOrigin.x - (s.x - S.panStart.x) / S.zoom;
+      S.panY = S.panOrigin.y - (s.y - S.panStart.y) / S.zoom;
+      render();
+      return;
+    }
     if (S.mode === 'move' && S.dragging !== null) {
-      S.nodes[S.dragging].x = snapPx(sx + S.dragOffset.x);
-      S.nodes[S.dragging].y = snapPx(sy + S.dragOffset.y);
+      const snapped = snapWorld(wp.x + S.dragOffset.x, wp.y + S.dragOffset.y);
+      S.nodes[S.dragging].x = snapped.x;
+      S.nodes[S.dragging].y = snapped.y;
       render();
       updateSummary();
     }
@@ -458,45 +603,39 @@
 
   function onTouchEnd(e) {
     e.preventDefault();
-    if (S.mode === 'move') S.dragging = null;
+    lastTouchDist = null;
+    S.panning  = false;
+    S.dragging = null;
   }
 
   // ─── Keyboard ─────────────────────────────────────────────────────────────
   function onKeyDown(e) {
     const body = document.getElementById('fm-body');
     if (!body || !body.classList.contains('open')) return;
-
     if (e.key === 'Enter' && S.mode === 'draw' && S.drawing && S.nodes.length >= 2) {
-      finishRun();
-      e.preventDefault();
+      finishRun(); e.preventDefault();
     }
-    if (e.key === 'Escape' && S.mode === 'draw' && S.drawing) {
+    if (e.key === 'Escape' && S.mode === 'draw') {
       S.drawing = false;
-      S.pendingNode = null;
-      if (S.nodes.length > 0) S.nodes.pop(); // remove last pending
       octx.clearRect(0, 0, W, H);
-      render();
       e.preventDefault();
     }
     if ((e.key === 'z' || e.key === 'Z') && (e.ctrlKey || e.metaKey)) {
-      doUndo();
-      e.preventDefault();
+      doUndo(); e.preventDefault();
     }
   }
 
   // ─── Node placement ───────────────────────────────────────────────────────
   function nextLabel() {
-    const labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    return labels[labelCounter++ % 26];
+    return 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[labelCounter++ % 26];
   }
 
-  function placeNode(x, y) {
-    // Don't place duplicate on same spot
+  function placeNode(wx, wy) {
     if (S.nodes.length > 0) {
       const last = S.nodes[S.nodes.length - 1];
-      if (last.x === x && last.y === y) return;
+      if (last.x === wx && last.y === wy) return;
     }
-    S.nodes.push({ x, y, label: nextLabel() });
+    S.nodes.push({ x: wx, y: wy, label: nextLabel() });
     render();
     updateSummary();
     updateApplyBtn();
@@ -504,70 +643,42 @@
 
   function finishRun() {
     S.drawing = false;
-    S.pendingNode = null;
     octx.clearRect(0, 0, W, H);
     render();
     updateSummary();
   }
 
-  function hitTestNode(x, y) {
-    for (let i = S.nodes.length - 1; i >= 0; i--) {
-      const n = S.nodes[i];
-      if (Math.abs(n.x - x) <= NODE_R + 4 && Math.abs(n.y - y) <= NODE_R + 4) return i;
-    }
-    return -1;
-  }
-
   // ─── Gate placement ───────────────────────────────────────────────────────
-  function tryPlaceGate(x, y) {
+  function tryPlaceGate(sx, sy) {
     const segs = segments();
-    if (!segs.length) {
-      showToast('Draw your fence run first, then place gates.');
-      return;
-    }
+    if (!segs.length) { showToast('Draw your fence run first.'); return; }
     let bestSeg = -1, bestT = 0, bestDist = Infinity;
     segs.forEach((seg, i) => {
-      const { t, dist } = projectOnSegment(x, y, seg);
-      if (dist < bestDist && dist < 20) {
-        bestDist = dist; bestSeg = i; bestT = t;
-      }
+      const { t, dist } = projectOnSegScreen(sx, sy, seg);
+      if (dist < bestDist && dist < 20) { bestDist = dist; bestSeg = i; bestT = t; }
     });
-    if (bestSeg === -1) {
-      showToast('Click closer to a fence segment to place a gate.');
-      return;
-    }
-    const seg = segs[bestSeg];
-    const segMm = segLenMm(seg);
-    const rawW = prompt('Gate opening width (mm)?', '900');
-    if (rawW === null) return;
-    const widthMm = parseInt(rawW);
+    if (bestSeg === -1) { showToast('Click closer to a fence segment.'); return; }
+    const seg    = segs[bestSeg];
+    const segMm  = segLenMm(seg);
+    const raw    = prompt('Gate opening width (mm)?', '900');
+    if (raw === null) return;
+    const widthMm = parseInt(raw);
     if (!widthMm || widthMm < 100) { alert('Invalid gate width.'); return; }
-    if (widthMm >= segMm) { alert('Gate width (' + widthMm + 'mm) is too wide for this segment (' + segMm + 'mm).'); return; }
+    if (widthMm >= segMm) { alert('Gate (' + widthMm + 'mm) too wide for segment (' + segMm + 'mm).'); return; }
     S.gates.push({ seg: bestSeg, t: bestT, widthMm });
     render();
     updateSummary();
     updateApplyBtn();
   }
 
-  function projectOnSegment(px, py, seg) {
-    const dx = seg.b.x - seg.a.x, dy = seg.b.y - seg.a.y;
-    const lenSq = dx * dx + dy * dy;
-    if (lenSq === 0) return { t: 0, dist: distPx({ x: px, y: py }, seg.a) };
-    const t = Math.max(0, Math.min(1, ((px - seg.a.x) * dx + (py - seg.a.y) * dy) / lenSq));
-    const cx = seg.a.x + t * dx, cy = seg.a.y + t * dy;
-    return { t, dist: distPx({ x: px, y: py }, { x: cx, y: cy }) };
-  }
-
   // ─── Undo / Clear ─────────────────────────────────────────────────────────
   function doUndo() {
-    if (S.mode === 'draw' && S.nodes.length > 0) {
+    if (S.gates.length > 0 && S.mode === 'gate') {
+      S.gates.pop();
+    } else if (S.nodes.length > 0) {
       S.nodes.pop();
       labelCounter = Math.max(0, labelCounter - 1);
-      // remove gates that reference now-invalid segments
-      const maxSeg = Math.max(0, S.nodes.length - 2);
-      S.gates = S.gates.filter(g => g.seg < maxSeg);
-    } else if (S.gates.length > 0) {
-      S.gates.pop();
+      S.gates = S.gates.filter(g => g.seg < Math.max(0, S.nodes.length - 1));
     }
     render();
     updateSummary();
@@ -576,15 +687,10 @@
 
   function doClear() {
     if (S.applied) {
-      if (!confirm('This layout has already been applied to the calculator. Clearing it will not remove those values. Continue?')) return;
+      if (!confirm('This layout has already been applied to the calculator. Clearing will not remove those values. Continue?')) return;
     }
-    if ((S.nodes.length > 0 || S.gates.length > 0) &&
-        !confirm('Clear all nodes and gates?')) return;
-    S.nodes = [];
-    S.gates = [];
-    S.drawing = false;
-    S.pendingNode = null;
-    S.applied = false;
+    if ((S.nodes.length > 0 || S.gates.length > 0) && !confirm('Clear all?')) return;
+    S.nodes = []; S.gates = []; S.drawing = false; S.applied = false;
     labelCounter = 0;
     octx.clearRect(0, 0, W, H);
     render();
@@ -592,203 +698,166 @@
     updateApplyBtn();
   }
 
-  // ─── Summary table ────────────────────────────────────────────────────────
+  // ─── Summary ──────────────────────────────────────────────────────────────
   function updateSummary() {
-    const segs = segments();
+    const segs   = segments();
     const sumDiv = document.getElementById('fm-summary');
+    const totDiv = document.getElementById('fm-totals');
     if (!sumDiv) return;
 
     if (segs.length === 0) {
       sumDiv.innerHTML = '';
-      document.getElementById('fm-totals').textContent = '';
+      if (totDiv) totDiv.textContent = '';
       updateApplyBtn();
       return;
     }
 
-    let totalFenceMm = 0, totalGatesMm = 0, cornerCount = 0;
+    let totalFence = 0, totalGates = 0, cornerCount = 0;
     let rows = '';
     segs.forEach((seg, i) => {
-      const segMm = segLenMm(seg);
-      const gatesOnSeg = S.gates.filter(g => g.seg === i);
-      const gatesTotalMm = gatesOnSeg.reduce((s, g) => s + g.widthMm, 0);
-      const netFenceMm   = segMm - gatesTotalMm;
-      totalFenceMm  += netFenceMm;
-      totalGatesMm  += gatesTotalMm;
-      const gateStr = gatesOnSeg.length
-        ? gatesOnSeg.map(g => g.widthMm.toLocaleString() + ' mm').join(', ')
-        : '—';
-      // Angle at end node (if not last)
+      const mm   = segLenMm(seg);
+      const gons = S.gates.filter(g => g.seg === i);
+      const gMm  = gons.reduce((s, g) => s + g.widthMm, 0);
+      totalFence += mm - gMm;
+      totalGates += gMm;
+      const gStr = gons.length ? gons.map(g => g.widthMm.toLocaleString() + 'mm').join(', ') : '—';
       let angleStr = '—';
       if (i < segs.length - 1) {
         const deg = angleDeg(seg.a, seg.b, segs[i + 1].b);
-        if (deg > 0 && deg < 175) { angleStr = deg + '°'; cornerCount++; }
+        if (deg > 2 && deg < 175) { angleStr = deg + '°'; cornerCount++; }
       }
-      rows += `<tr>
-        <td>${seg.a.label}–${seg.b.label}</td>
-        <td>${segMm.toLocaleString()} mm</td>
-        <td>${gateStr}</td>
-        <td>${netFenceMm.toLocaleString()} mm</td>
-        <td>${angleStr}</td>
-      </tr>`;
+      rows += `<tr><td>${seg.a.label}–${seg.b.label}</td><td>${mm.toLocaleString()} mm</td><td>${gStr}</td><td>${(mm - gMm).toLocaleString()} mm</td><td>${angleStr}</td></tr>`;
     });
 
     sumDiv.innerHTML = `
       <div id="fm-summary-title">Run summary</div>
       <table>
-        <thead><tr>
-          <th>Segment</th><th>Length</th><th>Gates</th><th>Net fence</th><th>Corner angle</th>
-        </tr></thead>
+        <thead><tr><th>Segment</th><th>Length</th><th>Gates</th><th>Net fence</th><th>Corner</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>`;
 
-    const gateCount = S.gates.length;
-    document.getElementById('fm-totals').innerHTML =
-      `Total fence: <strong>${totalFenceMm.toLocaleString()} mm (${(totalFenceMm / 1000).toFixed(2)} m)</strong>
-       &nbsp;|&nbsp; Corners: <strong>${cornerCount}</strong>
-       &nbsp;|&nbsp; Gates: <strong>${gateCount}</strong>
-       ${gateCount ? '(total opening ' + totalGatesMm.toLocaleString() + ' mm)' : ''}`;
-
+    if (totDiv) {
+      totDiv.innerHTML = `Total fence: <strong>${totalFence.toLocaleString()} mm (${(totalFence/1000).toFixed(2)} m)</strong>
+        &nbsp;|&nbsp; Corners: <strong>${cornerCount}</strong>
+        &nbsp;|&nbsp; Gates: <strong>${S.gates.length}</strong>
+        ${S.gates.length ? '(total opening ' + totalGates.toLocaleString() + ' mm)' : ''}`;
+    }
     updateApplyBtn();
   }
 
   function updateApplyBtn() {
     const btn = document.getElementById('fm-apply-btn');
-    if (!btn) return;
-    btn.disabled = S.nodes.length < 2;
+    if (btn) btn.disabled = S.nodes.length < 2;
   }
 
   // ─── Apply to calculator ──────────────────────────────────────────────────
+  window.applyFenceLayout = function () { applyToCalculator(); };
+
   function applyToCalculator() {
     if (S.nodes.length < 2) return;
     const segs = segments();
-    let totalFenceMm = 0, cornerCount = 0;
+    let totalFence = 0, cornerCount = 0;
     segs.forEach((seg, i) => {
-      const segMm = segLenMm(seg);
-      const gatesOnSeg = S.gates.filter(g => g.seg === i);
-      const gatesTotalMm = gatesOnSeg.reduce((s, g) => s + g.widthMm, 0);
-      totalFenceMm += segMm - gatesTotalMm;
+      const mm   = segLenMm(seg);
+      const gMm  = S.gates.filter(g => g.seg === i).reduce((s, g) => s + g.widthMm, 0);
+      totalFence += mm - gMm;
       if (i < segs.length - 1) {
         const deg = angleDeg(seg.a, seg.b, segs[i + 1].b);
-        if (deg > 0 && deg < 175) cornerCount++;
+        if (deg > 2 && deg < 175) cornerCount++;
       }
     });
 
-    const totalFenceM = parseFloat((totalFenceMm / 1000).toFixed(2));
-    const lengthEl   = document.getElementById('f_length');
-    const cornersEl  = document.getElementById('f_corners');
-    const jobDescEl  = document.getElementById('jobDesc');
+    const totalM = parseFloat((totalFence / 1000).toFixed(2));
 
-    // Warn before overwriting existing run length
-    if (lengthEl && lengthEl.value && parseFloat(lengthEl.value) !== totalFenceM) {
-      if (!confirm('Overwrite current run length (' + lengthEl.value + 'm) with layout value (' + totalFenceM + 'm)?')) return;
+    // runLength is in mm in the Generator form
+    const lenEl     = document.getElementById('runLength');
+    const cornersEl = document.getElementById('corners');
+
+    if (lenEl && lenEl.value && parseInt(lenEl.value) !== totalFence) {
+      if (!confirm('Overwrite current run length (' + (parseInt(lenEl.value)/1000).toFixed(2) + 'm) with layout value (' + totalM + 'm)?')) return;
     }
+    if (lenEl)     { lenEl.value     = totalFence; }
+    if (cornersEl) { cornersEl.value = cornerCount; }
 
-    if (lengthEl)  { lengthEl.value = totalFenceM; lengthEl.classList.add('prefilled'); }
-    if (cornersEl) { cornersEl.value = cornerCount; cornersEl.classList.add('prefilled'); }
+    // Trigger live update
+    if (typeof onConfigChange === 'function') onConfigChange();
 
-    // Prepend layout summary to job description
-    const segSummary = segs.map((seg, i) => {
-      const gatesOnSeg = S.gates.filter(g => g.seg === i);
-      const gStr = gatesOnSeg.length ? ' (gate' + (gatesOnSeg.length > 1 ? 's' : '') + ': ' + gatesOnSeg.map(g => g.widthMm + 'mm').join(', ') + ')' : '';
-      return seg.a.label + '–' + seg.b.label + ' ' + (segLenMm(seg) / 1000).toFixed(2) + 'm' + gStr;
-    }).join(', ');
-
-    const layoutNote = '[Layout: ' + segSummary + '; ' + cornerCount + ' corner' + (cornerCount !== 1 ? 's' : '') + ']';
-    if (jobDescEl && !jobDescEl.value.startsWith('[Layout:')) {
-      jobDescEl.value = layoutNote + (jobDescEl.value ? '\n' + jobDescEl.value : '');
-    } else if (jobDescEl) {
-      // Replace existing layout prefix
-      jobDescEl.value = layoutNote + jobDescEl.value.replace(/^\[Layout:[^\]]*\]\n?/, '\n').trimStart();
-    }
-
-    // Add gates to the calculator gate list
-    if (window.resetGates) window.resetGates();
-    S.gates.forEach(g => {
-      if (window.addGate) {
-        const gMm = g.widthMm;
-        const gType = gMm >= 2000 ? 'sliding' : gMm >= 1200 ? 'swing_double' : 'pedestrian';
-        window.addGate({ type: gType, width: gMm, motor: false });
+    // Prepend layout note to job description
+    const nlEl = document.getElementById('nl-input');
+    if (nlEl) {
+      const segSummary = segs.map((seg, i) => {
+        const gons = S.gates.filter(g => g.seg === i);
+        const gStr = gons.length ? ' (gate' + (gons.length > 1 ? 's' : '') + ': ' + gons.map(g => g.widthMm + 'mm').join(',') + ')' : '';
+        return seg.a.label + '–' + seg.b.label + ' ' + (segLenMm(seg)/1000).toFixed(2) + 'm' + gStr;
+      }).join(', ');
+      const note = '[Layout: ' + segSummary + '; ' + cornerCount + ' corner' + (cornerCount !== 1 ? 's' : '') + ']';
+      if (!nlEl.value.startsWith('[Layout:')) {
+        nlEl.value = note + (nlEl.value ? '\n' + nlEl.value : '');
+      } else {
+        nlEl.value = note + nlEl.value.replace(/^\[Layout:[^\]]*\]\n?/, '\n').trimStart();
       }
-    });
+    }
 
     S.applied = true;
-    showToast('Layout applied — ' + totalFenceM + 'm fence, ' + cornerCount + ' corner' + (cornerCount !== 1 ? 's' : '') + ', ' + S.gates.length + ' gate' + (S.gates.length !== 1 ? 's' : ''));
+    showToast('Layout applied — ' + totalM + 'm, ' + cornerCount + ' corner' + (cornerCount !== 1 ? 's' : '') + ', ' + S.gates.length + ' gate' + (S.gates.length !== 1 ? 's' : ''));
   }
 
-  // ─── Site plan for BOM output ─────────────────────────────────────────────
+  // ─── Site plan export ─────────────────────────────────────────────────────
   window.fmGetSitePlanDataURL = function () {
     if (!canvas || S.nodes.length < 2) return null;
-    // Render a clean copy on an offscreen canvas
-    const oc = document.createElement('canvas');
     const margin = 40;
-    // Find bounding box
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
     S.nodes.forEach(n => {
       minX = Math.min(minX, n.x); maxX = Math.max(maxX, n.x);
       minY = Math.min(minY, n.y); maxY = Math.max(maxY, n.y);
     });
-    const bw = maxX - minX + margin * 2;
-    const bh = maxY - minY + margin * 2;
-    oc.width  = Math.max(bw, 200);
-    oc.height = Math.max(bh, 200);
+    const oc  = document.createElement('canvas');
+    oc.width  = Math.max(maxX - minX + margin * 2, 200);
+    oc.height = Math.max(maxY - minY + margin * 2, 200);
     const oc2 = oc.getContext('2d');
     oc2.fillStyle = '#fff';
     oc2.fillRect(0, 0, oc.width, oc.height);
-
-    // Offset transform
     const ox = margin - minX, oy = margin - minY;
 
-    // Draw segments
     const segs = segments();
     segs.forEach((seg, i) => {
-      const gatesOnSeg = S.gates.filter(g => g.seg === i);
-      const intervals  = computeIntervals(seg, gatesOnSeg);
+      const gons = S.gates.filter(g => g.seg === i);
+      const ivs  = computeIntervals(seg, gons);
       oc2.save();
-      oc2.strokeStyle = SEG_COLOUR; oc2.lineWidth = 2.5;
-      intervals.forEach(([t0, t1]) => {
+      oc2.strokeStyle = SEG_COLOUR; oc2.lineWidth = 2;
+      ivs.forEach(([t0, t1]) => {
         oc2.beginPath();
         oc2.moveTo(seg.a.x + ox + (seg.b.x - seg.a.x) * t0, seg.a.y + oy + (seg.b.y - seg.a.y) * t0);
         oc2.lineTo(seg.a.x + ox + (seg.b.x - seg.a.x) * t1, seg.a.y + oy + (seg.b.y - seg.a.y) * t1);
         oc2.stroke();
       });
       oc2.restore();
-      // Length label
-      const mx = (seg.a.x + seg.b.x) / 2 + ox;
-      const my = (seg.a.y + seg.b.y) / 2 + oy;
-      oc2.save(); oc2.font = '11px sans-serif'; oc2.fillStyle = SEG_COLOUR; oc2.textAlign = 'center';
-      oc2.fillText(segLenMm(seg).toLocaleString() + 'mm', mx, my - 7); oc2.restore();
+      oc2.save();
+      oc2.font = '11px sans-serif'; oc2.fillStyle = SEG_COLOUR; oc2.textAlign = 'center';
+      oc2.fillText(segLenMm(seg).toLocaleString() + 'mm',
+        (seg.a.x + seg.b.x) / 2 + ox, (seg.a.y + seg.b.y) / 2 + oy - 7);
+      oc2.restore();
     });
-
-    // Draw gates
     S.gates.forEach(g => {
       if (g.seg >= segs.length) return;
       const seg = segs[g.seg];
-      const gx = seg.a.x + (seg.b.x - seg.a.x) * g.t + ox;
-      const gy = seg.a.y + (seg.b.y - seg.a.y) * g.t + oy;
-      const segLenPx = distPx(seg.a, seg.b);
-      const halfPx   = (g.widthMm / S.scale) * GRID / 2;
-      const halfT    = segLenPx > 0 ? halfPx / segLenPx : 0;
+      const segLenPx = distWorld(seg.a, seg.b);
+      const halfPx = (g.widthMm / S.scale) * GRID / 2;
+      const halfT  = segLenPx > 0 ? halfPx / segLenPx : 0;
       const ax = seg.a.x + (seg.b.x - seg.a.x) * (g.t - halfT) + ox;
       const ay = seg.a.y + (seg.b.y - seg.a.y) * (g.t - halfT) + oy;
       const bx = seg.a.x + (seg.b.x - seg.a.x) * (g.t + halfT) + ox;
       const by = seg.a.y + (seg.b.y - seg.a.y) * (g.t + halfT) + oy;
-      oc2.save(); oc2.strokeStyle = GATE_COLOUR; oc2.lineWidth = 2; oc2.setLineDash([5, 4]);
+      oc2.save(); oc2.strokeStyle = GATE_COLOUR; oc2.lineWidth = 2; oc2.setLineDash([5,4]);
       oc2.beginPath(); oc2.moveTo(ax, ay); oc2.lineTo(bx, by); oc2.stroke(); oc2.restore();
-      oc2.save(); oc2.font = '10px sans-serif'; oc2.fillStyle = GATE_COLOUR; oc2.textAlign = 'center';
-      oc2.fillText(g.widthMm + 'mm', gx, gy + 14); oc2.restore();
     });
-
-    // Draw nodes
     S.nodes.forEach(n => {
       oc2.save();
       oc2.beginPath(); oc2.arc(n.x + ox, n.y + oy, NODE_R, 0, Math.PI * 2);
-      oc2.fillStyle = '#fff'; oc2.fill();
-      oc2.strokeStyle = NODE_COLOUR; oc2.lineWidth = 2; oc2.stroke();
-      oc2.restore();
+      oc2.fillStyle = '#fff'; oc2.fill(); oc2.strokeStyle = NODE_COLOUR; oc2.lineWidth = 2; oc2.stroke(); oc2.restore();
       oc2.save(); oc2.font = 'bold 11px sans-serif'; oc2.fillStyle = NODE_COLOUR; oc2.textAlign = 'center';
-      oc2.fillText(n.label, n.x + ox, n.y + oy - 11); oc2.restore();
+      oc2.fillText(n.label, n.x + ox, n.y + oy - 12); oc2.restore();
     });
-
     return oc.toDataURL('image/png');
   };
 
@@ -802,15 +871,14 @@
   }
 
   // ─── Serialisation ────────────────────────────────────────────────────────
-  window.fmGetState = function ()  { return JSON.stringify({ nodes: S.nodes, gates: S.gates, scale: S.scale }); };
-  window.fmLoadState = function (json) {
+  window.fmGetState   = () => JSON.stringify({ nodes: S.nodes, gates: S.gates, scale: S.scale });
+  window.fmLoadState  = (json) => {
     try {
       const d = JSON.parse(json);
-      S.nodes = d.nodes || [];
-      S.gates = d.gates || [];
-      S.scale = d.scale || 1000;
+      S.nodes = d.nodes || []; S.gates = d.gates || []; S.scale = d.scale || 1000;
       labelCounter = S.nodes.length;
-      document.getElementById('fm-scale').value = S.scale;
+      const el = document.getElementById('fm-scale');
+      if (el) el.value = S.scale;
       render(); updateSummary(); updateApplyBtn();
     } catch (e) { /* ignore */ }
   };
