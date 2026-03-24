@@ -9,19 +9,24 @@
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#222;font-size:14px}
   h1{font-size:20px;font-weight:700;color:#fff}
-  h2{font-size:15px;font-weight:600;color:#1a4480;margin-bottom:10px}
-  .header{background:linear-gradient(135deg,#1a4480,#2563a8);padding:14px 24px;display:flex;align-items:center;gap:12px;print-color-adjust:exact;-webkit-print-color-adjust:exact}
-  .header .logo{font-size:26px;line-height:1}
+  h2{font-size:15px;font-weight:600;color:#2c5a9a;margin-bottom:10px}
+  .header{background:linear-gradient(135deg,#2c5a9a,#4a84cc);padding:12px 24px;display:flex;align-items:center;gap:16px;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+  .header-brand{display:flex;align-items:center;gap:9px;flex-shrink:0}
+  .header-brand-text{font-size:13px;font-weight:700;color:#fff;letter-spacing:.02em;line-height:1}
+  .header-brand-sub{font-size:10px;color:rgba(255,255,255,.6);font-weight:400;margin-top:2px}
+  .header-center{flex:1;text-align:center}
   .header small{color:#c9dff5;font-size:12px;display:block;margin-top:2px}
+  .header-go-logo{height:36px;background:#fff;border-radius:6px;padding:4px 8px;display:flex;align-items:center;flex-shrink:0}
+  .header-go-logo img{height:28px;width:auto;display:block}
   .main{max-width:1100px;margin:0 auto;padding:20px 16px}
-  .card{background:#fff;border-radius:8px;border:1px solid #dde3ed;padding:18px 20px;margin-bottom:16px}
+  .card{background:#fff;border-radius:10px;border:1px solid #dde3ed;padding:20px 24px;margin-bottom:16px}
   .nl-area{width:100%;min-height:70px;border:2px solid #c9dff5;border-radius:6px;padding:10px;font-size:14px;resize:vertical;line-height:1.5}
-  .nl-area:focus{outline:none;border-color:#2563a8}
+  .nl-area:focus{outline:none;border-color:#4a84cc}
   .nl-hint{font-size:12px;color:#666;margin-top:6px;font-style:italic}
   .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:6px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:.15s}
-  .btn-primary{background:#2563a8;color:#fff}.btn-primary:hover{background:#1a4480}
+  .btn-primary{background:#4a84cc;color:#fff}.btn-primary:hover{background:#2c5a9a}
   .btn-success{background:#16a34a;color:#fff}.btn-success:hover{background:#15803d}
-  .btn-outline{background:#fff;color:#2563a8;border:1.5px solid #2563a8}.btn-outline:hover{background:#eef4fc}
+  .btn-outline{background:#fff;color:#4a84cc;border:1.5px solid #4a84cc}.btn-outline:hover{background:#eef4fc}
   .btn-danger{background:#dc2626;color:#fff}.btn-danger:hover{background:#b91c1c}
   .btn-sm{padding:5px 11px;font-size:12px}
   .btn-purple{background:#7c3aed;color:#fff;border:none}.btn-purple:hover{background:#6d28d9}
@@ -29,37 +34,44 @@
   .row-2{grid-template-columns:1fr 1fr}
   .row-3{grid-template-columns:1fr 1fr 1fr}
   .row-4{grid-template-columns:1fr 1fr 1fr 1fr}
-  label{display:block;font-size:12px;font-weight:600;color:#444;margin-bottom:4px}
-  input[type=number],select,input[type=text],input[type=password]{width:100%;border:1.5px solid #ccd4e0;border-radius:5px;padding:7px 9px;font-size:13px;color:#222}
-  input:focus,select:focus{outline:none;border-color:#2563a8}
-  .form-note{font-size:11px;color:#888;margin-top:3px}
+  label{display:block;font-size:12px;font-weight:600;color:#444;margin-bottom:5px;letter-spacing:.02em}
+  input[type=number],select,input[type=text],input[type=password]{width:100%;border:1.5px solid #ccd4e0;border-radius:6px;padding:9px 11px;font-size:14px;color:#222;transition:border-color .15s}
+  input:focus,select:focus{outline:none;border-color:#4a84cc;box-shadow:0 0 0 3px rgba(74,132,204,.1)}
+  .form-note{font-size:11px;color:#888;margin-top:4px;line-height:1.4}
   .calc-box{background:#f0f6ff;border:1px solid #bfd4f0;border-radius:6px;padding:12px 16px;margin:10px 0;font-size:13px}
   .calc-row{display:flex;justify-content:space-between;padding:2px 0}
-  .calc-row strong{color:#1a4480}
+  .calc-row strong{color:#2c5a9a}
   .warn{background:#fff7ed;border:1px solid #f59e0b;border-radius:6px;padding:10px 14px;margin:8px 0;font-size:12px;color:#92400e}
   .warn::before{content:'⚠ ';font-weight:700}
   .bom-section{margin-bottom:10px}
-  .bom-section h3{font-size:12px;font-weight:700;color:#fff;background:#1a4480;padding:5px 12px;border-radius:4px 4px 0 0;letter-spacing:.5px;text-transform:uppercase}
+  .bom-section h3{font-size:11px;font-weight:700;color:#2c5a9a;background:#f0f6ff;padding:7px 12px 7px 14px;border-radius:4px 4px 0 0;letter-spacing:.5px;text-transform:uppercase;border-left:3px solid #4a84cc}
   table{width:100%;border-collapse:collapse}
   th{background:#f3f6fc;font-size:11px;font-weight:700;color:#444;text-align:left;padding:7px 10px;border-bottom:2px solid #dde3ed}
-  td{padding:6px 10px;border-bottom:1px solid #eee;font-size:13px}
+  td{padding:8px 10px;border-bottom:1px solid #eee;font-size:13px}
   tr:last-child td{border-bottom:none}
   .td-r{text-align:right}
-  .td-code{font-family:monospace;font-size:12px;color:#2563a8}
-  .total-row td{font-weight:700;font-size:14px;background:#f0f6ff;border-top:2px solid #2563a8}
+  .td-code{font-family:monospace;font-size:12px;color:#4a84cc}
+  .print-only{display:none}
+  .bom-qty-input{width:52px;padding:3px 5px;border:1.5px solid #ccd4e0;border-radius:4px;font-size:12px;text-align:right;-moz-appearance:textfield}
+  .bom-qty-input::-webkit-outer-spin-button,.bom-qty-input::-webkit-inner-spin-button{-webkit-appearance:none}
+  .bom-qty-input:focus{border-color:#4a84cc;outline:none}
+  #bom-search-list li{padding:7px 12px;font-size:12px;cursor:pointer;border-bottom:1px solid #f0f2f6;color:#222}
+  #bom-search-list li:hover,#bom-search-list li.bom-ac-active{background:#e8f0fe;color:#1a4480}
+  @media print{.bom-qty-input{border:none;background:none;width:auto}}
+  .total-row td{font-weight:700;font-size:14px;background:#f0f6ff;border-top:2px solid #4a84cc}
   .actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-  .tier-tabs{display:flex;gap:4px;margin-bottom:12px}
-  .tier-tab{padding:5px 14px;border:1.5px solid #ccd4e0;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;color:#555;background:#fff}
-  .tier-tab.active{background:#2563a8;border-color:#2563a8;color:#fff}
+  .tier-tabs{display:inline-flex;gap:3px;margin-bottom:12px;background:#edf2f7;border-radius:20px;padding:4px}
+  .tier-tab{padding:6px 16px;border:none;border-radius:16px;cursor:pointer;font-size:12px;font-weight:600;color:#555;background:transparent;transition:.15s}
+  .tier-tab.active{background:#4a84cc;color:#fff;box-shadow:0 1px 4px rgba(74,132,204,.3)}
   .quote-header{display:none}
   #bom-output{display:none}
-  .tag{display:inline-block;background:#e0edff;color:#1a4480;border-radius:3px;padding:1px 6px;font-size:11px;font-weight:600;margin-left:4px}
+  .tag{display:inline-block;background:#e0edff;color:#2c5a9a;border-radius:3px;padding:1px 6px;font-size:11px;font-weight:600;margin-left:4px}
   .highlight{background:#fffbe6}
   select option[disabled]{color:#aaa}
-  .slat-calc{background:#1a4480;color:#fff;border-radius:6px;padding:12px 16px;font-family:monospace;font-size:13px;margin:10px 0;line-height:1.8}
+  .slat-calc{background:#2c5a9a;color:#fff;border-radius:6px;padding:12px 16px;font-family:monospace;font-size:13px;margin:10px 0;line-height:1.8}
   .slat-calc .divider{border-top:1px solid #4a6fa5;margin:6px 0}
   .slat-option{cursor:pointer;padding:3px 8px;border-radius:3px;margin:2px 0;display:flex;align-items:center;gap:8px}
-  .slat-option:hover{background:#2563a8}
+  .slat-option:hover{background:#4a84cc}
   .slat-option.selected{background:#16a34a}
   .slat-option .badge{background:#16a34a;color:#fff;font-size:10px;padding:1px 5px;border-radius:2px}
   .slat-option.closest .badge{background:#f59e0b;color:#000}
@@ -70,7 +82,7 @@
   .gate-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:10px}
   .gate-row-3{grid-template-columns:1fr 1fr 1fr}
   .gate-list-item{display:flex;align-items:center;justify-content:space-between;background:#f0f6ff;border:1px solid #bfd4f0;border-radius:5px;padding:8px 12px;margin-bottom:6px;font-size:13px}
-  .gate-list-item .gate-info strong{color:#1a4480}
+  .gate-list-item .gate-info strong{color:#2c5a9a}
   .gate-empty{color:#999;font-style:italic;font-size:13px;padding:8px 0}
   .gate-warn{background:#fff7ed;border:1px solid #f59e0b;border-radius:5px;padding:6px 10px;font-size:12px;color:#92400e;margin-top:6px}
   .gate-warn::before{content:'⚠ '}
@@ -81,14 +93,14 @@
   #fm-toggle-bar{background:#fff;border:1px solid #dde3ed;border-radius:8px;padding:12px 16px;cursor:pointer;user-select:none;display:flex;justify-content:space-between;align-items:center}
   #fm-toggle-bar:hover{background:#f9fafb}
   #fm-toggle-bar.open{border-radius:8px 8px 0 0}
-  #fm-toggle-label{font-size:14px;font-weight:600;color:#1a4480}
+  #fm-toggle-label{font-size:14px;font-weight:600;color:#2c5a9a}
   #fm-toggle-caret{font-size:11px;color:#888;transition:transform .2s}
   #fm-toggle-bar.open #fm-toggle-caret{transform:rotate(180deg)}
   #fm-body{background:#fff;border:1px solid #dde3ed;border-top:none;border-radius:0 0 8px 8px;padding:14px 16px 18px;display:none}
   #fm-body.open{display:block}
   .fm-btn{background:#fff;border:1.5px solid #ccd4e0;border-radius:5px;color:#333;font-size:12px;font-weight:600;padding:5px 12px;cursor:pointer;transition:.12s;white-space:nowrap}
   .fm-btn:hover{background:#f3f6fc}
-  .fm-btn.active{background:#2563a8;color:#fff;border-color:#2563a8}
+  .fm-btn.active{background:#4a84cc;color:#fff;border-color:#4a84cc}
   .fm-btn.danger{color:#dc2626}
   .fm-btn.danger:hover{background:#fee2e2}
   .fm-sep{width:1px;height:22px;background:#dde3ed;margin:0 2px}
@@ -118,33 +130,66 @@
   #bom-site-plan .plan-label{font-size:11px;color:#888;margin-top:4px}
   @media print {
     body{background:#fff;font-size:12px}
-    .no-print,.header .logo,.nl-area,.btn,.tier-tabs,.actions,#fm-section,.ai-summary-box{display:none!important}
-    .card{border:none;padding:0;margin:0}
+    .no-print,.nl-area,.btn,.tier-tabs,.actions,#fm-section,.ai-summary-box,#bom-extra-section,.user-bar,#quotes-panel{display:none!important}
+    .print-only{display:inline}
+    .card{border:none;padding:0;margin:0 0 12px}
     .quote-header{display:block!important;margin-bottom:16px}
     .main{max-width:100%;padding:0}
     #bom-output{display:block!important}
-    .header{background:#1a4480!important;padding:10px 20px}
+    .header{background:#2c5a9a!important;padding:10px 20px;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+    .header-brand,.header-center{display:flex!important}
+    .header-go-logo{display:flex!important}
     h1{font-size:16px}
     table{font-size:11px}
-    th,td{padding:4px 8px}
-    .bom-section h3{font-size:10px;padding:3px 8px}
+    th,td{padding:5px 8px}
+    .bom-section h3{font-size:10px;padding:4px 8px 4px 10px;border-left:2px solid #4a84cc}
     .warn{display:none}
     @page{margin:15mm}
   }
-  @media (max-width:700px){.row-3,.row-4{grid-template-columns:1fr 1fr}.row-2{grid-template-columns:1fr}}
+  @media (max-width:700px){
+    .row-3,.row-4{grid-template-columns:1fr 1fr}
+    .row-2{grid-template-columns:1fr}
+    .gate-row{grid-template-columns:1fr 1fr}
+    .gate-row-3{grid-template-columns:1fr 1fr}
+    .actions{position:sticky;bottom:0;background:#fff;border-top:1px solid #dde3ed;padding:12px 16px;margin:0 -16px;z-index:10;border-radius:0}
+    .card{padding:16px}
+  }
+  @media (max-width:480px){
+    .row-3,.row-4,.row-2{grid-template-columns:1fr}
+    .gate-row,.gate-row-3{grid-template-columns:1fr 1fr}
+    .main{padding:12px 10px}
+    .card{padding:14px 12px}
+    .btn{padding:10px 14px;font-size:14px;min-height:44px}
+    .actions .btn{flex:1;justify-content:center}
+    h1{font-size:16px}
+    .header{padding:10px 12px;gap:10px}
+    .header-center small{display:none}
+    .header-brand-sub{display:none}
+    .tier-tabs{display:flex;flex-wrap:wrap;width:100%;border-radius:10px}
+    .tier-tab{flex:1;text-align:center;border-radius:8px}
+    table{font-size:12px}
+    th,td{padding:6px 7px}
+  }
   /* ── Auth overlay ─────────────────────────────────────────────────── */
-  #auth-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#1a4480,#2563a8);display:flex;align-items:center;justify-content:center;z-index:10000}
-  #auth-box{background:#fff;border-radius:12px;padding:36px 40px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
-  #auth-box h2{color:#1a4480;margin-bottom:6px;font-size:20px;text-align:center}
-  #auth-box p{color:#666;font-size:13px;margin-bottom:24px;text-align:center}
-  .auth-field{margin-bottom:14px}
-  .auth-field label{font-size:12px;font-weight:600;color:#444;display:block;margin-bottom:4px}
-  #auth-submit{width:100%;background:#2563a8;color:#fff;border:none;border-radius:6px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;margin-top:6px}
-  #auth-submit:hover{background:#1a4480}
+  #auth-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#2c5a9a,#4a84cc);display:flex;align-items:center;justify-content:center;z-index:10000}
+  #auth-box{background:#fff;border-radius:16px;padding:36px 40px;width:100%;max-width:400px;box-shadow:0 24px 64px rgba(0,0,0,.35)}
+  .auth-logos{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid #edf2f7}
+  .auth-logo-brand{display:flex;align-items:center;gap:8px}
+  .auth-logo-brand-text{font-size:14px;font-weight:700;color:#2c5a9a;letter-spacing:.02em;line-height:1}
+  .auth-logo-brand-sub{font-size:10px;color:#999;font-weight:400;margin-top:2px}
+  .auth-divider{width:1px;height:36px;background:#dde3ed}
+  #auth-box h2{color:#2c5a9a;margin-bottom:6px;font-size:22px;text-align:center;font-weight:700}
+  #auth-box p{color:#888;font-size:13px;margin-bottom:22px;text-align:center}
+  .auth-field{margin-bottom:16px}
+  .auth-field label{font-size:12px;font-weight:600;color:#444;display:block;margin-bottom:5px}
+  #auth-submit{width:100%;background:#4a84cc;color:#fff;border:none;border-radius:8px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;transition:.15s;letter-spacing:.02em}
+  #auth-submit:hover{background:#2c5a9a}
   #auth-submit:disabled{opacity:.6;cursor:not-allowed}
-  #auth-error{font-size:12px;margin-top:8px;min-height:18px}
-  #auth-switch{text-align:center;margin-top:16px;font-size:13px;color:#666}
-  #auth-switch a{color:#2563a8;cursor:pointer;font-weight:600;text-decoration:underline}
+  #auth-error{font-size:12px;margin-top:8px;min-height:18px;color:#dc2626;text-align:center}
+  #auth-switch{text-align:center;margin-top:18px;font-size:13px;color:#888}
+  #auth-switch a{color:#4a84cc;cursor:pointer;font-weight:600;text-decoration:none;border-bottom:1px solid #4a84cc}
+  .auth-powered{text-align:center;margin-top:16px;font-size:11px;color:#bbb}
+  @media(max-width:480px){#auth-box{padding:28px 22px;border-radius:12px}}
   /* ── Header user bar ───────────────────────────────────────────────── */
   .user-bar{margin-left:auto;display:flex;align-items:center;gap:12px;flex-shrink:0}
   .user-bar span{color:#c9dff5;font-size:13px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -157,7 +202,7 @@
   #quotes-toggle.open{border-radius:8px 8px 0 0}
   #quotes-body{background:#fff;border:1px solid #dde3ed;border-top:none;border-radius:0 0 8px 8px;padding:14px 16px;display:none}
   .q-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#f0f6ff;border:1px solid #bfd4f0;border-radius:5px;margin-bottom:6px;font-size:13px;gap:12px}
-  .q-item-info strong{color:#1a4480;display:block;margin-bottom:2px}
+  .q-item-info strong{color:#2c5a9a;display:block;margin-bottom:2px}
   .q-item-info span{color:#888;font-size:12px}
   .q-item-actions{display:flex;gap:6px;flex-shrink:0}
   #save-quote-btn{background:#16a34a;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;display:none;align-items:center;gap:6px}
@@ -171,28 +216,59 @@
 <!-- ── Auth Overlay ──────────────────────────────────────────────────────── -->
 <div id="auth-overlay">
   <div id="auth-box">
-    <div style="text-align:center;font-size:40px;margin-bottom:8px">🏗</div>
-    <h2>QuickScreen BOM Generator</h2>
+    <div class="auth-logos">
+      <div class="auth-logo-brand">
+        <svg width="32" height="32" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="36" height="36" rx="8" fill="#eef4fb"/>
+          <path d="M25 12C25 9.24 22.76 7 20 7H15C12.24 7 10 9.24 10 12C10 14.76 12.24 17 15 17H21C23.76 17 26 19.24 26 22C26 24.76 23.76 27 21 27H16C13.24 27 11 24.76 11 22" stroke="#2c5a9a" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="27" cy="9" r="2" fill="#4a84cc"/>
+        </svg>
+        <div>
+          <div class="auth-logo-brand-text">SkybrookAI</div>
+          <div class="auth-logo-brand-sub">Powered by AI</div>
+        </div>
+      </div>
+      <div class="auth-divider"></div>
+      <img src="data:image/png;base64,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" alt="Glass Outlet" style="height:36px;width:auto">
+    </div>
+    <h2>Quickscreen</h2>
     <p>Sign in to save and manage your quotes</p>
     <div class="auth-field">
-      <label>Email</label>
+      <label>Email address</label>
       <input type="email" id="auth-email" placeholder="you@example.com" autocomplete="email">
     </div>
     <div class="auth-field">
       <label>Password</label>
-      <input type="password" id="auth-password" placeholder="Password" autocomplete="current-password">
+      <input type="password" id="auth-password" placeholder="Enter your password" autocomplete="current-password">
     </div>
     <div id="auth-error"></div>
     <button id="auth-submit" onclick="handleAuth()">Sign In</button>
     <div id="auth-switch">Don't have an account? <a onclick="toggleAuthMode()">Sign up</a></div>
+    <div class="auth-powered">© SkybrookAI · Built for The Glass Outlet</div>
   </div>
 </div>
 
 <div class="header">
-  <div class="logo">🏗</div>
-  <div>
-    <h1>QuickScreen BOM Generator</h1>
-    <small>Horizontal Slat Fence &amp; Screen — Live pricing · AI-assisted</small>
+  <!-- SkybrookAI branding (left) -->
+  <div class="header-brand">
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="36" height="36" rx="8" fill="rgba(255,255,255,0.12)"/>
+      <path d="M25 12C25 9.24 22.76 7 20 7H15C12.24 7 10 9.24 10 12C10 14.76 12.24 17 15 17H21C23.76 17 26 19.24 26 22C26 24.76 23.76 27 21 27H16C13.24 27 11 24.76 11 22" stroke="white" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="27" cy="9" r="2" fill="rgba(255,255,255,0.75)"/>
+    </svg>
+    <div>
+      <div class="header-brand-text">SkybrookAI</div>
+      <div class="header-brand-sub">Powered by AI</div>
+    </div>
+  </div>
+  <!-- Title (centre) -->
+  <div class="header-center">
+    <h1>Quickscreen</h1>
+    <small>Slat screening systems — pricing &amp; AI assisted BOM generator</small>
+  </div>
+  <!-- Glass Outlet logo + user bar (right) -->
+  <div class="header-go-logo">
+    <img src="data:image/png;base64,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" alt="Glass Outlet">
   </div>
   <div class="user-bar">
     <span id="user-email-display"></span>
@@ -253,7 +329,7 @@
   <div id="describe-section" class="no-print">
     <div id="describe-toggle" onclick="toggleDescribe()"
       style="background:#fff;border:1px solid #dde3ed;border-radius:8px;padding:12px 16px;cursor:pointer;user-select:none;display:flex;justify-content:space-between;align-items:center;margin-bottom:0">
-      <span style="font-size:14px;font-weight:600;color:#1a4480">📝 Describe the Job <span class="ai-badge">AI</span>
+      <span style="font-size:14px;font-weight:600;color:#2c5a9a">📝 Describe the Job <span class="ai-badge">AI</span>
         <span style="font-size:11px;color:#888;font-weight:400;margin-left:8px">optional — AI or local parsing fills the form below</span>
       </span>
       <span id="describe-caret" style="font-size:11px;color:#888;transition:transform .2s">▼</span>
@@ -477,17 +553,29 @@
   <div id="bom-output">
 
     <div class="quote-header">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start">
-        <div>
-          <div style="font-size:18px;font-weight:700;color:#1a4480">MATERIAL QUOTE</div>
-          <div id="q-customer" style="font-size:14px;margin-top:4px"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <svg width="28" height="28" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="36" height="36" rx="8" fill="#eef4fb"/>
+            <path d="M25 12C25 9.24 22.76 7 20 7H15C12.24 7 10 9.24 10 12C10 14.76 12.24 17 15 17H21C23.76 17 26 19.24 26 22C26 24.76 23.76 27 21 27H16C13.24 27 11 24.76 11 22" stroke="#2c5a9a" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="27" cy="9" r="2" fill="#4a84cc"/>
+          </svg>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:#2c5a9a;letter-spacing:.02em">SkybrookAI</div>
+            <div style="font-size:10px;color:#999">Powered by AI</div>
+          </div>
         </div>
-        <div style="text-align:right;font-size:12px;color:#666">
-          <div id="q-date"></div>
-          <div style="margin-top:2px">QuickScreen Horizontal Slat System</div>
+        <div style="text-align:center">
+          <div style="font-size:17px;font-weight:700;color:#2c5a9a;letter-spacing:.03em">MATERIAL QUOTE</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Quickscreen Slat Screening System</div>
+        </div>
+        <div style="text-align:right">
+          <img src="data:image/png;base64,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" alt="Glass Outlet" style="height:32px;width:auto;display:block;margin-left:auto">
+          <div id="q-date" style="font-size:11px;color:#888;margin-top:4px"></div>
         </div>
       </div>
-      <hr style="margin:10px 0;border-color:#dde3ed">
+      <div id="q-customer" style="font-size:13px;color:#333;margin-bottom:4px"></div>
+      <hr style="margin:8px 0;border-color:#dde3ed">
     </div>
 
     <div class="card" id="bom-config-summary" style="margin-bottom:10px;padding:12px 16px"></div>
@@ -507,9 +595,32 @@
 
     <div class="card" style="padding:0;overflow:hidden">
       <div id="bom-tables"></div>
-      <div style="padding:14px 16px;background:#f0f6ff;border-top:2px solid #2563a8;display:flex;justify-content:space-between;align-items:center">
+      <div style="padding:14px 16px;background:#f0f6ff;border-top:2px solid #4a84cc;display:flex;justify-content:space-between;align-items:center">
         <div style="font-size:13px;color:#444">All prices ex-GST &nbsp;|&nbsp; Tier <span id="tier-label">1</span></div>
-        <div style="font-size:20px;font-weight:700;color:#1a4480">TOTAL: $<span id="grand-total">0.00</span></div>
+        <div style="font-size:20px;font-weight:700;color:#2c5a9a">TOTAL: $<span id="grand-total">0.00</span></div>
+      </div>
+    </div>
+
+    <!-- ── Extra Items Search ──────────────────────────────────────── -->
+    <div id="bom-extra-section" class="no-print" style="display:none;margin-top:8px">
+      <div class="card" style="padding:14px 16px">
+        <div style="font-size:13px;font-weight:600;color:#2c5a9a;margin-bottom:10px">+ Add Extra Items to BOM</div>
+        <div style="position:relative">
+          <input type="text" id="bom-search-input" placeholder="Search by product code or description…"
+            style="width:100%;box-sizing:border-box;padding:8px 12px;border:1.5px solid #ccd4e0;border-radius:6px;font-size:13px;outline:none">
+          <ul id="bom-search-list"
+            style="display:none;position:absolute;left:0;right:0;top:100%;background:#fff;
+              border:1.5px solid #4a84cc;border-top:none;border-radius:0 0 6px 6px;
+              max-height:220px;overflow-y:auto;z-index:500;margin:0;padding:0;list-style:none;
+              box-shadow:0 6px 18px rgba(0,0,0,.12)"></ul>
+        </div>
+        <div id="bom-add-row" style="display:none;margin-top:10px;align-items:center;gap:8px;flex-wrap:wrap">
+          <div id="bom-add-label" style="flex:1;font-size:12px;font-weight:600;color:#1a4480;min-width:160px"></div>
+          <div style="font-size:12px;color:#666" id="bom-add-price"></div>
+          <input type="number" id="bom-add-qty" value="1" min="1" step="1"
+            style="width:65px;padding:6px 8px;border:1.5px solid #ccd4e0;border-radius:4px;font-size:13px">
+          <button class="btn btn-primary btn-sm" onclick="addExtraItem()">Add to BOM</button>
+        </div>
       </div>
     </div>
 
@@ -526,7 +637,7 @@
   <!-- ── My Saved Quotes ──────────────────────────────────────────────── -->
   <div id="quotes-panel" class="no-print" style="display:none">
     <div id="quotes-toggle" onclick="toggleQuotesPanel()">
-      <span style="font-size:14px;font-weight:600;color:#1a4480">💾 My Saved Quotes <span id="quotes-count" style="font-size:12px;color:#888;font-weight:400"></span></span>
+      <span style="font-size:14px;font-weight:600;color:#2c5a9a">💾 My Saved Quotes <span id="quotes-count" style="font-size:12px;color:#888;font-weight:400"></span></span>
       <span id="quotes-caret" style="font-size:11px;color:#888">▼</span>
     </div>
     <div id="quotes-body">
@@ -1195,6 +1306,7 @@ function renderBOM(cfg) {
   document.getElementById('q-date').textContent = new Date().toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'});
   document.getElementById('q-customer').textContent = document.getElementById('customer').value || '';
 
+  currentBOM.forEach((r, i) => r._idx = i);
   const sections = {};
   currentBOM.forEach(r => { if (!sections[r.section]) sections[r.section]=[]; sections[r.section].push(r); });
 
@@ -1209,9 +1321,9 @@ function renderBOM(cfg) {
       rowsHTML += `<tr${noPrice?' class="highlight"':''}>
         <td class="td-code">${r.code}${noPrice?' <span class="tag">⚠ POA</span>':''}</td>
         <td>${r.desc}</td>
-        <td class="td-r">${r.qty}</td>
+        <td class="td-r"><input type="number" class="bom-qty-input no-print" data-idx="${r._idx}" value="${r.qty}" min="0"><span class="print-only">${r.qty}</span></td>
         <td class="td-r">${price!=null?'$'+price.toFixed(2):'—'}</td>
-        <td class="td-r">${line!=null?'$'+line.toFixed(2):'POA'}</td>
+        <td class="td-r bom-line-total">${line!=null?'$'+line.toFixed(2):'POA'}</td>
       </tr>`;
     });
     tablesHTML += `<div class="bom-section"><h3>${secName}</h3>
@@ -1220,6 +1332,7 @@ function renderBOM(cfg) {
   });
   document.getElementById('bom-tables').innerHTML = tablesHTML;
   document.getElementById('grand-total').textContent = grandTotal.toFixed(2);
+  document.getElementById('bom-extra-section').style.display = '';
   document.getElementById('tier-label').textContent = currentTier;
 }
 
@@ -1233,6 +1346,7 @@ function setTier(t, el) {
 function rerenderPrices() {
   const tier = currentTier - 1;
   const tierKey = ['p1','p2','p3'][tier];
+  currentBOM.forEach((r, i) => r._idx = i);
   const sections = {};
   currentBOM.forEach(r => { if(!sections[r.section])sections[r.section]=[]; sections[r.section].push(r); });
   let grandTotal = 0, tablesHTML = '';
@@ -1242,13 +1356,180 @@ function rerenderPrices() {
       const price = r[tierKey]; const line = price!=null?price*r.qty:null;
       if(line) grandTotal += line;
       const noPrice = price==null;
-      rowsHTML += `<tr${noPrice?' class="highlight"':''}><td class="td-code">${r.code}${noPrice?' <span class="tag">⚠ POA</span>':''}</td><td>${r.desc}</td><td class="td-r">${r.qty}</td><td class="td-r">${price!=null?'$'+price.toFixed(2):'—'}</td><td class="td-r">${line!=null?'$'+line.toFixed(2):'POA'}</td></tr>`;
+      rowsHTML += `<tr${noPrice?' class="highlight"':''}><td class="td-code">${r.code}${noPrice?' <span class="tag">⚠ POA</span>':''}</td><td>${r.desc}</td><td class="td-r"><input type="number" class="bom-qty-input no-print" data-idx="${r._idx}" value="${r.qty}" min="0"><span class="print-only">${r.qty}</span></td><td class="td-r">${price!=null?'$'+price.toFixed(2):'—'}</td><td class="td-r bom-line-total">${line!=null?'$'+line.toFixed(2):'POA'}</td></tr>`;
     });
     tablesHTML += `<div class="bom-section"><h3>${secName}</h3><table><thead><tr><th style="width:160px">Code</th><th>Description</th><th class="td-r" style="width:55px">Qty</th><th class="td-r" style="width:80px">Unit $</th><th class="td-r" style="width:90px">Line $</th></tr></thead><tbody>${rowsHTML}</tbody></table></div>`;
   });
   document.getElementById('bom-tables').innerHTML = tablesHTML;
   document.getElementById('grand-total').textContent = grandTotal.toFixed(2);
   document.getElementById('tier-label').textContent = currentTier;
+}
+
+// ─── EDITABLE QTY ────────────────────────────────────────────────────────────
+(function(){
+  document.addEventListener('change', function(e) {
+    if (!e.target.classList.contains('bom-qty-input')) return;
+    const idx = parseInt(e.target.dataset.idx);
+    const qty = Math.max(0, parseInt(e.target.value) || 0);
+    if (!currentBOM[idx]) return;
+    currentBOM[idx].qty = qty;
+    e.target.value = qty;
+    const tierKey = ['p1','p2','p3'][currentTier-1];
+    const price = currentBOM[idx][tierKey];
+    const line  = price != null ? price * qty : null;
+    const tr = e.target.closest('tr');
+    if (tr) tr.querySelector('.bom-line-total').textContent = line != null ? '$'+line.toFixed(2) : 'POA';
+    // recalc grand total
+    let grand = 0;
+    currentBOM.forEach(r => { const p=r[tierKey]; if(p!=null) grand += p*r.qty; });
+    document.getElementById('grand-total').textContent = grand.toFixed(2);
+  });
+})();
+
+// ─── PRODUCT SEARCH & EXTRA ITEMS ────────────────────────────────────────────
+const COL_NAMES_SHORT = {B:'Black',MN:'Monument',G:'Woodland Grey',SM:'Surfmist',W:'Pearl White',BS:'Basalt',D:'Dune',M:'Mill',S:'Palladium Silver',P:'Primrose',PB:'Paperbark'};
+
+function codeToDesc(code) {
+  const p = code.split('-');
+  const col = c => COL_NAMES_SHORT[c] || c;
+  if (p[2]==='S65')          return `65mm Slat ${col(p[3])} 6100mm`;
+  if (p[2]==='S90')          return `90mm Slat ${col(p[3])} 6100mm`;
+  if (p[2]==='SF')           return `Side Frame ${col(p[3])} 5800mm`;
+  if (p[2]==='CFC')          return `CFC Concealed Fixing Cover ${col(p[3])} 5800mm`;
+  if (p[2]==='F'&&p[0]==='QS') return `F-Section ${col(p[3])} 5800mm`;
+  if (p[2]==='CSR')          return `Centre Support Rail ${col(p[3])} 5800mm`;
+  if (p[2]==='FP'&&p[1]==='2400') return `50mm Post ${col(p[3])} 2400mm`;
+  if (p[2]==='FP'&&p[1]==='6000') return `50mm Post ${col(p[3])} 6000mm`;
+  if (p[2]==='65HD'&&p[1]==='2400') return `65mm HD Post ${col(p[3])} 2400mm`;
+  if (p[2]==='65HD'&&p[1]==='5800') return `65mm HD Post ${col(p[3])} 5800mm`;
+  if (code.startsWith('XP-BP-SET-'))    return `50mm Base Plate Set ${col(p[3])}`;
+  if (code.startsWith('XP-65BP-SET-'))  return `65mm Base Plate Set ${col(p[3])}`;
+  if (code.startsWith('XP-DC-2P-'))     return `50mm Domical Cover 2-Part ${col(p[3])}`;
+  if (code.startsWith('XP-65DC-2P-'))   return `65mm Domical Cover 2-Part ${col(p[3])}`;
+  if (code.startsWith('XP-DR-'))        return `50mm Dress Ring ${col(p[3])}`;
+  if (code.startsWith('XP-65DR-'))      return `65mm Dress Ring ${col(p[3])}`;
+  if (code.startsWith('XPL-SB-50PK-'))  return `Spacer Block 50-pack ${p[3]}mm gap`;
+  if (code.startsWith('XP-SCREWS-'))    return `Screening Screws 100-pack ${col(p[2])}`;
+  if (code==='XP-SCREWSGF-10PK')        return 'Gate Frame Screws 12G×65mm 10-pack';
+  if (code==='QS-SFC-B')                return 'Side Frame Cap Black (each)';
+  if (code.startsWith('XP-CSRC-'))      return `CSR Cap ${col(p[2])}`;
+  if (code.startsWith('XP-BTP-'))       return `CSR Top/Base Plate ${col(p[2])}`;
+  if (code.startsWith('XP-6100-GB65-')) return `65mm Gate Blade ${col(p[4])} 6100mm`;
+  if (code.startsWith('XP-6100-HD6545-')) return `Gate HD Rail 65×45mm ${col(p[4])} 6100mm`;
+  if (code.startsWith('XPSG-6100-TR-')) return `Sliding Gate Top Rail ${col(p[3])} 6100mm`;
+  if (code.startsWith('XPSG-6100-BR-')) return `Sliding Gate Bottom Rail ${col(p[3])} 6100mm`;
+  if (code.startsWith('XP-GKIT-LSET09-')) return `Gate Frame Kit 9mm gap ${col(p[3])}`;
+  if (code.startsWith('XP-GKIT-LSET20-')) return `Gate Frame Kit 20mm gap ${col(p[3])}`;
+  if (code.startsWith('XP-4200-GSTOP-')) return `Gate Stop ${col(p[3])} 4200mm`;
+  if (code.startsWith('XPSG-2700-ST65-')) return `65mm Steel Gate Post ${col(p[3])} 2700mm`;
+  if (code==='XPSG-WHEEL')      return 'Sliding Gate Wheel';
+  if (code==='XPSG-WHEEL-CS')   return 'Wheel Clamping Set 2-pack';
+  if (code==='XPSG-TOPROLL-2PK') return 'Sliding Gate Top Rollers 2-pack';
+  if (code==='XPSG-GUIDE')      return 'Slide Guide';
+  if (code==='XPSG-STOP')       return 'Sliding Gate Stop';
+  if (code==='XPSG-CATCH-U')    return 'U-Catch';
+  if (code==='XPSG-CATCH-F')    return 'F-Catch';
+  if (code==='XPSG-ANCHOR')     return 'Track Anchor';
+  if (code==='XPSG-3000-TRACK-ST') return 'Sliding Gate Track Steel 3000mm';
+  if (code==='XPSG-6000-TRACK-ST') return 'Sliding Gate Track Steel 6000mm';
+  if (code==='ML-TL-KF-H-FT')  return 'Magna Latch + TruClose KwikFit Hinge';
+  if (code==='ML-TL')           return 'Magna Latch';
+  if (code==='TC-H-AT-2L-B')   return 'TruClose Adjustable Hinge Pair Black';
+  if (code.startsWith('XP-LBOX-')) return `Lock Box ${col(p[2])}`;
+  return code;
+}
+
+// Build flat searchable list from P{} price database
+let _searchIndex = null;
+function getSearchIndex() {
+  if (_searchIndex) return _searchIndex;
+  _searchIndex = Object.keys(P).map(code => ({
+    code,
+    desc: codeToDesc(code),
+    prices: P[code],
+  }));
+  return _searchIndex;
+}
+
+(function initBomSearch() {
+  const input  = document.getElementById('bom-search-input');
+  const list   = document.getElementById('bom-search-list');
+  const addRow = document.getElementById('bom-add-row');
+  if (!input) return;
+
+  let activeIdx = -1;
+  let selected  = null;
+
+  function hideList() { list.style.display='none'; list.innerHTML=''; activeIdx=-1; }
+  function setActive(i) {
+    [...list.children].forEach((el,j) => el.classList.toggle('bom-ac-active', j===i));
+    activeIdx = i;
+  }
+  function selectItem(item) {
+    selected = item;
+    input.value = `${item.code} — ${item.desc}`;
+    const price = item.prices ? item.prices[currentTier-1] : null;
+    document.getElementById('bom-add-label').textContent = `${item.code} — ${item.desc}`;
+    document.getElementById('bom-add-price').textContent = price != null ? `$${price.toFixed(2)} / unit` : 'POA';
+    addRow.style.display = 'flex';
+    document.getElementById('bom-add-qty').value = 1;
+    hideList();
+  }
+
+  input.addEventListener('input', () => {
+    selected = null;
+    addRow.style.display = 'none';
+    const q = input.value.trim().toLowerCase();
+    if (q.length < 1) { hideList(); return; }
+    const hits = getSearchIndex().filter(item =>
+      item.code.toLowerCase().includes(q) || item.desc.toLowerCase().includes(q)
+    ).slice(0, 10);
+    if (!hits.length) { hideList(); return; }
+    list.innerHTML = '';
+    activeIdx = -1;
+    hits.forEach(item => {
+      const li = document.createElement('li');
+      const price = item.prices ? item.prices[currentTier-1] : null;
+      li.innerHTML = `<span style="font-family:monospace;color:#4a84cc">${item.code}</span> — ${item.desc}`
+        + (price != null ? ` <span style="color:#888;float:right">$${price.toFixed(2)}</span>` : '');
+      li._item = item;
+      li.addEventListener('mousedown', e => { e.preventDefault(); selectItem(item); });
+      list.appendChild(li);
+    });
+    list.style.display = 'block';
+  });
+
+  input.addEventListener('keydown', e => {
+    const items = list.querySelectorAll('li');
+    if (!items.length && e.key!=='Escape') return;
+    if (e.key==='ArrowDown') { e.preventDefault(); setActive(Math.min(activeIdx+1, items.length-1)); }
+    else if (e.key==='ArrowUp') { e.preventDefault(); setActive(Math.max(activeIdx-1, 0)); }
+    else if (e.key==='Enter' && activeIdx>=0) { e.preventDefault(); selectItem(items[activeIdx]._item); }
+    else if (e.key==='Escape') hideList();
+  });
+
+  document.addEventListener('click', e => { if (e.target!==input) hideList(); });
+
+  window._bomSearchSelected = () => selected;
+})();
+
+function addExtraItem() {
+  const item = window._bomSearchSelected && window._bomSearchSelected();
+  if (!item) { alert('Search and select a product first.'); return; }
+  const qty = Math.max(1, parseInt(document.getElementById('bom-add-qty').value) || 1);
+  const prices = item.prices || [null,null,null];
+  currentBOM.push({
+    section: 'Extra Items',
+    code: item.code,
+    desc: item.desc,
+    qty,
+    p1: prices[0], p2: prices[1], p3: prices[2],
+  });
+  rerenderPrices();
+  // Clear search
+  document.getElementById('bom-search-input').value = '';
+  document.getElementById('bom-add-row').style.display = 'none';
+  document.getElementById('bom-search-list').style.display = 'none';
 }
 
 // ─── EXPORT / COPY ───────────────────────────────────────────────────────────
