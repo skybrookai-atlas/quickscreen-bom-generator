@@ -453,6 +453,39 @@ This section documents every fix applied to the BOM generator app. Update this i
 - Gate frame screws: `XP-SCREWSGF-10PK` ($3.02) — correct product (12G×65mm)
 - Old `XP-4200-GSTOP` removed from pedestrian gate — now covered by gate kit
 
+### 2026-03-24 — Gate BOM support added to app
+
+**New Gates card in `QuickScreen-BOM-Generator.html`**
+- Manual gate selector: Single Swing / Double Swing / Sliding Gate
+- Inputs: opening width, height (match fence or custom), colour, gap, slat size — all with "match fence" toggles
+- Multiple gates can be added; each appears as a list item with remove button
+- Gate BOM auto-appended as named sections after fence sections on Generate BOM
+
+**Single/Double Swing Gate logic (XP pedestrian gate)**
+- Gate kit: `XP-GKIT-LSET{09|20}-{col}` (frame, inserts, stops, rubber, caps, stop screws) — 1 per leaf
+- Gate blades: `XP-6100-GB65-{col}` — always 65mm regardless of fence slat size; count = slatCount(height−130, 65, gap)
+- HD rails: `XP-6100-HD6545-{col}` — 2 per leaf (top + bottom), stock-optimised from 6100mm
+- Hardware: `ML-TL-KF-H-FT` (Magna Latch + Kwik Fit hinges) — 1 per leaf
+- Lock box: `XP-LBOX-LSET-{col}` — 1 per gate
+- Gate frame screws: `XP-SCREWSGF-10PK` — 2 packs per leaf
+- Posts: `XP-2400-65HD-{col}` — 2 for single swing, 3 for double swing
+- Double swing also adds: `SS-0300DB-ZP` drop bolt (passive leaf)
+- Warnings: no 5mm gate kit exists → uses 9mm kit; >1200mm → flag; >2100mm height → capped
+
+**Sliding Gate logic**
+- Slats: `XP-6100-S65-{col}` or `QS-6100-S90-{col}` — regular fence slats, gate panel = opening + 200mm overlap
+- Top rail: `XPSG-6100-TR-{col}` — 1 per gate, cut to panel width
+- Bottom rail: `XPSG-6100-BR-{col}` — 1 per gate
+- Fixed hardware per gate: 2× `XPSG-WHEEL`, 2× `XPSG-WHEEL-CS`, 1× `XPSG-TOPROLL-2PK`, 1× `XPSG-GUIDE`, 1× `XPSG-STOP`, 1× `XPSG-CATCH-U`
+- Track: calculated from panel × 2; uses `XPSG-3000-TRACK-ST` / `XPSG-6000-TRACK-ST`; `XPSG-ANCHOR` = 22 per 3m, 42 per 6m
+- Posts: 2× `XPSG-2700-ST65-{col}` (galv. steel)
+- Note: `XPSG-2700-ST65-B` not in catalogue — priced same as other colours
+
+**AI parse updated for gates**
+- Extracts `gates[]` array from description: type, openingWidth, height, gap, colour, qty
+- Populates gate list automatically
+- Shows "Still needed" hint banner for missing gate dimensions
+
 ### 2026-03-24 — Merged apps + fence mapper v2 (zoom/pan/scale calibration)
 
 **Apps merged into single file**
