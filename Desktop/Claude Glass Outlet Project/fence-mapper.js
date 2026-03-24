@@ -5,6 +5,7 @@
   const GRID        = 50;
   const NODE_R      = 7;
   const GATE_COLOUR = '#f59e0b';
+  const GOOGLE_MAPS_API_KEY = 'AIzaSyAndiFD6Rt2rRQF4ibm0DsJ3sEbL5oPSXg';
   const GRID_COLOUR = '#e5e7eb';
   const AXIS_COLOUR = '#d1d5db';
   const RUN_PALETTE = ['#2563eb','#16a34a','#7c3aed','#dc2626','#ea580c','#0891b2','#b45309','#0f766e'];
@@ -1036,16 +1037,7 @@
     const address=addrEl?addrEl.value.trim():'';
     if (!address) { showToast('Enter an address first.'); return; }
 
-    let apiKey=localStorage.getItem('qs_gmaps_key')||'';
-    if (!apiKey) {
-      const gmapsInputEl=document.getElementById('gmaps-key-input');
-      apiKey=gmapsInputEl?gmapsInputEl.value.trim():'';
-    }
-    if (!apiKey) {
-      apiKey=prompt('Enter your Google Maps API Key (will be saved locally):','');
-      if (!apiKey) return;
-      localStorage.setItem('qs_gmaps_key',apiKey);
-    }
+    const apiKey=GOOGLE_MAPS_API_KEY;
 
     const loadBtn=document.getElementById('fm-load-map');
     if(loadBtn) loadBtn.textContent='Loading...';

@@ -132,15 +132,71 @@
     @page{margin:15mm}
   }
   @media (max-width:700px){.row-3,.row-4{grid-template-columns:1fr 1fr}.row-2{grid-template-columns:1fr}}
+  /* ── Auth overlay ─────────────────────────────────────────────────── */
+  #auth-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#1a4480,#2563a8);display:flex;align-items:center;justify-content:center;z-index:10000}
+  #auth-box{background:#fff;border-radius:12px;padding:36px 40px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+  #auth-box h2{color:#1a4480;margin-bottom:6px;font-size:20px;text-align:center}
+  #auth-box p{color:#666;font-size:13px;margin-bottom:24px;text-align:center}
+  .auth-field{margin-bottom:14px}
+  .auth-field label{font-size:12px;font-weight:600;color:#444;display:block;margin-bottom:4px}
+  #auth-submit{width:100%;background:#2563a8;color:#fff;border:none;border-radius:6px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;margin-top:6px}
+  #auth-submit:hover{background:#1a4480}
+  #auth-submit:disabled{opacity:.6;cursor:not-allowed}
+  #auth-error{font-size:12px;margin-top:8px;min-height:18px}
+  #auth-switch{text-align:center;margin-top:16px;font-size:13px;color:#666}
+  #auth-switch a{color:#2563a8;cursor:pointer;font-weight:600;text-decoration:underline}
+  /* ── Header user bar ───────────────────────────────────────────────── */
+  .user-bar{margin-left:auto;display:flex;align-items:center;gap:12px;flex-shrink:0}
+  .user-bar span{color:#c9dff5;font-size:13px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .user-bar button{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:5px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer}
+  .user-bar button:hover{background:rgba(255,255,255,.25)}
+  /* ── My Quotes panel ───────────────────────────────────────────────── */
+  #quotes-panel{margin-bottom:16px}
+  #quotes-toggle{background:#fff;border:1px solid #dde3ed;border-radius:8px;padding:12px 16px;cursor:pointer;user-select:none;display:flex;justify-content:space-between;align-items:center}
+  #quotes-toggle:hover{background:#f9fafb}
+  #quotes-toggle.open{border-radius:8px 8px 0 0}
+  #quotes-body{background:#fff;border:1px solid #dde3ed;border-top:none;border-radius:0 0 8px 8px;padding:14px 16px;display:none}
+  .q-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#f0f6ff;border:1px solid #bfd4f0;border-radius:5px;margin-bottom:6px;font-size:13px;gap:12px}
+  .q-item-info strong{color:#1a4480;display:block;margin-bottom:2px}
+  .q-item-info span{color:#888;font-size:12px}
+  .q-item-actions{display:flex;gap:6px;flex-shrink:0}
+  #save-quote-btn{background:#16a34a;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;display:none;align-items:center;gap:6px}
+  #save-quote-btn:hover{background:#15803d}
+  #save-quote-btn:disabled{opacity:.5;cursor:not-allowed}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+
+<!-- ── Auth Overlay ──────────────────────────────────────────────────────── -->
+<div id="auth-overlay">
+  <div id="auth-box">
+    <div style="text-align:center;font-size:40px;margin-bottom:8px">🏗</div>
+    <h2>QuickScreen BOM Generator</h2>
+    <p>Sign in to save and manage your quotes</p>
+    <div class="auth-field">
+      <label>Email</label>
+      <input type="email" id="auth-email" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <div class="auth-field">
+      <label>Password</label>
+      <input type="password" id="auth-password" placeholder="Password" autocomplete="current-password">
+    </div>
+    <div id="auth-error"></div>
+    <button id="auth-submit" onclick="handleAuth()">Sign In</button>
+    <div id="auth-switch">Don't have an account? <a onclick="toggleAuthMode()">Sign up</a></div>
+  </div>
+</div>
 
 <div class="header">
   <div class="logo">🏗</div>
   <div>
     <h1>QuickScreen BOM Generator</h1>
     <small>Horizontal Slat Fence &amp; Screen — Live pricing · AI-assisted</small>
+  </div>
+  <div class="user-bar">
+    <span id="user-email-display"></span>
+    <button onclick="signOut()">Sign Out</button>
   </div>
 </div>
 
@@ -225,16 +281,6 @@
           <button class="btn btn-outline btn-sm" onclick="saveAPIKey()">Save</button>
           <button class="btn btn-sm" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5" onclick="clearAPIKey()">Clear</button>
         </div>
-      </div>
-    </div>
-    <!-- Google Maps API key -->
-    <div style="margin-top:8px;border-top:1px solid #eef0f4;padding-top:10px">
-      <div style="font-size:11px;color:#888;font-weight:600;margin-bottom:6px">🗺 Google Maps API Key <span id="gmaps-key-indicator" style="color:#16a34a"></span></div>
-      <div style="font-size:11px;color:#888;margin-bottom:6px">Required for satellite underlay in the fence mapper. Saved in your browser only.</div>
-      <div style="display:flex;gap:6px">
-        <input type="password" id="gmaps-key-input" placeholder="AIza..." autocomplete="off" style="flex:1;font-family:monospace;font-size:12px">
-        <button class="btn btn-outline btn-sm" onclick="saveGmapsKey()">Save</button>
-        <button class="btn btn-sm" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5" onclick="clearGmapsKey()">Clear</button>
       </div>
     </div>
   </div>
@@ -472,8 +518,20 @@
       <button class="btn btn-outline" onclick="exportCSV()">📥 Export CSV</button>
       <button class="btn btn-outline" onclick="copyBOM()">📋 Copy to Clipboard</button>
       <button class="btn btn-purple" onclick="askClaudeReview()">🤖 Ask Claude to review</button>
+      <button id="save-quote-btn" onclick="saveQuote()">💾 Save Quote</button>
     </div>
 
+  </div>
+
+  <!-- ── My Saved Quotes ──────────────────────────────────────────────── -->
+  <div id="quotes-panel" class="no-print" style="display:none">
+    <div id="quotes-toggle" onclick="toggleQuotesPanel()">
+      <span style="font-size:14px;font-weight:600;color:#1a4480">💾 My Saved Quotes <span id="quotes-count" style="font-size:12px;color:#888;font-weight:400"></span></span>
+      <span id="quotes-caret" style="font-size:11px;color:#888">▼</span>
+    </div>
+    <div id="quotes-body">
+      <div id="quotes-list"><div style="color:#999;font-style:italic;font-size:13px">No saved quotes yet.</div></div>
+    </div>
   </div>
 
 </div><!-- .main -->
@@ -680,27 +738,6 @@ function toggleDescribe() {
   }
 })();
 
-// ─── Google Maps Key ──────────────────────────────────────────────────────────
-function saveGmapsKey() {
-  const key = document.getElementById('gmaps-key-input').value.trim();
-  if (key) {
-    localStorage.setItem('qs_gmaps_key', key);
-    document.getElementById('gmaps-key-indicator').textContent = '✓ saved';
-  }
-}
-function clearGmapsKey() {
-  localStorage.removeItem('qs_gmaps_key');
-  document.getElementById('gmaps-key-input').value = '';
-  document.getElementById('gmaps-key-indicator').textContent = '';
-}
-(function loadGmapsKey() {
-  const k = localStorage.getItem('qs_gmaps_key');
-  if (k) {
-    const el = document.getElementById('gmaps-key-input');
-    if (el) el.value = k;
-    document.getElementById('gmaps-key-indicator').textContent = '✓ saved';
-  }
-})();
 
 // ─── AI Settings ─────────────────────────────────────────────────────────────
 function toggleAPIKey() {
