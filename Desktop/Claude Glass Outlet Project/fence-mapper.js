@@ -85,33 +85,98 @@
     bindEvents();
     render();
     updateSummary();
-    loadMapsScript();
+    initAddressAutocomplete();
   }
 
-  function loadMapsScript() {
-    if (window.google?.maps?.places) { initAddressAutocomplete(); return; }
-    if (document.querySelector('script[data-fm-maps]')) return; // already loading
-    const s = document.createElement('script');
-    s.dataset.fmMaps = '1';
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places&loading=async`;
-    s.async = true;
-    s.onload = initAddressAutocomplete;
-    document.head.appendChild(s);
-  }
-
+  // ─── Address autocomplete (Nominatim / OpenStreetMap) ─────────────────────
+  // Works from file:// and any HTTP origin — no API key required.
   function initAddressAutocomplete() {
     const input = document.getElementById('fm-map-address');
-    if (!input || !window.google?.maps?.places) return;
-    if (input._acInit) return;
+    if (!input || input._acInit) return;
     input._acInit = true;
-    const ac = new google.maps.places.Autocomplete(input, {
-      types: ['geocode'],
-      fields: ['formatted_address', 'geometry'],
+
+    // Inject dropdown styles once
+    if (!document.getElementById('fm-ac-style')) {
+      const st = document.createElement('style');
+      st.id = 'fm-ac-style';
+      st.textContent = `
+        #fm-ac-list{position:absolute;z-index:20000;background:#fff;border:1.5px solid #ccd4e0;
+          border-top:none;border-radius:0 0 6px 6px;box-shadow:0 6px 18px rgba(0,0,0,.15);
+          max-height:220px;overflow-y:auto;width:100%;box-sizing:border-box;left:0}
+        #fm-ac-list li{padding:8px 12px;font-size:12px;cursor:pointer;list-style:none;
+          border-bottom:1px solid #f0f2f6;color:#222;line-height:1.3}
+        #fm-ac-list li:last-child{border-bottom:none}
+        #fm-ac-list li:hover,#fm-ac-list li.ac-active{background:#e8f0fe;color:#1a4480}
+        #fm-ac-wrap{position:relative;flex:1}
+      `;
+      document.head.appendChild(st);
+    }
+
+    // Wrap the input in a relative-positioned div for dropdown anchoring
+    const parent = input.parentNode;
+    const acWrap = document.createElement('div');
+    acWrap.id = 'fm-ac-wrap';
+    parent.insertBefore(acWrap, input);
+    acWrap.appendChild(input);
+
+    const list = document.createElement('ul');
+    list.id = 'fm-ac-list';
+    list.style.display = 'none';
+    acWrap.appendChild(list);
+
+    let debounceTimer = null;
+    let activeIdx = -1;
+
+    function hideList() { list.style.display = 'none'; list.innerHTML = ''; activeIdx = -1; }
+
+    function setActive(idx) {
+      const items = list.querySelectorAll('li');
+      items.forEach((el, i) => el.classList.toggle('ac-active', i === idx));
+      activeIdx = idx;
+    }
+
+    input.addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      const q = input.value.trim();
+      if (q.length < 3) { hideList(); return; }
+      debounceTimer = setTimeout(async () => {
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&addressdetails=1&limit=6`,
+            { headers: { 'Accept-Language': 'en' } }
+          );
+          const data = await res.json();
+          list.innerHTML = '';
+          activeIdx = -1;
+          if (!data.length) { hideList(); return; }
+          data.forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = item.display_name;
+            li.addEventListener('mousedown', e => {
+              e.preventDefault();
+              input.value = item.display_name;
+              hideList();
+            });
+            list.appendChild(li);
+          });
+          list.style.display = 'block';
+        } catch { hideList(); }
+      }, 300);
     });
-    ac.addListener('place_changed', () => {
-      const place = ac.getPlace();
-      if (place?.formatted_address) input.value = place.formatted_address;
+
+    input.addEventListener('keydown', e => {
+      const items = list.querySelectorAll('li');
+      if (!items.length) return;
+      if (e.key === 'ArrowDown') { e.preventDefault(); setActive(Math.min(activeIdx+1, items.length-1)); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(Math.max(activeIdx-1, 0)); }
+      else if (e.key === 'Enter' && activeIdx >= 0) {
+        e.preventDefault();
+        input.value = items[activeIdx].textContent;
+        hideList();
+      } else if (e.key === 'Escape') { hideList(); }
     });
+
+    document.addEventListener('click', e => { if (!acWrap.contains(e.target)) hideList(); });
   }
 
   function resize() {
