@@ -177,6 +177,8 @@
               input._lat = lat;
               input._lng = lng;
               hideList();
+              // Auto-load satellite imagery as soon as address is selected
+              setTimeout(loadGoogleMap, 50);
             });
             list.appendChild(li);
           });
@@ -1197,10 +1199,12 @@
       const img=new Image();
       img.onload=()=>{
         S.mapImage=img;
-        // meters per pixel at this lat/zoom
+        // meters per pixel at this lat/zoom (Web Mercator standard formula)
         const mPerPx=(156543.03392*Math.cos(lat*Math.PI/180))/Math.pow(2,zoom);
-        // world units per pixel: (S.scale mm / 1000 m) / (mPerPx * GRID world-px per unit)
-        S.mapPixelsPerWorldUnit=(S.scale/1000)/(mPerPx*GRID);
+        // canvas pixels per image pixel at zoom=1:
+        //   1 world unit = GRID canvas px = S.scale/1000 metres
+        //   => (mPerPx metres/img-px) / (S.scale/1000 metres/world-unit) * GRID canvas-px/world-unit
+        S.mapPixelsPerWorldUnit=(mPerPx*1000*GRID)/S.scale;
         const c=s2w(W/2,H/2);
         S.mapWorldOrigin={x:c.x,y:c.y};
         render();
