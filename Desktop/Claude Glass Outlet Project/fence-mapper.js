@@ -88,8 +88,7 @@
     initAddressAutocomplete();
   }
 
-  // ─── Address autocomplete (Nominatim / OpenStreetMap) ─────────────────────
-  // Works from file:// and any HTTP origin — no API key required.
+  // ─── Address autocomplete (Google Places API — New) ──────────────────────
   function initAddressAutocomplete() {
     const input = document.getElementById('fm-map-address');
     if (!input || input._acInit) return;
@@ -105,9 +104,14 @@
           max-height:220px;overflow-y:auto;width:100%;box-sizing:border-box;left:0}
         #fm-ac-list li{padding:8px 12px;font-size:12px;cursor:pointer;list-style:none;
           border-bottom:1px solid #f0f2f6;color:#222;line-height:1.3}
+        #fm-ac-list li .ac-main{font-weight:600;color:#222}
+        #fm-ac-list li .ac-sub{color:#888;font-size:11px;margin-top:1px}
         #fm-ac-list li:last-child{border-bottom:none}
-        #fm-ac-list li:hover,#fm-ac-list li.ac-active{background:#e8f0fe;color:#1a4480}
+        #fm-ac-list li:hover,#fm-ac-list li.ac-active{background:#e8f0fe}
+        #fm-ac-list li:hover .ac-main,#fm-ac-list li.ac-active .ac-main{color:#1a4480}
         #fm-ac-wrap{position:relative;flex:1}
+        #fm-ac-list .ac-powered{padding:5px 12px;font-size:10px;color:#bbb;text-align:right;
+          border-top:1px solid #f0f2f6;list-style:none;cursor:default}
       `;
       document.head.appendChild(st);
     }
@@ -130,75 +134,123 @@
     function hideList() { list.style.display = 'none'; list.innerHTML = ''; activeIdx = -1; }
 
     function setActive(idx) {
-      const items = list.querySelectorAll('li');
+      const items = list.querySelectorAll('li:not(.ac-powered)');
       items.forEach((el, i) => el.classList.toggle('ac-active', i === idx));
       activeIdx = idx;
     }
 
-    // Format a Photon feature into a readable address string
-    function photonLabel(props) {
-      const parts = [];
-      if (props.housenumber) parts.push(props.housenumber);
-      if (props.street)      parts.push(props.street);
-      else if (props.name)   parts.push(props.name);
-      if (props.suburb)      parts.push(props.suburb);
-      if (props.city || props.town || props.village)
-        parts.push(props.city || props.town || props.village);
-      if (props.state)       parts.push(props.state);
-      if (props.country)     parts.push(props.country);
-      return parts.filter(Boolean).join(', ');
+    // Select a suggestion item and trigger map load
+    function selectItem(li) {
+      input.value = li._label;
+      // coords already attached if prefetched; otherwise geocoding fallback runs in loadGoogleMap
+      input._lat = li._lat || null;
+      input._lng = li._lng || null;
+      input._placeId = li._placeId || null;
+      hideList();
+      // If we have a placeId but no coords yet, fetch them before loading map
+      if (input._placeId && (input._lat == null || input._lng == null)) {
+        fetchPlaceCoords(input._placeId).then(coords => {
+          if (coords) { input._lat = coords.lat; input._lng = coords.lng; }
+          setTimeout(loadGoogleMap, 50);
+        });
+      } else {
+        setTimeout(loadGoogleMap, 50);
+      }
+    }
+
+    // Fetch lat/lng for a placeId via Places Details (New API)
+    async function fetchPlaceCoords(placeId) {
+      const key = localStorage.getItem('qs_gmaps_key') || GOOGLE_MAPS_API_KEY;
+      try {
+        const res = await fetch(`https://places.googleapis.com/v1/places/${placeId}`, {
+          headers: { 'X-Goog-Api-Key': key, 'X-Goog-FieldMask': 'location' }
+        });
+        const data = await res.json();
+        if (data.location) return { lat: data.location.latitude, lng: data.location.longitude };
+      } catch {}
+      return null;
     }
 
     input.addEventListener('input', () => {
-      input._lat = null; input._lng = null; // clear stale coords on manual edit
+      input._lat = null; input._lng = null; input._placeId = null;
       clearTimeout(debounceTimer);
       const q = input.value.trim();
       if (q.length < 3) { hideList(); return; }
       debounceTimer = setTimeout(async () => {
+        const key = localStorage.getItem('qs_gmaps_key') || GOOGLE_MAPS_API_KEY;
         try {
-          // Photon (Komoot) — OSM-based, free, CORS-friendly, street-number level
-          const res = await fetch(
-            `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=6&lang=en`
-          );
+          // Google Places Autocomplete (New API) — Australian addresses, CORS-friendly
+          const res = await fetch('https://places.googleapis.com/v1/places:autocomplete', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Goog-Api-Key': key
+            },
+            body: JSON.stringify({
+              input: q,
+              includedRegionCodes: ['au'],
+              languageCode: 'en'
+            })
+          });
           const data = await res.json();
           list.innerHTML = '';
           activeIdx = -1;
-          const features = data.features || [];
-          if (!features.length) { hideList(); return; }
-          features.forEach(feat => {
-            const label = photonLabel(feat.properties);
-            const [lng, lat] = feat.geometry.coordinates;
+          const suggestions = data.suggestions || [];
+          if (!suggestions.length) { hideList(); return; }
+          suggestions.slice(0, 6).forEach(s => {
+            const pred = s.placePrediction;
+            if (!pred) return;
+            const main = pred.structuredFormat?.mainText?.text || pred.text?.text || '';
+            const sub  = pred.structuredFormat?.secondaryText?.text || '';
+            const label = sub ? `${main}, ${sub}` : main;
             const li = document.createElement('li');
-            li.textContent = label;
-            li._lat = lat; li._lng = lng;
-            li.addEventListener('mousedown', e => {
-              e.preventDefault();
-              input.value = label;
-              input._lat = lat;
-              input._lng = lng;
-              hideList();
-              // Auto-load satellite imagery as soon as address is selected
-              setTimeout(loadGoogleMap, 50);
-            });
+            li._label   = label;
+            li._placeId = pred.placeId || null;
+            li._lat = null; li._lng = null;
+            li.innerHTML = `<div class="ac-main">${main}</div>${sub ? `<div class="ac-sub">${sub}</div>` : ''}`;
+            li.addEventListener('mousedown', e => { e.preventDefault(); selectItem(li); });
             list.appendChild(li);
           });
+          // "Powered by Google" footer (required by Google ToS)
+          const footer = document.createElement('li');
+          footer.className = 'ac-powered';
+          footer.textContent = 'Powered by Google';
+          list.appendChild(footer);
           list.style.display = 'block';
-        } catch { hideList(); }
+        } catch(err) {
+          // Fallback to Photon/OSM if Places API fails
+          try {
+            const res2 = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=6&lang=en`);
+            const d2 = await res2.json();
+            list.innerHTML = '';
+            activeIdx = -1;
+            const features = d2.features || [];
+            if (!features.length) { hideList(); return; }
+            features.forEach(feat => {
+              const p = feat.properties;
+              const parts = [p.housenumber, p.street||p.name, p.suburb, p.city||p.town||p.village, p.state].filter(Boolean);
+              const label = parts.join(', ');
+              const [lng, lat] = feat.geometry.coordinates;
+              const li = document.createElement('li');
+              li._label = label; li._lat = lat; li._lng = lng; li._placeId = null;
+              li.innerHTML = `<div class="ac-main">${label}</div>`;
+              li.addEventListener('mousedown', e => { e.preventDefault(); selectItem(li); });
+              list.appendChild(li);
+            });
+            list.style.display = 'block';
+          } catch { hideList(); }
+        }
       }, 300);
     });
 
     input.addEventListener('keydown', e => {
-      const items = list.querySelectorAll('li');
+      const items = list.querySelectorAll('li:not(.ac-powered)');
       if (!items.length) return;
       if (e.key === 'ArrowDown') { e.preventDefault(); setActive(Math.min(activeIdx+1, items.length-1)); }
       else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(Math.max(activeIdx-1, 0)); }
       else if (e.key === 'Enter' && activeIdx >= 0) {
         e.preventDefault();
-        const sel = items[activeIdx];
-        input.value = sel.textContent;
-        input._lat = sel._lat;
-        input._lng = sel._lng;
-        hideList();
+        selectItem(items[activeIdx]);
       } else if (e.key === 'Escape') { hideList(); }
     });
 

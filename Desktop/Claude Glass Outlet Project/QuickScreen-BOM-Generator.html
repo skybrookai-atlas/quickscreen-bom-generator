@@ -932,10 +932,11 @@ function clearAPIKey() {
 })();
 
 (function loadGMapsKey() {
-  // Always ensure the key is seeded — no manual entry required
+  // Seed all Google API keys on every page load — no manual entry required
   const KEY = 'AIzaSyAndiFD6Rt2rRQF4ibm0DsJ3sEbL5oPSXg';
-  localStorage.setItem('qs_gmaps_key', KEY);
-  // Hide the key input row — key is managed in code
+  localStorage.setItem('qs_gmaps_key',    KEY);  // Maps Static API + Geocoding
+  localStorage.setItem('qs_places_key',   KEY);  // Places Autocomplete (New API)
+  // Hide the key input row — keys are managed in code
   const row = document.getElementById('fm-key-row');
   if (row) row.style.display = 'none';
 })();
