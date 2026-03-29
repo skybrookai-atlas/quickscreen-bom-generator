@@ -26,24 +26,26 @@ Load these as needed — do NOT load all at once. Load on first use for that sys
 
 | File | When to Load |
 |------|-------------|
-| `references/calculation_rules.md` | First time you need to calculate any quantities — contains ALL formulas |
-| `references/product_mapping.json` | When looking up specific product codes from catalogue names |
-| `references/product_list.csv` | When looking up prices for BOM line items |
+| `references/calculation_rules.md` | First time you need to calculate any quantities — contains ALL formulas for ALL systems |
 | `references/system_details.md` | When user asks technical questions about a system's specs/capabilities |
+
+> **Note:** `product_list.csv` and `product_mapping.json` do NOT exist in this folder. Product codes and prices are embedded in `const P` inside `QuickScreen-BOM-Generator.html` in the project folder. For detailed spreadsheet analysis see `analysis_slat_frames.md` in the project folder.
 
 ## Overview of Systems
 
-There are 6 QuickScreen systems:
+There are multiple QuickScreen systems:
 
-| # | System | Key Use | Max Dimensions |
-|---|--------|---------|----------------|
-| 1 | Horizontal Slat (Side Frame) | Privacy/feature screens, boundary fences | Height: ~2700mm, Width: ~6000mm per panel |
-| 2 | Vertical Slat | Decorative vertical screens, dividers | Same frame, slats rotated 90° |
-| 3 | Pedestrian Gate (XP hinged) | Swing gates for foot traffic | Max ~1200mm W × 2100mm H |
-| 4 | QSG Pedestrian Gate | QuickScreen Gate system hinged gates | Similar to XP but different frame |
-| 5 | Sliding Gate | Driveway/wide opening gates | Up to ~6150mm wide |
-| 6 | Equipment Enclosure | AC units, pool pumps, bins | Custom to equipment size |
-| 7 | POSTA Letterbox | Fence-mounted letterbox | Between 50mm posts at 600mm centres |
+| # | System | Key Use | Max Dimensions | Notes |
+|---|--------|---------|----------------|-------|
+| 1 | QSHS — Horizontal Slat (Side Frame) | Privacy/feature screens, boundary fences | Height: ~2700mm, Width: ~6000mm per panel | Standard system — in app ✓ |
+| 2 | Vertical Slat (VS) | Decorative vertical screens, dividers | Same frame, slats rotated 90° | In app ✓ |
+| 3 | XPress Plus Premium (XPL) | Insert-based premium system, 65mm slat ONLY | Height up to ~2700mm | Not yet in HTML app |
+| 4 | BAYG — Buy As You Go | Same side frame as XPL, spacers sold separately | 65mm or 90mm slats | Not yet in HTML app |
+| 5 | Pedestrian Gate (XP hinged) | Swing gates for foot traffic | Max ~1200mm W × 2100mm H | In app ✓ |
+| 6 | QSG Pedestrian Gate | QuickScreen Gate system hinged gates | Similar to XP but different frame | In app (partial) |
+| 7 | Sliding Gate | Driveway/wide opening gates | Up to ~6150mm wide | In app ✓ |
+| 8 | Equipment Enclosure | AC units, pool pumps, bins | Custom to equipment size | |
+| 9 | POSTA Letterbox | Fence-mounted letterbox | Between 50mm posts at 600mm centres | |
 
 ## Instructions
 
@@ -561,3 +563,48 @@ This section documents every fix applied to the BOM generator app. Update this i
 - Added `resetGates()` helper (clears gate list before re-populating from mapper)
 - Added `<div id="bom-site-plan">` in step3 — populated with mapper PNG on BOM generation
 - Added `<div id="fm-toast">` for toast notifications
+
+---
+
+## System Formulas Quick Reference (from analysis_slat_frames.md)
+
+### XPL Insert Dimensions
+| Constant | Value | Notes |
+|----------|-------|-------|
+| Wslot | 66.5mm | Insert blade width |
+| Gs (9mm nominal) | 8mm actual | Actual gap at 9mm setting |
+| Gs (20mm nominal) | 20mm actual | Actual gap at 20mm setting |
+| Blade_cc (9mm) | 74.5mm | = Wslot + Gs |
+| Blade_cc (20mm) | 86.5mm | = Wslot + Gs |
+| Ht_EndCap | 3mm | End cap height |
+| Cut_Allowance | 2mm | Saw kerf |
+
+### XPL Slat Count (blade count method)
+XPL uses blade_cc to determine slat count (different from QSHS height formula):
+```
+Blade_cc = Wslot + Gs   # 74.5mm (9mm gap) or 86.5mm (20mm gap)
+num_blades = INT(available_height / Blade_cc)
+available_height = screen_height - 2 × Ht_EndCap = screen_height - 6
+```
+XPL is 65mm slat ONLY. No 90mm option exists.
+
+### BAYG Slat Count
+BAYG uses its own lookup table (BAYG_ScrHts) for height → slat count.
+Programmatic approximation (same formula as QSHS):
+```
+num_slats = largest N where N × (slat_width + gap) - gap + 3 ≤ target_height
+```
+BAYG spacers = 2 × (num_slats + 1) per panel, sold in 50-packs.
+
+### VS Vertical Slat Count (AUTHORITATIVE formula from CTS - Vertical Screens tab)
+```
+num_slats = ROUNDDOWN((panel_width - 8 + slat_spacing) / (slat_spacing + slat_size), 0)
+```
+Where 8 = frame channel depth (4mm each side).
+Overhang = ROUND((panel_width - 8 - num_slats × (slat_spacing + slat_size) + slat_spacing) / 2, 1)
+Slat cut length = panel HEIGHT (slats run vertically).
+Top/bottom rails = side frames cut to panel WIDTH.
+
+### Pricing Tiers
+T2 = T1 × 0.85 (15% discount from T1)
+T3 ≈ T1 × 0.80 (approx — varies by product)

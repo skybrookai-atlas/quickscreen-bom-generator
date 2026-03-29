@@ -400,6 +400,16 @@
   <div class="card no-print">
     <h2>⚙ Configuration</h2>
 
+    <div style="margin-bottom:14px">
+      <label>System Type</label>
+      <select id="systemType" onchange="onSystemChange()">
+        <option value="qshs">QSHS — Horizontal Slat Screen (standard)</option>
+        <option value="vs">VS — Vertical Slat Screen</option>
+        <option value="xpl">XPL — XPress Plus Premium (65mm only, insert system)</option>
+        <option value="bayg">BAYG — Buy As You Go (spacers separate)</option>
+      </select>
+    </div>
+
     <div class="row row-3" style="margin-bottom:14px">
       <div>
         <label>Customer / Job Reference</label>
@@ -488,6 +498,7 @@
     </div>
 
     <!-- Slat Calculator -->
+    <div id="system-note"></div>
     <div id="slat-calc-box"></div>
     <!-- Warnings -->
     <div id="warnings"></div>
@@ -1072,8 +1083,63 @@ function onConfigChange() {
   const panelW    = Math.round(run / numPanels);
   const posts     = numPanels + 1 + parseInt(document.getElementById('corners').value || 0);
 
-  document.getElementById('slat-calc-box').innerHTML = `<div class="slat-calc">
-    <div style="font-size:11px;opacity:.7;margin-bottom:4px">SLAT CALCULATOR — ${w}mm slat / ${g}mm gap</div>
+  const sys = (document.getElementById('systemType') || {value:'qshs'}).value;
+
+  if (sys === 'vs') {
+    // Vertical slat: slat count driven by panel WIDTH
+    const vsSlats = Math.floor((panelW - 8 + g) / (g + w));
+    const vsOverhang = Math.round(((panelW - 8 - vsSlats * (g + w) + g) / 2) * 10) / 10;
+    document.getElementById('slat-calc-box').innerHTML = `<div class="slat-calc">
+      <div style="font-size:11px;opacity:.7;margin-bottom:4px">VERTICAL SLAT CALC — ${w}mm slat / ${g}mm gap</div>
+      <div class="divider"></div>
+      <div style="display:flex;gap:20px;flex-wrap:wrap">
+        <div><div style="font-size:11px;opacity:.7">Panel Layout</div><div style="font-size:18px;font-weight:700">${numPanels} × ${panelW}mm</div></div>
+        <div><div style="font-size:11px;opacity:.7">Slats per Panel</div><div style="font-size:18px;font-weight:700">${vsSlats}</div></div>
+        <div><div style="font-size:11px;opacity:.7">Posts</div><div style="font-size:18px;font-weight:700">${posts}</div></div>
+      </div>
+      <div class="divider"></div>
+      <div style="font-size:12px;opacity:.8">Slats cut to ${t}mm height &nbsp;|&nbsp; Rails cut to ${panelW}mm width &nbsp;|&nbsp; Overhang each side: ${vsOverhang}mm</div>
+    </div>`;
+    document.getElementById('slat-calc-box').dataset.slats = vsSlats;
+    document.getElementById('slat-calc-box').dataset.actualHeight = t;
+    document.getElementById('slat-calc-box').dataset.vsMode = '1';
+    document.getElementById('slat-calc-box').dataset.vsOverhang = vsOverhang;
+  } else if (sys === 'xpl') {
+    // XPL: blade_cc method
+    const Gs = g === 20 ? 20 : 8;  // actual gap (9mm nominal = 8mm actual)
+    const Wslot = 66.5;
+    const blade_cc = Wslot + Gs;
+    const availH = t - 6;  // minus 2 × Ht_EndCap (3mm each)
+    const numBlades = Math.floor(availH / blade_cc);
+    const actualH_xpl = Math.round(numBlades * blade_cc + 6);
+    const numBladesP1 = numBlades + 1;
+    const actualH_xplP1 = Math.round(numBladesP1 * blade_cc + 6);
+    document.getElementById('slat-calc-box').innerHTML = `<div class="slat-calc">
+      <div style="font-size:11px;opacity:.7;margin-bottom:4px">XPL BLADE CALC — 65mm insert / ${g}mm gap (Blade_cc = ${blade_cc}mm)</div>
+      <div class="divider"></div>
+      <div style="display:flex;gap:20px;flex-wrap:wrap">
+        <div><div style="font-size:11px;opacity:.7">Target Height</div><div style="font-size:18px;font-weight:700">${t}mm</div></div>
+        <div><div style="font-size:11px;opacity:.7">Panel Layout</div><div style="font-size:18px;font-weight:700">${numPanels} × ${panelW}mm</div></div>
+        <div><div style="font-size:11px;opacity:.7">Posts</div><div style="font-size:18px;font-weight:700">${posts}</div></div>
+      </div>
+      <div class="divider"></div>
+      <div style="font-size:11px;opacity:.7;margin-bottom:4px">Available heights — click to select:</div>
+      <div class="slat-option ${Math.abs(actualH_xpl-t)<=Math.abs(actualH_xplP1-t)?'selected closest':''}" onclick="selectSlats(${numBlades},${actualH_xpl})">
+        <span>${numBlades} blades → <strong>${actualH_xpl}mm</strong></span>
+        <span class="badge">${actualH_xpl<t?'–'+(t-actualH_xpl):'+'+(actualH_xpl-t)}mm ${Math.abs(actualH_xpl-t)<=Math.abs(actualH_xplP1-t)?'closest':''}</span>
+      </div>
+      <div class="slat-option ${Math.abs(actualH_xplP1-t)<Math.abs(actualH_xpl-t)?'selected closest':''}" onclick="selectSlats(${numBladesP1},${actualH_xplP1})">
+        <span>${numBladesP1} blades → <strong>${actualH_xplP1}mm</strong></span>
+        <span class="badge">${actualH_xplP1<t?'–'+(t-actualH_xplP1):'+'+(actualH_xplP1-t)}mm ${Math.abs(actualH_xplP1-t)<Math.abs(actualH_xpl-t)?'closest':''}</span>
+      </div>
+    </div>`;
+    document.getElementById('slat-calc-box').dataset.slats = Math.abs(actualH_xpl-t)<=Math.abs(actualH_xplP1-t)?numBlades:numBladesP1;
+    document.getElementById('slat-calc-box').dataset.actualHeight = Math.abs(actualH_xpl-t)<=Math.abs(actualH_xplP1-t)?actualH_xpl:actualH_xplP1;
+    delete document.getElementById('slat-calc-box').dataset.vsMode;
+  } else {
+    // QSHS and BAYG: standard horizontal slat formula
+    document.getElementById('slat-calc-box').innerHTML = `<div class="slat-calc">
+    <div style="font-size:11px;opacity:.7;margin-bottom:4px">SLAT CALCULATOR — ${w}mm slat / ${g}mm gap${sys==='bayg'?' (BAYG)':''}</div>
     <div class="divider"></div>
     <div style="display:flex;gap:20px;flex-wrap:wrap">
       <div><div style="font-size:11px;opacity:.7">Target Height</div><div style="font-size:18px;font-weight:700">${t}mm</div></div>
@@ -1091,14 +1157,37 @@ function onConfigChange() {
       <span class="badge">${hb<t?'–'+(t-hb):'+'+(hb-t)}mm ${Math.abs(hb-t)<Math.abs(ha-t)?'closest':''}</span>
     </div>
   </div>`;
-
-  document.getElementById('slat-calc-box').dataset.slats = Math.abs(ha-t)<=Math.abs(hb-t)?n:na;
-  document.getElementById('slat-calc-box').dataset.actualHeight = Math.abs(ha-t)<=Math.abs(hb-t)?ha:hb;
+    document.getElementById('slat-calc-box').dataset.slats = Math.abs(ha-t)<=Math.abs(hb-t)?n:na;
+    document.getElementById('slat-calc-box').dataset.actualHeight = Math.abs(ha-t)<=Math.abs(hb-t)?ha:hb;
+    delete document.getElementById('slat-calc-box').dataset.vsMode;
+  }
 
   const warns = [];
   if (panelW > 2600) warns.push(`Panel width ${panelW}mm exceeds 2600mm max. Consider more panels.`);
   if (panelW >= 2000) warns.push(`Panels are ${panelW}mm wide — Centre Support Rails will be included automatically.`);
   document.getElementById('warnings').innerHTML = warns.map(w => `<div class="warn">${w}</div>`).join('');
+}
+
+function onSystemChange() {
+  const sys = document.getElementById('systemType').value;
+  // XPL only supports 65mm slats
+  const slatSel = document.getElementById('slatSize');
+  if (sys === 'xpl') {
+    slatSel.value = '65';
+    slatSel.disabled = true;
+  } else {
+    slatSel.disabled = false;
+  }
+  // VS shows vertical slat note
+  const note = document.getElementById('system-note');
+  const notes = {
+    qshs: '',
+    vs: '<div class="calc-box" style="margin-bottom:10px">🔄 <strong>Vertical Slat Screen:</strong> Slats run vertically (cut to height). Top &amp; bottom rails cut to panel width. Slat count determined by panel width.</div>',
+    xpl: '<div class="calc-box" style="margin-bottom:10px">⭐ <strong>XPress Plus Premium:</strong> Insert-based system. 65mm slat only. Uses blade centre-to-centre (74.5mm at 9mm gap) for slat count. No 90mm option.</div>',
+    bayg: '<div class="calc-box" style="margin-bottom:10px">📦 <strong>Buy As You Go:</strong> Same as QSHS. Spacers are itemised separately in the BOM. 65mm or 90mm available.</div>'
+  };
+  if (note) note.innerHTML = notes[sys] || '';
+  onConfigChange();
 }
 
 let chosenSlats = null, chosenHeight = null;
@@ -1195,6 +1284,81 @@ function generateRunBOM(runCfg, sectionPrefix) {
   return { bom, numPanels, panelWidth, numPosts, actualHeight };
 }
 
+// Generate BOM for a single VERTICAL SLAT (VS) run
+function generateVerticalRunBOM(runCfg, sectionPrefix) {
+  const { col, slatSize, gap, run, targetH, maxPanel, leftTerm, rightTerm, postMount, corners, numSlats, actualHeight } = runCfg;
+
+  const numPanels  = Math.ceil(run / maxPanel);
+  const panelWidth = Math.round(run / numPanels);
+  const useHDPost  = targetH > 1800;
+  const postCode   = useHDPost ? `XP-2400-65HD-${col}` : `XP-2400-FP-${col}`;
+  const postDesc   = useHDPost ? `65×65mm HD Post 2400mm ${COLOUR_NAMES[col]} (incl. cap)` : `50×50mm Full Post 2400mm ${COLOUR_NAMES[col]} (incl. cap)`;
+  const numPosts   = numPanels + 1 + corners;
+
+  // VS: slat count is from panel WIDTH
+  const vsSlats = Math.floor((panelWidth - 8 + gap) / (gap + slatSize));
+  const totalSlats = vsSlats * numPanels;
+
+  // VS: slats cut to HEIGHT
+  const slatCut = targetH;
+  const slatPrefix = slatSize === 65 ? 'XP-6100-S65' : 'QS-6100-S90';
+  const slatsPerStock = Math.floor(6100 / slatCut);
+  const slatStocks = Math.ceil(totalSlats / slatsPerStock);
+
+  // VS: top + bottom rails = side frames cut to panel WIDTH
+  const totalRails = numPanels * 2;  // 1 top + 1 bottom per panel
+  const railCut = panelWidth;
+  const railsPerStock = Math.floor(5800 / railCut);
+  const railStocks = Math.ceil(totalRails / railsPerStock);
+
+  // VS: CFC covers match rails (1:1 with side frames used as rails)
+  const cfcStocks = railStocks;
+
+  // VS: F-section at wall ends
+  const totalF = (leftTerm === 'wall' ? 1 : 0) + (rightTerm === 'wall' ? 1 : 0);
+  const fPerStock = Math.floor(5800 / targetH);
+  const fStocks = totalF > 0 ? Math.ceil(totalF / fPerStock) : 0;
+
+  // VS: screws — 1 per slat × 1.01 spare, rounded to nearest 10, sold in 50-packs
+  const rawScrews = Math.ceil(totalSlats * 1.01 / 10) * 10;
+  const screwPacks = Math.ceil(rawScrews / 50);
+
+  const mountItems = [];
+  if (postMount === 'baseplate') {
+    const bpCode = useHDPost ? `XP-65BP-SET-${col}` : `XP-BP-SET-${col}`;
+    const dcCode = useHDPost ? `XP-65DC-2P-${col}` : `XP-DC-2P-${col}`;
+    mountItems.push({code:bpCode, desc:`Base Plate Set ${COLOUR_NAMES[col]} (${useHDPost?'65':'50'}mm post)`, qty:numPosts});
+    mountItems.push({code:dcCode, desc:`2-Part Domical Cover ${COLOUR_NAMES[col]} (${useHDPost?'65':'50'}mm post)`, qty:numPosts});
+  } else if (postMount === 'coredrilled') {
+    const drCode = useHDPost ? `XP-65DR-${col}` : `XP-DR-${col}`;
+    mountItems.push({code:drCode, desc:`Dress Ring ${COLOUR_NAMES[col]} (${useHDPost?'65':'50'}mm post)`, qty:numPosts});
+  }
+
+  const pfx = sectionPrefix ? sectionPrefix + ' — ' : '';
+  const bom = [];
+
+  bom.push({section:`${pfx}1. Vertical Slat Materials`, rows:[
+    {code:`${slatPrefix}-${col}`, desc:`${slatSize}mm Vertical Slat ${COLOUR_NAMES[col]} cut to ${slatCut}mm (${slatsPerStock}/stock)`, qty:slatStocks, unit:'stock length (6100mm)', note:`${totalSlats} slats total — ${vsSlats} per panel × ${numPanels} panels`},
+  ]});
+
+  bom.push({section:`${pfx}2. Top & Bottom Rails`, rows:[
+    {code:`QS-5800-SF-${col}`, desc:`Side Frame (Top/Bottom Rail) ${COLOUR_NAMES[col]} cut to ${railCut}mm (${railsPerStock}/stock)`, qty:railStocks, unit:'stock length (5800mm)', note:`${totalRails} rails total (2 per panel)`},
+    {code:`QS-5800-CFC-${col}`, desc:`CFC Cover ${COLOUR_NAMES[col]} cut to ${railCut}mm`, qty:cfcStocks, unit:'stock length (5800mm)', note:'1:1 with rails'},
+    ...(totalF > 0 ? [{code:`QS-5800-F-${col}`, desc:`F-Section ${COLOUR_NAMES[col]} cut to ${targetH}mm`, qty:fStocks, unit:'stock length (5800mm)', note:`${totalF} wall terminations`}] : []),
+  ]});
+
+  bom.push({section:`${pfx}3. Posts & Mounting`, rows:[
+    {code:postCode, desc:postDesc, qty:numPosts, unit:'EA', note:`${numPanels} panels + 1 + ${corners} corners`},
+    ...mountItems.map(m => ({code:m.code, desc:m.desc, qty:m.qty, unit:'EA', note:''})),
+  ]});
+
+  bom.push({section:`${pfx}4. Fasteners`, rows:[
+    {code:`XP-SCREWS-${col}`, desc:`Screening Screws ${COLOUR_NAMES[col]} (100-pack)`, qty:screwPacks * 2, unit:'pack (100)', note:`${rawScrews} screws needed (1 per slat top + bottom)`},
+  ]});
+
+  return { bom, numPanels, panelWidth, numPosts, actualHeight: targetH };
+}
+
 function generateBOM() {
   const col       = document.getElementById('colour').value;
   const slatSize  = parseInt(document.getElementById('slatSize').value);
@@ -1210,6 +1374,8 @@ function generateBOM() {
 
   let numSlats = chosenSlats || parseInt(calcBox.dataset.slats) || slatCount(targetH, slatSize, gap);
   let actualHeight = chosenHeight || parseInt(calcBox.dataset.actualHeight) || slatHeight(numSlats, slatSize, gap);
+  const systemType = (document.getElementById('systemType') || {value:'qshs'}).value;
+  const runBOMFn = systemType === 'vs' ? generateVerticalRunBOM : generateRunBOM;
 
   const allBomSections = [];
 
@@ -1231,7 +1397,7 @@ function generateBOM() {
       const rSlats  = slatCount(rTargetH, rSlatSize, rGap);
       const rActH   = slatHeight(rSlats, rSlatSize, rGap);
 
-      const result = generateRunBOM({
+      const result = runBOMFn({
         col:rCol, slatSize:rSlatSize, gap:rGap, run:rRun, targetH:rTargetH,
         maxPanel:rMaxPanel, leftTerm:rLeftTerm, rightTerm:rRightTerm,
         postMount:rPostMount, corners:rCorners, numSlats:rSlats, actualHeight:rActH
@@ -1264,7 +1430,7 @@ function generateBOM() {
     });
   } else {
     // ── Single-run mode (no mapper applied) ──
-    const result = generateRunBOM({
+    const result = runBOMFn({
       col, slatSize, gap, run, targetH, maxPanel, leftTerm, rightTerm,
       postMount, corners, numSlats, actualHeight
     }, null);
@@ -1294,7 +1460,7 @@ function generateBOM() {
   const numPanels  = Math.ceil(run / maxPanel);
   const panelWidth = Math.round(run / numPanels);
   const numPosts   = numPanels + 1 + corners;
-  const cfg = { run, numPanels, panelWidth, numSlats, actualHeight, targetH, slatSize, gap, col, postMount, numPosts, leftTerm, rightTerm, corners, maxPanel, multiRun: fmRuns && fmRuns.length > 1 };
+  const cfg = { run, numPanels, panelWidth, numSlats, actualHeight, targetH, slatSize, gap, col, postMount, numPosts, leftTerm, rightTerm, corners, maxPanel, multiRun: fmRuns && fmRuns.length > 1, systemType };
   renderBOM(cfg);
 
   // Site plan from fence mapper
@@ -1328,7 +1494,7 @@ function renderBOM(cfg) {
   document.getElementById('bom-config-summary').innerHTML = `
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px 16px;font-size:12px">
       ${multiRunSummary}
-      <div><span style="color:#888">System:</span> <strong>Horizontal Slat Fence</strong></div>
+      <div><span style="color:#888">System:</span> <strong>${{qshs:'QSHS — Horizontal Slat',vs:'VS — Vertical Slat',xpl:'XPL — XPress Plus Premium',bayg:'BAYG — Buy As You Go'}[cfg.systemType]||'Horizontal Slat Fence'}</strong></div>
       <div><span style="color:#888">${cfg.multiRun ? 'Form defaults:' : 'Run:'}</span> <strong>${(cfg.run/1000).toFixed(1)}m (${cfg.numPanels} panels × ${cfg.panelWidth}mm)</strong></div>
       <div><span style="color:#888">Actual height:</span> <strong>${cfg.actualHeight}mm</strong> <span style="color:#888">(target ${cfg.targetH}mm)</span></div>
       <div><span style="color:#888">Slats:</span> <strong>${cfg.numSlats} × ${cfg.slatSize}mm / ${cfg.gap}mm gap</strong></div>
