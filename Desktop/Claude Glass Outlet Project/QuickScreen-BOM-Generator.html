@@ -338,7 +338,7 @@
         <span style="color:#aaa">·</span>
         <span style="font-size:11px;color:#999">Scroll = zoom &nbsp; Right-drag = pan &nbsp; Double-click to finish run &nbsp; Click label to edit length &nbsp; ⚙ to configure run</span>
       </div>
-      <div id="fm-map-row" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:12px;color:#666;margin-bottom:8px">
+      <div id="fm-map-row" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:12px;color:#666;margin-bottom:6px">
         <span>🗺</span>
         <input type="text" id="fm-map-address" placeholder="Enter address for satellite underlay…"
           style="flex:1;min-width:180px;border:1.5px solid #ccd4e0;border-radius:5px;padding:4px 8px;font-size:12px"
@@ -347,6 +347,14 @@
         <label style="display:flex;align-items:center;gap:4px;white-space:nowrap">
           Opacity: <input type="range" id="fm-map-opacity" min="0.1" max="1" step="0.1" value="0.5" style="width:70px">
         </label>
+      </div>
+      <div id="fm-key-row" style="display:flex;align-items:center;gap:6px;font-size:11px;color:#888;margin-bottom:8px">
+        <span>🔑</span>
+        <input type="password" id="fm-gmaps-key" placeholder="Google Maps API key (required for satellite)"
+          style="flex:1;min-width:180px;border:1.5px solid #ccd4e0;border-radius:5px;padding:3px 8px;font-size:11px;font-family:monospace"
+          onchange="(function(){var k=document.getElementById('fm-gmaps-key').value.trim();if(k){localStorage.setItem('qs_gmaps_key',k);document.getElementById('fm-key-status').textContent='✓ saved';}})()">
+        <span id="fm-key-status" style="color:#16a34a;font-weight:600;white-space:nowrap"></span>
+        <a href="https://console.cloud.google.com/apis/library/maps-backend.googleapis.com" target="_blank" style="color:#4a84cc;font-size:10px;white-space:nowrap">Get key ↗</a>
       </div>
       <div id="fm-canvas-wrap" class="mode-draw">
         <canvas id="fm-canvas"></canvas>
@@ -921,6 +929,13 @@ function clearAPIKey() {
     document.getElementById('api-key-input').value = k;
     document.getElementById('api-key-indicator').textContent = '✓ saved';
   }
+})();
+
+(function loadGMapsKey() {
+  const k = localStorage.getItem('qs_gmaps_key');
+  const el = document.getElementById('fm-gmaps-key');
+  const st = document.getElementById('fm-key-status');
+  if (k && el) { el.value = k; if (st) st.textContent = '✓ saved'; }
 })();
 
 // ─── AI PARSE ────────────────────────────────────────────────────────────────

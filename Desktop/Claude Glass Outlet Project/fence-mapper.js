@@ -1175,10 +1175,12 @@
     const address=addrEl?addrEl.value.trim():'';
     if (!address) { showToast('Enter an address first.'); return; }
 
-    const apiKey=GOOGLE_MAPS_API_KEY;
+    // Prefer user-configured key from localStorage, fall back to hardcoded
+    const apiKey = localStorage.getItem('qs_gmaps_key') || GOOGLE_MAPS_API_KEY;
+    if (!apiKey) { showToast('No Google Maps API key — enter one in the key field.'); return; }
 
     const loadBtn=document.getElementById('fm-load-map');
-    if(loadBtn) loadBtn.textContent='Loading...';
+    if(loadBtn) { loadBtn.textContent='Loading...'; loadBtn.disabled=true; }
     showToast('Loading satellite map…');
 
     try {
@@ -1190,13 +1192,14 @@
         const geoRes=await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`);
         const geoData=await geoRes.json();
         if (geoData.status!=='OK'||!geoData.results.length) {
-          showToast('Address not found — check address or API key'); return;
+          showToast(`Geocoding failed (${geoData.status}) — check address or API key`); return;
         }
         ({lat,lng}=geoData.results[0].geometry.location);
       }
       const zoom=20, imgW=800, imgH=600;
       const mapUrl=`https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=${zoom}&size=${imgW}x${imgH}&maptype=satellite&key=${apiKey}`;
       const img=new Image();
+      img.crossOrigin='anonymous';  // prevent canvas tainting so site-plan export works
       img.onload=()=>{
         S.mapImage=img;
         // meters per pixel at this lat/zoom (Web Mercator standard formula)
@@ -1210,12 +1213,12 @@
         render();
         showToast('Satellite map loaded — draw your fence on top');
       };
-      img.onerror=()=>showToast('Map image failed to load — check API key billing');
+      img.onerror=()=>{ showToast('Map image failed to load — verify Static Maps API is enabled and billing is active'); };
       img.src=mapUrl;
     } catch(err) {
       showToast('Map error: '+(err.message||err));
     } finally {
-      if(loadBtn) loadBtn.textContent='Load Map';
+      if(loadBtn) { loadBtn.textContent='Load Map'; loadBtn.disabled=false; }
     }
   }
 
