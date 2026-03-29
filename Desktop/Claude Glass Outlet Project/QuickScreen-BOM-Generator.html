@@ -932,10 +932,12 @@ function clearAPIKey() {
 })();
 
 (function loadGMapsKey() {
-  const k = localStorage.getItem('qs_gmaps_key');
-  const el = document.getElementById('fm-gmaps-key');
-  const st = document.getElementById('fm-key-status');
-  if (k && el) { el.value = k; if (st) st.textContent = '✓ saved'; }
+  // Always ensure the key is seeded — no manual entry required
+  const KEY = 'AIzaSyAndiFD6Rt2rRQF4ibm0DsJ3sEbL5oPSXg';
+  localStorage.setItem('qs_gmaps_key', KEY);
+  // Hide the key input row — key is managed in code
+  const row = document.getElementById('fm-key-row');
+  if (row) row.style.display = 'none';
 })();
 
 // ─── AI PARSE ────────────────────────────────────────────────────────────────
