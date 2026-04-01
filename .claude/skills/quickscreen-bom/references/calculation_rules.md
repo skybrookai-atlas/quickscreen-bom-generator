@@ -185,13 +185,23 @@ Vertical slat screens use the same extrusion products but oriented differently:
 ### 2.3 Key Formulas
 The VS sheet uses a named range `VS_VertSlatMat` (vertical slat material table) for lookups.
 
+**Authoritative vertical slat count formula** (from CTS - Vertical Screens tab):
+```
+num_slats = ROUNDDOWN((panel_width - 8 + slat_spacing) / (slat_spacing + slat_size), 0)
+```
+Where `8` = frame channel depth (4mm each side). Always use this — do NOT use the VLOOKUP approximation.
+
+**Overhang / even distribution:**
+```
+overhang_each_side = ROUND((panel_width - 8 - num_slats × (slat_spacing + slat_size) + slat_spacing) / 2, 1)
+```
+
 ```
 # Slat cut length = panel height (vertical orientation)
 slat_cut_length = panel_height
 
-# Number of vertical slats per panel:
-# Depends on panel width, slat width, and spacing
-total_vertical_slats = VLOOKUP(panel_width, VS_VertSlatMat, 8, FALSE)
+# Number of vertical slats per panel (use formula above, not VLOOKUP):
+total_vertical_slats = VLOOKUP(panel_width, VS_VertSlatMat, 8, FALSE)  # legacy — prefer formula above
 
 # Side frames become top/bottom rails (cut to panel width)
 rail_cut_length = panel_width
@@ -640,8 +650,8 @@ These items MUST be automatically added when their parent product appears in the
 | Side Frame (QS-5800-SF) | Side Frame Cap (QS-SFCAP-Acc-2PK) | 1 pack per 2 side frames |
 | Centre Support Rail (XP-5800-CSR) | CSR Cap (XP-CSRC-Acc) | 1 per CSR |
 | Centre Support Rail (XP-5800-CSR) | CSR Top/Base Plate (XP-BTP) | 2 per CSR (top+bottom) |
-| Any slats | Spacers (QS-SPACER-xxMM-50PK) | 2×(slats+1) per panel, in 50-packs |
-| Any slats | Screws (QS-SCREWS-50PK) | slats×2×1.01 + CSR screws, in 50-packs |
+| Any slats | Spacers (XPL-SB-50PK-{gap}MM) | 2×(slats+1) per panel, in 50-packs — gap = 05, 09, or 20 |
+| Any slats | Screws (XP-SCREWS-{col}) | slats×2×1.01 + CSR screws, in 100-packs |
 | F-Section (QS-5800-F) | F-Section screws (XP-SCREWS-Singles) | MAX(3, ROUNDUP(height/900+1)) per F-section |
 | Base-plated post | Base Plate Set | 1 per post |
 | Base-plated post | Domical Cover | 1 per post |
@@ -707,4 +717,253 @@ Present as a markdown table, built progressively:
 | Mill (raw aluminium) | M | Standard - cheapest |
 | Primrose | P | Limited |
 | Paperbark | PB | Limited |
+
+---
+
+## 11. XPress Plus Premium (XPL) — Insert-Based System
+
+Source: `Order-Form-CTS-Slat-Side-Frame-Systems-V9.03`, sheet `XPL`
+
+> **CRITICAL CONSTRAINT: XPL Premium side frame system is 65mm slat ONLY. No 90mm option exists.**
+
+### 11.1 How XPL Differs from QSHS
+
+QSHS counts individual slats; XPL counts **insert blades** held in slotted sections. The blade sits in a slot (not just stacked), so the centre-to-centre calculation is different.
+
+### 11.2 XPL Physical Constants
+
+| Constant | Value | Description |
+|----------|-------|-------------|
+| `Ht_EndCap` | 3 mm | Height consumed by end cap (top and bottom) |
+| `Cut_Allowance` | 2 mm | Saw kerf / waste per cut |
+| `Wslot` | 66.5 mm | Width of each insert blade slot |
+| `Ss` | 2 mm | Side clearance between frame and first blade slot |
+| `Gs` (9mm nominal) | 8 mm actual | Actual gap at "9mm" setting |
+| `Gs` (20mm nominal) | 20 mm actual | Actual gap at "20mm" setting |
+| `Blade_cc` (9mm) | 74.5 mm | Blade centre-to-centre = 8 + 66.5 |
+| `Blade_cc` (20mm) | 86.5 mm | Blade centre-to-centre = 20 + 66.5 |
+| `Trim_allowance` (9mm) | 6 mm | Trim allowance for 9mm inserts |
+| `Trim_allowance` (20mm) | 4 mm | Trim allowance for 20mm inserts |
+
+### 11.3 XPL Height → Blade Count
+
+XPL uses the `XPL_Ht` lookup table: each row D blades gives height:
+```
+height_for_D_blades = ROUNDDOWN(2×Ht_EndCap + 2×Ss + (D-1)×Gs + D×Wslot, 0)
+```
+
+To find blade count for a target height:
+```
+num_blades = VLOOKUP(target_height, XPL_Ht, 2, 0)   # exact match required
+```
+
+### 11.4 Width Deductions (XPL)
+
+Uses the same `SlatDeductions` table as QSHS but with a louvre column:
+```
+slat_cut_length = width_mm - VLOOKUP(screen_type, SlatDeductions, 2 + (louvre_mode), FALSE)
+```
+
+| Screen Type | Without Louvres | With Louvres |
+|-------------|----------------|--------------|
+| FENCE PANEL | -15mm | -58mm |
+| F-SECTION/VOID INFILL | -15mm | -78mm |
+| WINDOW SCREEN | -6mm | -56mm |
+
+### 11.5 Side Frame Cut Length (XPL)
+
+```
+side_frame_cut_length = height_mm - 2 × Ht_EndCap   # = height_mm - 6
+```
+
+### 11.6 Centre Support Rail (XPL)
+
+```
+csr_cut_length = height_mm - Gs × 2 - 3
+# = height_mm - (actual_gap × 2) - 3
+# NOTE: Different from QSHS formula (height - 6)
+```
+
+### 11.7 Fixing Types (XPL)
+
+XPL supports F-Section and U-Channel (QSHS only has F-Section):
+```
+fixing_qty = panels × 2        # 2 fixings per panel (left + right)
+fixing_cut_length = height_mm  # full screen height
+```
+
+**Stock lengths to order:**
+```
+f_section_stocks = ROUNDUP(fixing_qty / ROUNDDOWN(SF_stock_length / fixing_cut_length, 0), 0)
+u_channel_stocks = ROUNDUP(fixing_qty / ROUNDDOWN(UC_stock_length / fixing_cut_length, 0), 0)
+```
+
+### 11.8 F-Section Screws (XPL)
+
+Same formula as QSHS:
+```
+f_screws = panels × 2 × ROUNDUP((height_mm - 30) / 900 + 1, 0)
+```
+
+### 11.9 Slat Stock Optimisation (XPL)
+
+```
+slats_per_stock = ROUNDDOWN(slat_stock_length / (slat_cut_length + Cut_Allowance), 0)
+slat_stocks = ROUNDUP(total_slats / slats_per_stock, 0)
+```
+
+### 11.10 Insert Quantity
+
+```
+inserts_per_panel = INT(available_height / Blade_cc)
+total_inserts = SUM(inserts for all panels)
+```
+
+### 11.11 Pricing (XPL)
+
+XPL applies a 5% markup to all line totals:
+```
+line_total = ROUND(SUM(material_costs) × 1.05, 2)
+```
+
+Rates come from `XpMaterials` named range (per LM by material and colour group).
+
+---
+
+## 12. BAYG — Buy As You Go System
+
+Source: `Order-Form-CTS-Slat-Side-Frame-Systems-V9.03`, sheet `BAYG`
+
+### 12.1 What Is BAYG?
+
+BAYG uses the same side frame extrusions as XPL Premium but sells the spacer/slat assembly differently — spacers are a separate purchasable item ("buy as you go"). Slat widths available: 65mm or 90mm.
+
+### 12.2 Key Differences from QSHS/XPL
+
+- Uses `BAYG_ScrHts` lookup table (height → slat count) — NOT the XPL_Ht table
+- Has F-Channel fixing (not F-Section or U-Channel)
+- Spacers are sold separately and calculated differently
+- No F-section for FENCE type screens
+
+### 12.3 Slat Count (BAYG)
+
+```
+num_slats = VLOOKUP(target_height, BAYG_ScrHts, 2, 0)   # exact match lookup
+```
+
+The BAYG_ScrHts table is different from both QSHS's table and XPL_Ht.
+
+### 12.4 Side Frames (BAYG)
+
+```
+side_frame_qty = panels × 2
+side_frame_cut_length = height_mm - 2 × Ht_EndCap   # = height_mm - 6
+```
+
+### 12.5 CSR (BAYG)
+
+```
+csr_cut_length = height_mm - 3   # different from XPL (height - Gs×2 - 3)
+```
+
+### 12.6 Spacers (BAYG-specific)
+
+```
+spacers_per_panel = 2 × (num_slats + 1)
+# Spacers sold in bags — calculate bag quantity:
+spacer_bag_qty = ROUNDUP(total_spacers / bag_size, 0)
+```
+
+**Important note (from spreadsheet):** At 20mm spacing, the snap-in spacer is physically **21mm high** (not 20mm) to align with the gate frame spacing. The ordering code still refers to "20mm" spacing.
+
+### 12.7 F-Channel Fixing (BAYG)
+
+F-Channel is NOT used for FENCE type screens — only for other screen types:
+```
+f_channel_qty = IF(screen_type.startsWith("FENCE"), 0, panels × 2)
+f_channel_cut_length = height_mm   # full screen height
+```
+
+### 12.8 Screws (BAYG)
+
+```
+sf_screws = num_slats × 2 × 1.01   # 1% spare
+csr_screws = num_csr × num_slats
+total_screws = ROUNDUP((sf_screws + csr_screws) × 1.01, 0)  # overall 1% spare
+```
+
+### 12.9 CSR Width Lookup (confirmed from Tables tab)
+
+The same `CsrWidths` table applies to all systems:
+
+| Panel Width (mm) | CSR Count |
+|-----------------|-----------|
+| 0 – 1999 | 0 |
+| 2000 – 3999 | 1 |
+| 4000 – 5999 | 2 |
+| 6000+ | 3 |
+
+---
+
+## 13. Louvre Mode — Additional Rules
+
+Source: `CTS - Quickscreen`, `CTS - Xpr Plus Premium` tabs
+
+### 13.1 Louvre Bracket Quantity
+
+```
+louvre_brackets = num_slats × 2 × num_panels
+# Note: PAIR of brackets per slat (one each side)
+```
+
+### 13.2 Louvre Vertical Spacing Display
+
+The actual vertical spacing between louvre blades is:
+```
+louvre_vertical_spacing_display = slat_spacing + 7 mm
+```
+Show this to the user so they understand what they're ordering (e.g. for 9mm gap: "Louvre vertical spacing = 16mm").
+
+### 13.3 Width Deductions for Louvre Mode
+
+Louvre mode changes the slat cut length deduction (see section 1.2 and 11.4):
+- FENCE type: -58mm (vs -15mm without louvres)
+- F-SECTION type: -78mm (vs -15mm without louvres)
+- WINDOW type: -56mm (vs -6mm without louvres)
+
+### 13.4 Max Height in Louvre Mode
+
+For XPL/BAYG: max achievable height is limited to **2000mm** in louvre mode (vs full range otherwise).
+
+---
+
+## 14. Pricing Structure — Tier Discount Rules
+
+Source: `O_Grp` and `Tables (Old)` tabs
+
+### 14.1 Tier Discounts (confirmed from spreadsheet)
+
+| Tier | Description | Discount from T1 |
+|------|-------------|-----------------|
+| T1 | Standard / list price | — |
+| T2 | Mid volume | 15% off T1 |
+| T3 | Trade / large volume | (varies — check product_list.csv) |
+
+```
+# T2 price calculation:
+price_t2 = ROUND(price_t1 × (1 - 0.15), 2)
+```
+
+### 14.2 Colour Type Affects Price
+
+Products priced differently by finish:
+- **Mill** (M) = raw aluminium, cheapest
+- **Coloured** (all other standard colours) = standard painted finish
+- **Imaged** = special printed/textured finish, most expensive
+
+The price column selected = `MATCH(order_group, tier_headers) + MATCH(colour_type, ["Mil","Col","Img"]) - 1`
+
+### 14.3 Minimum Order Surcharge
+
+Orders below the `FreeIfOver` threshold incur a surcharge (Stratco code: SC-10655). Always flag if total BOM value appears low.
 | Palladium Silver Pearl | S | Limited |

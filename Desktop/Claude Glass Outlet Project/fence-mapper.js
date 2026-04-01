@@ -1656,10 +1656,10 @@
     const first=window.fmRuns[0];
     const lenEl=document.getElementById('runLength');
     const cornersEl=document.getElementById('corners');
-    if (lenEl&&lenEl.value&&parseInt(lenEl.value)!==Math.round(first.totalLengthMm)) {
+    if (lenEl&&lenEl.value&&Math.round(parseFloat(lenEl.value)*1000)!==Math.round(first.totalLengthMm)) {
       if (!confirm('Overwrite current run length?')) { window.fmRuns=null; return; }
     }
-    if(lenEl)     lenEl.value=Math.round(first.totalLengthMm);
+    if(lenEl)     lenEl.value=(first.totalLengthMm/1000).toFixed(1);
     if(cornersEl) cornersEl.value=first.corners;
 
     const nlEl=document.getElementById('nl-input');

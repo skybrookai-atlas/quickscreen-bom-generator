@@ -73,10 +73,10 @@
   .tag{display:inline-block;background:#e0edff;color:#2c5a9a;border-radius:3px;padding:1px 6px;font-size:11px;font-weight:600;margin-left:4px}
   .highlight{background:#fffbe6}
   select option[disabled]{color:#aaa}
-  .slat-calc{background:#2c5a9a;color:#fff;border-radius:6px;padding:12px 16px;font-family:monospace;font-size:13px;margin:10px 0;line-height:1.8}
-  .slat-calc .divider{border-top:1px solid #4a6fa5;margin:6px 0}
+  .slat-calc{background:linear-gradient(135deg,#f0f6ff,#eef4fb);color:#1a3a6b;border-radius:10px;padding:14px 18px;font-size:13px;margin:10px 0;line-height:1.9;border:1px solid #bfd4f0;box-shadow:0 2px 8px rgba(74,132,204,0.07)}
+  .slat-calc .divider{border-top:1px dashed #bfd4f0;margin:8px 0}
   .slat-option{cursor:pointer;padding:3px 8px;border-radius:3px;margin:2px 0;display:flex;align-items:center;gap:8px}
-  .slat-option:hover{background:#4a84cc}
+  .slat-option:hover{background:#d0e6ff;color:#1a3a6b}
   .slat-option.selected{background:#16a34a}
   .slat-option .badge{background:#16a34a;color:#fff;font-size:10px;padding:1px 5px;border-radius:2px}
   .slat-option.closest .badge{background:#f59e0b;color:#000}
@@ -95,12 +95,14 @@
   .match-toggle input[type=checkbox]{width:auto;margin:0}
   /* Fence mapper overrides to match Generator style */
   #fm-section{margin-bottom:16px}
-  #fm-toggle-bar{background:#fff;border:1px solid #dde3ed;border-radius:8px;padding:12px 16px;cursor:pointer;user-select:none;display:flex;justify-content:space-between;align-items:center}
-  #fm-toggle-bar:hover{background:#f9fafb}
-  #fm-toggle-bar.open{border-radius:8px 8px 0 0}
-  #fm-toggle-label{font-size:14px;font-weight:600;color:#2c5a9a}
+  #fm-toggle-bar{background:linear-gradient(135deg,#eef4fb 0%,#f5f8ff 100%);border:1px solid #dde3ed;border-left:3px solid #4a84cc;border-radius:8px;padding:12px 16px;cursor:pointer;user-select:none;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(74,132,204,0.08)}
+  #fm-toggle-bar:hover{background:linear-gradient(135deg,#e4eef8 0%,#edf3fc 100%)}
+  #fm-toggle-bar.open{border-radius:8px 8px 0 0;background:linear-gradient(135deg,#ddeaf8 0%,#e8f1fc 100%)}
+  #fm-toggle-label{font-size:14px;font-weight:700;color:#1a4480}
   #fm-toggle-caret{font-size:11px;color:#888;transition:transform .2s}
   #fm-toggle-bar.open #fm-toggle-caret{transform:rotate(180deg)}
+  #describe-toggle:hover{background:linear-gradient(135deg,#e4eef8 0%,#edf3fc 100%)!important}
+  #describe-toggle.open{background:linear-gradient(135deg,#ddeaf8 0%,#e8f1fc 100%)!important}
   #fm-body{background:#fff;border:1px solid #dde3ed;border-top:none;border-radius:0 0 8px 8px;padding:14px 16px 18px;display:none}
   #fm-body.open{display:block}
   .fm-btn{background:#fff;border:1.5px solid #ccd4e0;border-radius:5px;color:#333;font-size:12px;font-weight:600;padding:5px 12px;cursor:pointer;transition:.12s;white-space:nowrap}
@@ -214,6 +216,9 @@
   #save-quote-btn{background:#16a34a;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;display:none;align-items:center;gap:6px}
   #save-quote-btn:hover{background:#15803d}
   #save-quote-btn:disabled{opacity:.5;cursor:not-allowed}
+  /* ── Unset select styling ──────────────────────────────────────── */
+  select.unset { color: #aaa; }
+  select.unset option { color: #222; }
   /* ── Sub-labels (small section headings inside cards) ──────────── */
   .sub-label{font-size:12px;font-weight:600;color:#555;margin-bottom:8px;letter-spacing:.03em;text-transform:uppercase}
   /* ── Row gap ───────────────────────────────────────────────────── */
@@ -235,6 +240,23 @@
   /* ── Match toggle (checkbox + label) ──────────────────────────── */
   .match-toggle{display:flex;align-items:center;gap:6px;font-size:12px;color:#666;margin-bottom:5px;cursor:pointer}
   .match-toggle input[type=checkbox]{width:15px;height:15px;margin:0;accent-color:#4a84cc;cursor:pointer}
+  /* ── Height Picker ─────────────────────────────────────────────── */
+  .height-option{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;border:1.5px solid #ccd4e0;background:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:.15s;color:#444;margin-right:5px;margin-top:3px}
+  .height-option:hover{border-color:#4a84cc;color:#4a84cc;background:#eef4fc}
+  .height-option.selected{border-color:#16a34a;background:#f0fdf4;color:#15803d}
+  .height-option.selected-amber{border-color:#f59e0b;background:#fffbeb;color:#92400e}
+  .height-option .ho-badge{background:#16a34a;color:#fff;font-size:9px;padding:1px 4px;border-radius:2px;margin-left:2px}
+  .height-option.selected-amber .ho-badge{background:#f59e0b;color:#000}
+  /* ── Gate list with qty ────────────────────────────────────────── */
+  .gate-qty-input{width:48px;padding:3px 5px;border:1.5px solid #ccd4e0;border-radius:4px;font-size:12px;text-align:center;-moz-appearance:textfield}
+  .gate-qty-input::-webkit-outer-spin-button,.gate-qty-input::-webkit-inner-spin-button{-webkit-appearance:none}
+  .gate-qty-input:focus{border-color:#4a84cc;outline:none}
+  .match-fence-btn{display:inline-flex;align-items:center;gap:7px;padding:7px 14px;background:#eef4fc;border:1.5px solid #4a84cc;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;color:#2c5a9a;margin-bottom:14px;transition:.15s}
+  .match-fence-btn:hover{background:#deeaf8}
+  .match-fence-btn input[type=checkbox]{width:15px;height:15px;margin:0;accent-color:#4a84cc}
+  .gate-form-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
+  @media(max-width:700px){.gate-form-grid{grid-template-columns:1fr 1fr}}
+  @media(max-width:480px){.gate-form-grid{grid-template-columns:1fr}}
   /* ── Print overrides ───────────────────────────────────────────── */
   @media print{
     h2{border-bottom:1px solid #dde3ed;padding-bottom:4px;margin-bottom:8px;font-size:13px}
@@ -378,8 +400,8 @@
   <!-- ── Describe the Job ────────────────────────────────────────── -->
   <div id="describe-section" class="no-print">
     <div id="describe-toggle" onclick="toggleDescribe()"
-      style="background:#fff;border:1px solid #dde3ed;border-radius:8px;padding:12px 16px;cursor:pointer;user-select:none;display:flex;justify-content:space-between;align-items:center;margin-bottom:0">
-      <span style="font-size:14px;font-weight:600;color:#2c5a9a">📝 Describe the Job <span class="ai-badge">AI</span>
+      style="background:linear-gradient(135deg,#eef4fb 0%,#f5f8ff 100%);border:1px solid #dde3ed;border-left:3px solid #4a84cc;border-radius:8px;padding:12px 16px;cursor:pointer;user-select:none;display:flex;justify-content:space-between;align-items:center;margin-bottom:0;box-shadow:0 2px 8px rgba(74,132,204,0.08)">
+      <span style="font-size:14px;font-weight:700;color:#1a4480">📝 Describe the Job <span class="ai-badge">AI</span>
         <span style="font-size:11px;color:#888;font-weight:400;margin-left:8px">optional — AI or local parsing fills the form below</span>
       </span>
       <span id="describe-caret" style="font-size:11px;color:#888;transition:transform .2s">▼</span>
@@ -414,7 +436,7 @@
 
   <!-- ── Configuration Form ──────────────────────────────────────── -->
   <div class="card no-print">
-    <h2>⚙ Configuration</h2>
+    <h2>⚙ Fence Configuration</h2>
 
     <div style="margin-bottom:14px">
       <label>System Type</label>
@@ -432,12 +454,13 @@
         <input type="text" id="customer" placeholder="e.g. Smith Residence – Side Fence">
       </div>
       <div>
-        <label>Total Run Length (mm)</label>
-        <input type="number" id="runLength" value="20000" min="100" step="100" oninput="onConfigChange()">
+        <label>Total Run Length (m)</label>
+        <input type="number" id="runLength" value="20" min="0.5" step="0.5" oninput="onConfigChange()">
       </div>
       <div>
         <label>Target Height (mm)</label>
         <input type="number" id="targetHeight" value="1800" min="300" step="1" oninput="onConfigChange()">
+        <div id="height-picker" style="margin-top:6px"></div>
       </div>
     </div>
 
@@ -513,26 +536,27 @@
       </div>
     </div>
 
-    <!-- Slat Calculator -->
-    <div id="system-note"></div>
-    <div id="slat-calc-box"></div>
-    <!-- Warnings -->
+    <div id="system-note" style="margin-top:10px;font-size:12px;color:#555"></div>
     <div id="warnings"></div>
+    <div id="slat-calc-box" style="display:none"></div>
 
-    <div style="display:flex;gap:10px;align-items:center;margin-top:14px">
-      <button class="btn btn-success" onclick="generateBOM()">📋 Generate BOM</button>
-    </div>
   </div>
 
   <!-- ── Gates ──────────────────────────────────────────────────── -->
   <div class="card no-print" id="gates-card">
-    <h2>🚪 Gates</h2>
+    <h2>🚪 Gate Configuration</h2>
     <div id="gate-list"></div>
 
-    <!-- Add gate form -->
-    <div class="gate-add-section">
-      <div class="sub-label">Add a gate</div>
-      <div class="gate-row">
+    <!-- Add/Edit gate form -->
+    <div class="gate-add-section" id="gate-form-section">
+      <div class="sub-label" id="gate-form-title">Add a Gate</div>
+
+      <!-- Match Gate to Fence -->
+      <label class="match-fence-btn" onclick="matchGateToFence()">
+        <input type="checkbox" id="g-match-all" onchange="matchGateToFence()"> Match Gate to Fence
+      </label>
+
+      <div class="gate-form-grid">
         <div>
           <label>Gate Type</label>
           <select id="g-type" onchange="onGateTypeChange()">
@@ -547,48 +571,24 @@
           <div class="form-note" id="g-width-note">Max 1200mm recommended for swing gates</div>
         </div>
         <div>
-          <label>Gate Post Size</label>
-          <select id="g-post-size">
-            <option value="50">50×50mm post</option>
-            <option value="65" selected>65×65mm HD post (default)</option>
-            <option value="75">75×75mm post ⚠ confirm stock</option>
-            <option value="100">100×100mm post ⚠ confirm stock</option>
-          </select>
-          <div class="form-note">Posts either side of the gate opening</div>
-        </div>
-        <div>
-          <label>Hinge Type</label>
-          <select id="g-hinge-type">
-            <option value="kwikfit_ft">D&D Kwik Fit — Fixed Tension (standard)</option>
-            <option value="kwikfit_adj">D&D Kwik Fit — Adjustable</option>
-            <option value="heavy_duty">Heavy Duty Hinge Pair (weld-on)</option>
-          </select>
-        </div>
-        <div>
-          <label>Latch Type</label>
-          <select id="g-latch-type">
-            <option value="magna_top">D&D Magna Latch — Top Pull (standard)</option>
-            <option value="magna_lockbox">D&D Magna Latch + Lock Box Set</option>
-            <option value="drop_bolt">Drop Bolt only</option>
-            <option value="none">No Latch</option>
-          </select>
-        </div>
-        <div>
           <label>Gate Height (mm)</label>
-          <div class="match-toggle"><input type="checkbox" id="g-height-match" checked onchange="onGateMatchChange('height')"> Match fence</div>
-          <input type="number" id="g-height-custom" value="2100" min="600" max="2500" step="1" style="display:none">
+          <select id="g-height-select" onchange="onGateHeightSelectChange()">
+            <option value="match">Match fence height</option>
+            <option value="900">900mm</option>
+            <option value="1050">1050mm</option>
+            <option value="1200">1200mm</option>
+            <option value="1500">1500mm</option>
+            <option value="1800">1800mm</option>
+            <option value="1950">1950mm</option>
+            <option value="2100">2100mm</option>
+            <option value="custom">Custom…</option>
+          </select>
+          <input type="number" id="g-height-custom" value="2100" min="600" max="2500" step="1" style="display:none;margin-top:4px">
         </div>
-      </div>
-        <div>
-          <label>Qty</label>
-          <input type="number" id="g-qty" value="1" min="1" max="10" step="1">
-        </div>
-      </div>
-      <div class="gate-row gate-row-3">
         <div>
           <label>Colour</label>
-          <div class="match-toggle"><input type="checkbox" id="g-colour-match" checked onchange="onGateMatchChange('colour')"> Match fence</div>
-          <select id="g-colour-custom" style="display:none">
+          <select id="g-colour">
+            <option value="match">Match fence colour</option>
             <option value="B">Black Satin</option>
             <option value="MN">Monument Matt</option>
             <option value="G">Woodland Grey Matt</option>
@@ -604,27 +604,116 @@
         </div>
         <div>
           <label>Slat Gap</label>
-          <div class="match-toggle"><input type="checkbox" id="g-gap-match" checked onchange="onGateMatchChange('gap')"> Match fence</div>
-          <select id="g-gap-custom" style="display:none">
-            <option value="5">5mm</option>
-            <option value="9" selected>9mm</option>
-            <option value="20">20mm</option>
+          <select id="g-gap">
+            <option value="match">Match fence gap</option>
+            <option value="5">5mm — near-privacy</option>
+            <option value="9">9mm — standard</option>
+            <option value="20">20mm — open/decorative</option>
           </select>
         </div>
         <div id="g-slatsize-wrap">
-          <label>Slat Size <span id="g-slatsize-note" style="font-weight:400;color:#888">(swing gates always use 65mm blades)</span></label>
-          <div class="match-toggle"><input type="checkbox" id="g-slatsize-match" checked onchange="onGateMatchChange('slatsize')"> Match fence</div>
-          <select id="g-slatsize-custom" style="display:none">
+          <label>Slat Size <span id="g-slatsize-note" style="font-weight:400;color:#888;font-size:11px">(swing: always 65mm blades)</span></label>
+          <select id="g-slatsize">
+            <option value="match">Match fence slat size</option>
             <option value="65">65mm</option>
-            <option value="90">90mm</option>
+            <option value="90">90mm (sliding only)</option>
+          </select>
+        </div>
+        <div>
+          <label>Gate Post Size</label>
+          <select id="g-post-size">
+            <option value="50">50×50mm post</option>
+            <option value="65" selected>65×65mm HD post (default)</option>
+            <option value="75">75×75mm post ⚠ confirm stock</option>
+            <option value="100">100×100mm post ⚠ confirm stock</option>
+          </select>
+        </div>
+        <div>
+          <label>Hinge Type</label>
+          <select id="g-hinge-type">
+            <option value="kwikfit_ft">D&D Kwik Fit — Fixed Tension</option>
+            <option value="kwikfit_adj">D&D Kwik Fit — Adjustable</option>
+            <option value="heavy_duty">Heavy Duty (weld-on)</option>
+          </select>
+        </div>
+        <div>
+          <label>Latch Type</label>
+          <select id="g-latch-type">
+            <option value="magna_top">D&D Magna Latch — Top Pull</option>
+            <option value="magna_lockbox">D&D Magna Latch + Lock Box</option>
+            <option value="drop_bolt">Drop Bolt only</option>
+            <option value="none">No Latch</option>
           </select>
         </div>
       </div>
-      <div style="margin-top:4px">
-        <button class="btn btn-primary btn-sm" onclick="addGate()">＋ Add Gate to BOM</button>
+
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button class="btn btn-success btn-sm" id="gate-save-btn" onclick="saveGate()">＋ Save Gate</button>
+        <button class="btn btn-outline btn-sm" id="gate-add-another-btn" onclick="addAnotherGate()" style="display:none">＋ Add Another Gate</button>
+        <button class="btn btn-sm" id="gate-cancel-btn" onclick="cancelEditGate()" style="display:none;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5">✕ Cancel Edit</button>
       </div>
     </div>
     <div id="gate-ai-hint" class="gate-warn" style="display:none"></div>
+  </div>
+
+
+  <!-- ── Notes ──────────────────────────────────────────────────── -->
+  <div class="card no-print" id="notes-card">
+    <h2>📝 Notes</h2>
+    <textarea id="job-notes" class="nl-area" placeholder="Add any job notes, special requirements, site conditions, or instructions here…" style="min-height:80px"></textarea>
+  </div>
+
+  <!-- ── Contact & Delivery ─────────────────────────────────────── -->
+  <div class="card no-print" id="contact-card">
+    <h2>📦 Contact & Delivery</h2>
+    <div class="row row-3" style="margin-bottom:14px">
+      <div>
+        <label>Contact Name</label>
+        <input type="text" id="contact-name" placeholder="Full name">
+      </div>
+      <div>
+        <label>Phone</label>
+        <input type="text" id="contact-phone" placeholder="e.g. 0412 345 678">
+      </div>
+      <div>
+        <label>Email</label>
+        <input type="text" id="contact-email" placeholder="email@example.com">
+      </div>
+    </div>
+    <div style="margin-bottom:14px">
+      <label>Fulfilment</label>
+      <div style="display:flex;gap:20px;margin-top:6px">
+        <label style="display:flex;align-items:center;gap:6px;font-size:14px;font-weight:400;color:#333;cursor:pointer">
+          <input type="radio" name="fulfilment" id="f-pickup" value="pickup" checked onchange="onFulfilmentChange()" style="width:auto;margin:0"> Pick Up
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:14px;font-weight:400;color:#333;cursor:pointer">
+          <input type="radio" name="fulfilment" id="f-delivery" value="delivery" onchange="onFulfilmentChange()" style="width:auto;margin:0"> Delivery
+        </label>
+      </div>
+    </div>
+    <div id="delivery-address-section" style="display:none">
+      <div class="row row-2">
+        <div>
+          <label>Delivery Address</label>
+          <input type="text" id="delivery-address" placeholder="Street address">
+        </div>
+        <div>
+          <label>Suburb / State / Postcode</label>
+          <input type="text" id="delivery-suburb" placeholder="e.g. Surfers Paradise QLD 4217">
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Material Summary ────────────────────────────────────────── -->
+    <div style="margin-top:16px;border-top:1px solid #eef0f4;padding-top:14px">
+      <div style="font-size:12px;font-weight:700;color:#2c5a9a;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">Job Summary</div>
+      <div id="material-summary" style="font-size:13px;color:#444;line-height:1.8"></div>
+    </div>
+  </div>
+
+  <!-- ── Generate BOM ──────────────────────────────────────────────── -->
+  <div class="no-print" style="margin-bottom:16px;display:flex;gap:10px;align-items:center">
+    <button class="btn btn-success" style="font-size:15px;padding:12px 28px" onclick="generateBOM()">📋 Generate BOM</button>
   </div>
 
   <!-- ── BOM Output ──────────────────────────────────────────────── -->
@@ -652,7 +741,9 @@
           <div id="q-date" style="font-size:11px;color:#888;margin-top:4px"></div>
         </div>
       </div>
-      <div id="q-customer" style="font-size:13px;color:#333;margin-bottom:4px"></div>
+      <div id="q-customer" style="font-size:13px;color:#333;margin-bottom:2px"></div>
+      <div id="q-contact" style="font-size:12px;color:#666;margin-bottom:2px"></div>
+      <div id="q-notes" style="font-size:12px;color:#555;margin-bottom:4px;font-style:italic"></div>
       <hr style="margin:8px 0;border-color:#dde3ed">
     </div>
 
@@ -665,6 +756,16 @@
         <div class="tier-tab active" onclick="setTier(1,this)">Tier 1 — Standard</div>
         <div class="tier-tab" onclick="setTier(2,this)">Tier 2 — Mid Volume</div>
         <div class="tier-tab" onclick="setTier(3,this)">Tier 3 — Trade</div>
+      </div>
+    </div>
+
+    <!-- BOM view toggle -->
+    <div class="no-print" style="margin-bottom:12px" id="bom-view-toggle-wrap">
+      <div class="sub-label">View</div>
+      <div class="tier-tabs">
+        <div class="tier-tab active" id="bom-view-all" onclick="setBomView('all',this)">All Items</div>
+        <div class="tier-tab" id="bom-view-fence" onclick="setBomView('fence',this)">Fence Only</div>
+        <div class="tier-tab" id="bom-view-gates" onclick="setBomView('gates',this)">Gates Only</div>
       </div>
     </div>
 
@@ -912,6 +1013,7 @@ function toggleDescribe() {
   body.style.display = open ? 'block' : 'none';
   caret.style.transform = open ? 'rotate(180deg)' : '';
   toggle.style.borderRadius = open ? '8px 8px 0 0' : '8px';
+  toggle.classList.toggle('open', open);
   localStorage.setItem('qs_describe_open', open ? '1' : '0');
 }
 (function initDescribe() {
@@ -923,7 +1025,7 @@ function toggleDescribe() {
     const toggle = document.getElementById('describe-toggle');
     if (body) body.style.display = 'block';
     if (caret) caret.style.transform = 'rotate(180deg)';
-    if (toggle) toggle.style.borderRadius = '8px 8px 0 0';
+    if (toggle) { toggle.style.borderRadius = '8px 8px 0 0'; toggle.classList.add('open'); }
   }
 })();
 
@@ -1019,7 +1121,7 @@ If gates are mentioned but opening width or height is missing, add to "missing" 
     const text = data.content.map(b => b.text||'').join('').replace(/```json|```/g,'').trim();
     const p    = JSON.parse(text);
     if (p.customer)     set('customer', p.customer);
-    if (p.runLengthMm)  set('runLength', p.runLengthMm);
+    if (p.runLengthMm)  set('runLength', (p.runLengthMm / 1000).toFixed(1));
     if (p.targetHeight) set('targetHeight', p.targetHeight);
     if (p.slatSize)     set('slatSize', String(p.slatSize));
     if (p.slatGap)      set('slatGap', String(p.slatGap));
@@ -1046,7 +1148,7 @@ If gates are mentioned but opening width or height is missing, add to "missing" 
         const gap = (!g.gap || g.gap === 'match') ? fenceGap : parseInt(g.gap);
         const col = (!g.colour || g.colour === 'match') ? fenceCol : g.colour;
         const sz  = g.type === 'sliding' ? (fenceSlatSz || 65) : 65;
-        gateList.push({ type: g.type, width: parseInt(g.openingWidth)||1000, height: h, col, gap, slatSize: sz, qty: g.qty||1, warnings: [] });
+        gateList.push({ type: g.type, width: parseInt(g.openingWidth)||1000, height: h, col, gap, slatSize: sz, qty: g.qty||1, postSize: 65, hingeType: 'kwikfit_ft', latchType: 'magna_top', warnings: [] });
       });
       renderGateList();
     }
@@ -1082,8 +1184,8 @@ function parseNL() {
   const found  = [];
   const lenM   = txt.match(/(\d+(?:\.\d+)?)\s*(?:metres?|meters?|m)\b/);
   const lenMM  = txt.match(/(\d{3,6})\s*mm\s*(?:long|run|length|fence|screen)/);
-  if (lenM)      { set('runLength', Math.round(parseFloat(lenM[1])*1000)); found.push('length'); }
-  else if (lenMM){ set('runLength', parseInt(lenMM[1])); found.push('length'); }
+  if (lenM)      { set('runLength', parseFloat(lenM[1]).toFixed(1)); found.push('length'); }
+  else if (lenMM){ set('runLength', (parseInt(lenMM[1]) / 1000).toFixed(1)); found.push('length'); }
   const htMM = txt.match(/(\d{3,4})\s*mm\s*(?:high|tall|height)/);
   const htM  = txt.match(/(\d(?:\.\d+)?)\s*m\s*(?:high|tall|height)/);
   if (htMM)      { set('targetHeight', parseInt(htMM[1])); found.push('height'); }
@@ -1120,102 +1222,57 @@ function set(id, val) {
 // ─── SLAT HEIGHT CALCULATOR ───────────────────────────────────────────────────
 function slatHeight(n, w, g) { return Math.round(n * (w + g) - g + 3); }
 function slatCount(target, w, g) {
+  if (!w || !g || isNaN(w) || isNaN(g) || isNaN(target)) return 0;
   let n = 3;
-  while (true) { if (slatHeight(n, w, g) > target) return n - 1; n++; }
+  while (n < 500) { if (slatHeight(n, w, g) > target) return n - 1; n++; }
+  return n - 1;
 }
 
 // ─── LIVE PREVIEW ────────────────────────────────────────────────────────────
 function onConfigChange() {
-  const w    = parseInt(document.getElementById('slatSize').value);
-  const g    = parseInt(document.getElementById('slatGap').value);
-  const t    = parseInt(document.getElementById('targetHeight').value) || 1800;
-  const run  = parseInt(document.getElementById('runLength').value) || 20000;
-  const maxP = parseInt(document.getElementById('maxPanel').value);
+  const w = parseInt(document.getElementById('slatSize').value) || 65;
+  const g = parseInt(document.getElementById('slatGap').value) || 9;
+  const t = parseInt(document.getElementById('targetHeight').value) || 1800;
+  const run = Math.round(parseFloat(document.getElementById('runLength').value || 0) * 1000) || 20000;
+  const maxP = parseInt(document.getElementById('maxPanel').value) || 2600;
   const n = slatCount(t, w, g), ha = slatHeight(n, w, g);
-  const na = n + 1,             hb = slatHeight(na, w, g);
+  const na = n + 1, hb = slatHeight(na, w, g);
   const numPanels = Math.ceil(run / maxP);
-  const panelW    = Math.round(run / numPanels);
-  const posts     = numPanels + 1 + parseInt(document.getElementById('corners').value || 0);
-
+  const panelW = Math.round(run / numPanels);
+  const posts = numPanels + 1 + parseInt(document.getElementById('corners').value || 0);
   const sys = (document.getElementById('systemType') || {value:'qshs'}).value;
 
   if (sys === 'vs') {
-    // Vertical slat: slat count driven by panel WIDTH
     const vsSlats = Math.floor((panelW - 8 + g) / (g + w));
     const vsOverhang = Math.round(((panelW - 8 - vsSlats * (g + w) + g) / 2) * 10) / 10;
-    document.getElementById('slat-calc-box').innerHTML = `<div class="slat-calc">
-      <div style="font-size:11px;opacity:.7;margin-bottom:4px">VERTICAL SLAT CALC — ${w}mm slat / ${g}mm gap</div>
-      <div class="divider"></div>
-      <div style="display:flex;gap:20px;flex-wrap:wrap">
-        <div><div style="font-size:11px;opacity:.7">Panel Layout</div><div style="font-size:18px;font-weight:700">${numPanels} × ${panelW}mm</div></div>
-        <div><div style="font-size:11px;opacity:.7">Slats per Panel</div><div style="font-size:18px;font-weight:700">${vsSlats}</div></div>
-        <div><div style="font-size:11px;opacity:.7">Posts</div><div style="font-size:18px;font-weight:700">${posts}</div></div>
-      </div>
-      <div class="divider"></div>
-      <div style="font-size:12px;opacity:.8">Slats cut to ${t}mm height &nbsp;|&nbsp; Rails cut to ${panelW}mm width &nbsp;|&nbsp; Overhang each side: ${vsOverhang}mm</div>
-    </div>`;
     document.getElementById('slat-calc-box').dataset.slats = vsSlats;
     document.getElementById('slat-calc-box').dataset.actualHeight = t;
     document.getElementById('slat-calc-box').dataset.vsMode = '1';
     document.getElementById('slat-calc-box').dataset.vsOverhang = vsOverhang;
   } else if (sys === 'xpl') {
-    // XPL: blade_cc method
-    const Gs = g === 20 ? 20 : 8;  // actual gap (9mm nominal = 8mm actual)
+    const Gs = g === 20 ? 20 : 8;
     const Wslot = 66.5;
     const blade_cc = Wslot + Gs;
-    const availH = t - 6;  // minus 2 × Ht_EndCap (3mm each)
+    const availH = t - 6;
     const numBlades = Math.floor(availH / blade_cc);
-    const actualH_xpl = Math.round(numBlades * blade_cc + 6);
     const numBladesP1 = numBlades + 1;
+    const actualH_xpl = Math.round(numBlades * blade_cc + 6);
     const actualH_xplP1 = Math.round(numBladesP1 * blade_cc + 6);
-    document.getElementById('slat-calc-box').innerHTML = `<div class="slat-calc">
-      <div style="font-size:11px;opacity:.7;margin-bottom:4px">XPL BLADE CALC — 65mm insert / ${g}mm gap (Blade_cc = ${blade_cc}mm)</div>
-      <div class="divider"></div>
-      <div style="display:flex;gap:20px;flex-wrap:wrap">
-        <div><div style="font-size:11px;opacity:.7">Target Height</div><div style="font-size:18px;font-weight:700">${t}mm</div></div>
-        <div><div style="font-size:11px;opacity:.7">Panel Layout</div><div style="font-size:18px;font-weight:700">${numPanels} × ${panelW}mm</div></div>
-        <div><div style="font-size:11px;opacity:.7">Posts</div><div style="font-size:18px;font-weight:700">${posts}</div></div>
-      </div>
-      <div class="divider"></div>
-      <div style="font-size:11px;opacity:.7;margin-bottom:4px">Available heights — click to select:</div>
-      <div class="slat-option ${Math.abs(actualH_xpl-t)<=Math.abs(actualH_xplP1-t)?'selected closest':''}" onclick="selectSlats(${numBlades},${actualH_xpl})">
-        <span>${numBlades} blades → <strong>${actualH_xpl}mm</strong></span>
-        <span class="badge">${actualH_xpl<t?'–'+(t-actualH_xpl):'+'+(actualH_xpl-t)}mm ${Math.abs(actualH_xpl-t)<=Math.abs(actualH_xplP1-t)?'closest':''}</span>
-      </div>
-      <div class="slat-option ${Math.abs(actualH_xplP1-t)<Math.abs(actualH_xpl-t)?'selected closest':''}" onclick="selectSlats(${numBladesP1},${actualH_xplP1})">
-        <span>${numBladesP1} blades → <strong>${actualH_xplP1}mm</strong></span>
-        <span class="badge">${actualH_xplP1<t?'–'+(t-actualH_xplP1):'+'+(actualH_xplP1-t)}mm ${Math.abs(actualH_xplP1-t)<Math.abs(actualH_xpl-t)?'closest':''}</span>
-      </div>
-    </div>`;
     document.getElementById('slat-calc-box').dataset.slats = Math.abs(actualH_xpl-t)<=Math.abs(actualH_xplP1-t)?numBlades:numBladesP1;
     document.getElementById('slat-calc-box').dataset.actualHeight = Math.abs(actualH_xpl-t)<=Math.abs(actualH_xplP1-t)?actualH_xpl:actualH_xplP1;
     delete document.getElementById('slat-calc-box').dataset.vsMode;
   } else {
-    // QSHS and BAYG: standard horizontal slat formula
-    document.getElementById('slat-calc-box').innerHTML = `<div class="slat-calc">
-    <div style="font-size:11px;opacity:.7;margin-bottom:4px">SLAT CALCULATOR — ${w}mm slat / ${g}mm gap${sys==='bayg'?' (BAYG)':''}</div>
-    <div class="divider"></div>
-    <div style="display:flex;gap:20px;flex-wrap:wrap">
-      <div><div style="font-size:11px;opacity:.7">Target Height</div><div style="font-size:18px;font-weight:700">${t}mm</div></div>
-      <div><div style="font-size:11px;opacity:.7">Panel Layout</div><div style="font-size:18px;font-weight:700">${numPanels} × ${panelW}mm</div></div>
-      <div><div style="font-size:11px;opacity:.7">Posts</div><div style="font-size:18px;font-weight:700">${posts}</div></div>
-    </div>
-    <div class="divider"></div>
-    <div style="font-size:11px;opacity:.7;margin-bottom:4px">Available heights — click to select:</div>
-    <div class="slat-option ${Math.abs(ha-t)<=Math.abs(hb-t)?'selected closest':''}" onclick="selectSlats(${n},${ha})">
-      <span>${n} slats → <strong>${ha}mm</strong></span>
-      <span class="badge">${ha<t?'–'+(t-ha):'+'+(ha-t)}mm ${Math.abs(ha-t)<=Math.abs(hb-t)?'closest':''}</span>
-    </div>
-    <div class="slat-option ${Math.abs(hb-t)<Math.abs(ha-t)?'selected closest':''}" onclick="selectSlats(${na},${hb})">
-      <span>${na} slats → <strong>${hb}mm</strong></span>
-      <span class="badge">${hb<t?'–'+(t-hb):'+'+(hb-t)}mm ${Math.abs(hb-t)<Math.abs(ha-t)?'closest':''}</span>
-    </div>
-  </div>`;
     document.getElementById('slat-calc-box').dataset.slats = Math.abs(ha-t)<=Math.abs(hb-t)?n:na;
     document.getElementById('slat-calc-box').dataset.actualHeight = Math.abs(ha-t)<=Math.abs(hb-t)?ha:hb;
     delete document.getElementById('slat-calc-box').dataset.vsMode;
   }
 
+  updateHeightPicker();
+  updateWarnings(run, maxP, panelW);
+  updateMaterialSummary();
+}
+
+function updateWarnings(run, maxP, panelW) {
   const warns = [];
   if (panelW > 2600) warns.push(`Panel width ${panelW}mm exceeds 2600mm max. Consider more panels.`);
   if (panelW >= 2000) warns.push(`Panels are ${panelW}mm wide — Centre Support Rails will be included automatically.`);
@@ -1245,10 +1302,84 @@ function onSystemChange() {
 }
 
 let chosenSlats = null, chosenHeight = null;
-function selectSlats(n, h) {
+
+function updateHeightPicker() {
+  const picker = document.getElementById('height-picker');
+  if (!picker) return;
+  const w = parseInt(document.getElementById('slatSize').value) || 65;
+  const g = parseInt(document.getElementById('slatGap').value) || 9;
+  const t = parseInt(document.getElementById('targetHeight').value) || 1800;
+  const sys = (document.getElementById('systemType')||{value:'qshs'}).value;
+
+  const slatSizeSet = !document.getElementById('slatSize').classList.contains('unset');
+  const slatGapSet  = !document.getElementById('slatGap').classList.contains('unset');
+
+  // VS system — height is exact (slats cut to height); no picker needed
+  if (sys === 'vs' || sys === 'xpl') {
+    const actual = parseInt(document.getElementById('slat-calc-box').dataset.actualHeight) || t;
+    const diff = actual - t;
+    picker.innerHTML = diff === 0
+      ? `<span style="font-size:11px;color:#16a34a;font-weight:600">✓ Exact height achievable</span>`
+      : `<span style="font-size:11px;color:#888">Actual achievable: <strong style="color:#2c5a9a">${actual}mm</strong></span>`;
+    chosenSlats = parseInt(document.getElementById('slat-calc-box').dataset.slats)||null;
+    chosenHeight = actual;
+    return;
+  }
+
+  // QSHS/BAYG: if slat size or gap not yet deliberately chosen, no picker
+  if (!slatSizeSet || !slatGapSet) {
+    picker.innerHTML = `<span style="font-size:11px;color:#aaa">Choose slat size &amp; gap to see available heights</span>`;
+    chosenSlats = null; chosenHeight = null;
+    return;
+  }
+
+  // Both chosen — show height options
+  const n  = slatCount(t, w, g);
+  const ha = slatHeight(n, w, g);      // at or below target
+  const nb = n + 1;
+  const hb = slatHeight(nb, w, g);     // above target (first one over)
+  const nc = n - 1;
+  const hc = nc >= 1 ? slatHeight(nc, w, g) : null; // one step below
+
+  const opts = [];
+  if (hc !== null && nc >= 1) opts.push({ n: nc, h: hc });
+  opts.push({ n: n, h: ha });
+  opts.push({ n: nb, h: hb });
+
+  const targetInput = document.getElementById('targetHeight');
+  const isExact = ha === t;
+  if (!isExact) {
+    targetInput.style.borderColor = '#f59e0b';
+    targetInput.style.boxShadow = '0 0 0 3px rgba(245,158,11,.1)';
+  } else {
+    targetInput.style.borderColor = '';
+    targetInput.style.boxShadow = '';
+  }
+
+  picker.innerHTML = opts.map(o => {
+    const isSel = (chosenHeight === null ? o.h === ha : o.h === chosenHeight);
+    const diff = o.h - t;
+    const diffStr = diff === 0 ? '' : (diff > 0 ? ` +${diff}` : ` ${diff}`);
+    const isAmber = isSel && o.h !== t;
+    const cls = isSel ? (isAmber ? 'height-option selected-amber' : 'height-option selected') : 'height-option';
+    const badge = isSel ? `<span class="ho-badge">${o.n} slats</span>` : `<span style="font-size:10px;color:#aaa">${o.n}</span>`;
+    return `<span class="${cls}" onclick="selectHeight(${o.n},${o.h})">${o.h}mm${diffStr}${badge}</span>`;
+  }).join('');
+
+  // Update dataset with currently-selected height
+  if (chosenHeight === null) {
+    chosenSlats = n; chosenHeight = ha;
+    document.getElementById('slat-calc-box').dataset.slats = n;
+    document.getElementById('slat-calc-box').dataset.actualHeight = ha;
+  }
+}
+
+function selectHeight(n, h) {
   chosenSlats = n; chosenHeight = h;
-  document.querySelectorAll('.slat-option').forEach(el => el.classList.remove('selected'));
-  event.currentTarget.classList.add('selected');
+  document.getElementById('slat-calc-box').dataset.slats = n;
+  document.getElementById('slat-calc-box').dataset.actualHeight = h;
+  updateHeightPicker();
+  updateMaterialSummary();
 }
 
 // ─── BOM GENERATOR ───────────────────────────────────────────────────────────
@@ -1417,7 +1548,7 @@ function generateBOM() {
   const col       = document.getElementById('colour').value;
   const slatSize  = parseInt(document.getElementById('slatSize').value);
   const gap       = parseInt(document.getElementById('slatGap').value);
-  const run       = parseInt(document.getElementById('runLength').value);
+  const run       = Math.round(parseFloat(document.getElementById('runLength').value || 0) * 1000);
   const targetH   = parseInt(document.getElementById('targetHeight').value);
   const maxPanel  = parseInt(document.getElementById('maxPanel').value);
   const leftTerm  = document.getElementById('leftTerm').value;
@@ -1528,7 +1659,11 @@ function generateBOM() {
 
   document.getElementById('bom-output').style.display = 'block';
   document.getElementById('bom-output').scrollIntoView({ behavior:'smooth' });
+  setBomView('all', document.getElementById('bom-view-all'));
   chosenSlats = null; chosenHeight = null;
+  document.getElementById('targetHeight').style.borderColor='';
+  document.getElementById('targetHeight').style.boxShadow='';
+  updateHeightPicker();
 }
 
 function renderBOM(cfg) {
@@ -1559,6 +1694,24 @@ function renderBOM(cfg) {
 
   document.getElementById('q-date').textContent = new Date().toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'});
   document.getElementById('q-customer').textContent = document.getElementById('customer').value || '';
+  // Contact info
+  const cName  = (document.getElementById('contact-name')?.value || '').trim();
+  const cPhone = (document.getElementById('contact-phone')?.value || '').trim();
+  const cEmail = (document.getElementById('contact-email')?.value || '').trim();
+  const fulfilment = document.getElementById('f-delivery')?.checked ? 'Delivery' : 'Pick Up';
+  const delivAddr  = (document.getElementById('delivery-address')?.value || '').trim();
+  const delivSuburb = (document.getElementById('delivery-suburb')?.value || '').trim();
+  const contactParts = [cName, cPhone, cEmail].filter(Boolean);
+  let contactHTML = contactParts.length ? esc(contactParts.join(' · ')) : '';
+  contactHTML += (contactHTML ? ' &nbsp;·&nbsp; ' : '') + fulfilment;
+  if (fulfilment === 'Delivery' && (delivAddr || delivSuburb)) {
+    contactHTML += ': ' + esc([delivAddr, delivSuburb].filter(Boolean).join(', '));
+  }
+  document.getElementById('q-contact').innerHTML = contactHTML;
+  // Notes
+  const notes = (document.getElementById('job-notes')?.value || '').trim();
+  const qNotes = document.getElementById('q-notes');
+  if (qNotes) qNotes.innerHTML = notes ? '📝 ' + esc(notes) : '';
 
   currentBOM.forEach((r, i) => r._idx = i);
   const sections = {};
@@ -1592,7 +1745,7 @@ function renderBOM(cfg) {
 
 function setTier(t, el) {
   currentTier = t;
-  document.querySelectorAll('.tier-tab').forEach(e => e.classList.remove('active'));
+  document.querySelectorAll('.tier-tabs:not(#bom-view-toggle-wrap .tier-tabs) .tier-tab').forEach(e => e.classList.remove('active'));
   el.classList.add('active');
   if (currentBOM.length) rerenderPrices();
 }
@@ -1617,6 +1770,8 @@ function rerenderPrices() {
   document.getElementById('bom-tables').innerHTML = tablesHTML;
   document.getElementById('grand-total').textContent = grandTotal.toFixed(2);
   document.getElementById('tier-label').textContent = currentTier;
+  // Re-apply BOM view filter if one is active
+  if (currentBomView && currentBomView !== 'all') setBomView(currentBomView, null);
 }
 
 // ─── EDITABLE QTY ────────────────────────────────────────────────────────────
@@ -1849,89 +2004,200 @@ function clearAll() {
   document.getElementById('bom-output').style.display='none';
   document.getElementById('gate-ai-hint').style.display='none';
   chosenSlats=null; chosenHeight=null; currentBOM=[];
+  document.getElementById('targetHeight').style.borderColor='';
+  document.getElementById('targetHeight').style.boxShadow='';
+  updateHeightPicker();
   clearGates();
 }
 
 // ─── GATE LIST ────────────────────────────────────────────────────────────────
 let gateList = [];
+let editingGateIdx = null;
+
+function renderGateList() {
+  const el = document.getElementById('gate-list');
+  if (!gateList.length) { el.innerHTML = '<div class="gate-empty">No gates added yet.</div>'; updateMaterialSummary(); return; }
+  const labels = { single_swing:'Single Swing', double_swing:'Double Swing (pair)', sliding:'Sliding Gate' };
+  el.innerHTML = gateList.map((g, i) => `
+    <div class="gate-list-item">
+      <div class="gate-info" style="flex:1">
+        <strong>${labels[g.type]}</strong>
+        &nbsp;—&nbsp; ${g.width}mm wide × ${g.height}mm high &nbsp;|&nbsp; ${g.gap}mm gap &nbsp;|&nbsp; ${COLOUR_NAMES[g.col]||g.col}
+        <div style="font-size:11px;color:#666;margin-top:2px">${{'kwikfit_ft':'Kwik Fit Fixed','kwikfit_adj':'Kwik Fit Adj','heavy_duty':'Heavy Duty Weld-On'}[g.hingeType]||'Standard Hinge'} &nbsp;|&nbsp; ${{'magna_top':'Magna Latch','magna_lockbox':'Magna + Lock Box','drop_bolt':'Drop Bolt','none':'No Latch'}[g.latchType]||'Latch'} &nbsp;|&nbsp; ${g.postSize||65}mm post</div>
+        ${g.warnings.map(w => `<div class="gate-warn" style="margin-top:4px">${w}</div>`).join('')}
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+        <label style="font-size:11px;color:#666;font-weight:600;white-space:nowrap">Qty
+          <input type="number" class="gate-qty-input" value="${g.qty}" min="1" max="20" style="margin-left:3px"
+            onchange="updateGateQty(${i}, this.value)">
+        </label>
+        <button class="btn btn-sm btn-outline" onclick="editGate(${i})" style="padding:4px 9px">✏ Edit</button>
+        <button class="btn btn-sm" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;padding:4px 9px" onclick="removeGate(${i})">✕ Remove</button>
+      </div>
+    </div>`).join('');
+  updateMaterialSummary();
+}
+
+function updateGateQty(i, val) {
+  const qty = Math.max(1, parseInt(val) || 1);
+  if (gateList[i]) { gateList[i].qty = qty; }
+  updateMaterialSummary();
+}
+
+function matchGateToFence() {
+  document.getElementById('g-colour').value = 'match';
+  document.getElementById('g-gap').value = 'match';
+  document.getElementById('g-slatsize').value = 'match';
+  document.getElementById('g-height-select').value = 'match';
+  document.getElementById('g-height-custom').style.display = 'none';
+}
+
+function onGateHeightSelectChange() {
+  const sel = document.getElementById('g-height-select').value;
+  document.getElementById('g-height-custom').style.display = sel === 'custom' ? 'block' : 'none';
+}
 
 function onGateTypeChange() {
   const type = document.getElementById('g-type').value;
   const note = document.getElementById('g-width-note');
   const slatNote = document.getElementById('g-slatsize-note');
   if (type === 'sliding') {
-    note.textContent = 'Opening width only — gate panel will be opening + 200mm overlap';
-    slatNote.textContent = '(65mm or 90mm slats)';
-    document.getElementById('g-slatsize-match').disabled = false;
+    note.textContent = 'Opening width only — gate panel = opening + 200mm overlap';
+    slatNote.textContent = '(65mm or 90mm slats available)';
+    document.getElementById('g-slatsize-wrap').style.opacity = '1';
   } else {
     note.textContent = 'Max 1200mm recommended for swing gates';
     slatNote.textContent = '(swing gates always use 65mm blades)';
-    // Force slat size to match fence for swing gates (always 65mm blades)
-    document.getElementById('g-slatsize-match').checked = true;
-    onGateMatchChange('slatsize');
+    document.getElementById('g-slatsize').value = 'match'; // swing always 65mm
+    document.getElementById('g-slatsize-wrap').style.opacity = '.5';
   }
 }
 
-function onGateMatchChange(field) {
-  const match = document.getElementById(`g-${field}-match`).checked;
-  document.getElementById(`g-${field}-custom`).style.display = match ? 'none' : 'block';
+function getGateHeightMm() {
+  const sel = document.getElementById('g-height-select').value;
+  if (sel === 'match') {
+    return parseInt(document.getElementById('slat-calc-box').dataset.actualHeight) || parseInt(document.getElementById('targetHeight').value) || 2100;
+  }
+  if (sel === 'custom') return parseInt(document.getElementById('g-height-custom').value) || 2100;
+  return parseInt(sel) || 2100;
 }
 
-function gateEffectiveValue(field, fenceValue) {
-  const matchEl = document.getElementById(`g-${field}-match`);
-  if (!matchEl || matchEl.checked) return fenceValue;
-  return document.getElementById(`g-${field}-custom`).value;
+function getGateColour() {
+  const v = document.getElementById('g-colour').value;
+  return v === 'match' ? document.getElementById('colour').value : v;
 }
 
-function addGate() {
-  const type     = document.getElementById('g-type').value;
-  const width    = parseInt(document.getElementById('g-width').value);
-  const qty      = parseInt(document.getElementById('g-qty').value) || 1;
-  const col      = document.getElementById('colour').value; // fence colour (default)
+function getGateGap() {
+  const v = document.getElementById('g-gap').value;
+  return v === 'match' ? (parseInt(document.getElementById('slatGap').value) || 9) : parseInt(v);
+}
 
+function getGateSlatSize(type) {
+  if (type !== 'sliding') return 65;
+  const v = document.getElementById('g-slatsize').value;
+  return v === 'match' ? (parseInt(document.getElementById('slatSize').value) || 65) : parseInt(v);
+}
+
+function saveGate() {
+  const type = document.getElementById('g-type').value;
+  const width = parseInt(document.getElementById('g-width').value);
   if (!width || width < 400) { alert('Please enter a valid opening width (min 400mm).'); return; }
 
-  const fenceHeight = parseInt(document.getElementById('slat-calc-box').dataset.actualHeight) || parseInt(document.getElementById('targetHeight').value) || 2100;
-  const fenceGap    = parseInt(document.getElementById('slatGap').value);
-  const fenceSlatSz = parseInt(document.getElementById('slatSize').value);
-  const fenceCol    = document.getElementById('colour').value;
-
-  const gateHeight  = document.getElementById('g-height-match').checked ? Math.min(fenceHeight, 2100) : parseInt(document.getElementById('g-height-custom').value);
-  const gateCol     = document.getElementById('g-colour-match').checked ? fenceCol : document.getElementById('g-colour-custom').value;
-  const gateGap     = parseInt(document.getElementById('g-gap-match').checked ? fenceGap : document.getElementById('g-gap-custom').value);
-  const gateSlatSz  = type === 'sliding' ? parseInt(document.getElementById('g-slatsize-match').checked ? fenceSlatSz : document.getElementById('g-slatsize-custom').value) : 65;
+  const gateHeight = Math.min(getGateHeightMm(), type === 'sliding' ? 9999 : 2100);
+  const gateCol = getGateColour();
+  const gateGap = getGateGap() || 9;
+  const gateSlatSz = getGateSlatSize(type);
+  const gatePostSz = parseInt(document.getElementById('g-post-size').value) || 65;
+  const hingeType = document.getElementById('g-hinge-type').value || 'kwikfit_ft';
+  const latchType = document.getElementById('g-latch-type').value || 'magna_top';
 
   const warnings = [];
   if ((type === 'single_swing' || type === 'double_swing') && width > 1200)
-    warnings.push('Opening width exceeds 1200mm — consider a sliding gate.');
+    warnings.push('Opening width >1200mm — consider a sliding gate.');
   if ((type === 'single_swing' || type === 'double_swing') && gateHeight > 2100)
-    warnings.push('Gate height capped at 2100mm (max for standard gate kit).');
-  if (gateGap === 5 && (type === 'single_swing' || type === 'double_swing'))
-    warnings.push('No 5mm gate side frame in catalogue — using 9mm gate kit (closest available).');
+    warnings.push('Gate height capped at 2100mm for standard gate kit.');
+  if (gateGap === 5 && type !== 'sliding')
+    warnings.push('No 5mm gate side frame in catalogue — 9mm kit will be used.');
 
-  const gatePostSz = parseInt(document.getElementById('g-post-size').value) || 65;
-  const hingeType = document.getElementById('g-hinge-type')?.value || 'kwikfit_ft';
-  const latchType = document.getElementById('g-latch-type')?.value || 'magna_top';
-  gateList.push({ type, width, height: Math.min(gateHeight, type==='sliding'?9999:2100), col: gateCol, gap: gateGap, slatSize: gateSlatSz, qty, postSize: gatePostSz, hingeType, latchType, warnings });
+  const gateObj = { type, width, height: gateHeight, col: gateCol, gap: gateGap, slatSize: gateSlatSz, qty: 1, postSize: gatePostSz, hingeType, latchType, warnings };
+
+  if (editingGateIdx !== null) {
+    gateObj.qty = gateList[editingGateIdx].qty; // preserve qty when editing
+    gateList[editingGateIdx] = gateObj;
+    editingGateIdx = null;
+  } else {
+    gateList.push(gateObj);
+  }
   renderGateList();
+  resetGateForm();
 }
 
-function removeGate(i) { gateList.splice(i, 1); renderGateList(); }
+function resetGateForm() {
+  editingGateIdx = null;
+  document.getElementById('gate-form-title').textContent = 'Add a Gate';
+  document.getElementById('gate-save-btn').textContent = '＋ Save Gate';
+  document.getElementById('gate-save-btn').className = 'btn btn-success btn-sm';
+  document.getElementById('gate-cancel-btn').style.display = 'none';
+  document.getElementById('gate-add-another-btn').style.display = '';
+  document.getElementById('g-type').value = 'single_swing';
+  document.getElementById('g-width').value = '1000';
+  document.getElementById('g-height-select').value = 'match';
+  document.getElementById('g-height-custom').style.display = 'none';
+  document.getElementById('g-colour').value = 'match';
+  document.getElementById('g-gap').value = 'match';
+  document.getElementById('g-slatsize').value = 'match';
+  document.getElementById('g-post-size').value = '65';
+  document.getElementById('g-hinge-type').value = 'kwikfit_ft';
+  document.getElementById('g-latch-type').value = 'magna_top';
+  document.getElementById('g-match-all').checked = false;
+  onGateTypeChange();
+}
 
-function renderGateList() {
-  const el = document.getElementById('gate-list');
-  if (!gateList.length) { el.innerHTML = '<div class="gate-empty">No gates added yet.</div>'; return; }
-  const labels = { single_swing:'Single Swing', double_swing:'Double Swing (pair)', sliding:'Sliding Gate' };
-  el.innerHTML = gateList.map((g, i) => `
-    <div class="gate-list-item">
-      <div class="gate-info">
-        <strong>${g.qty > 1 ? g.qty + '× ' : ''}${labels[g.type]}</strong>
-        &nbsp;—&nbsp; ${g.width}mm wide × ${g.height}mm high &nbsp;|&nbsp; ${g.gap}mm gap &nbsp;|&nbsp; ${COLOUR_NAMES[g.col]}
-        <div style="font-size:11px;color:#666;margin-top:2px">${{'kwikfit_ft':'Kwik Fit Fixed','kwikfit_adj':'Kwik Fit Adjustable','heavy_duty':'Heavy Duty Weld-On'}[g.hingeType]||'Standard Hinge'} &nbsp;|&nbsp; ${{'magna_top':'Magna Latch','magna_lockbox':'Magna Latch + Lock Box','drop_bolt':'Drop Bolt','none':'No Latch'}[g.latchType]||'Standard Latch'} &nbsp;|&nbsp; ${g.postSize||65}mm post</div>
-        ${g.warnings.map(w => `<div class="gate-warn" style="margin-top:4px">${w}</div>`).join('')}
-      </div>
-      <button class="btn btn-sm" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;flex-shrink:0" onclick="removeGate(${i})">✕ Remove</button>
-    </div>`).join('');
+function addAnotherGate() {
+  resetGateForm();
+  document.getElementById('gate-add-another-btn').style.display = 'none';
+}
+
+function editGate(i) {
+  const g = gateList[i];
+  editingGateIdx = i;
+  document.getElementById('gate-form-title').textContent = 'Edit Gate';
+  document.getElementById('gate-save-btn').textContent = '✓ Update Gate';
+  document.getElementById('gate-save-btn').className = 'btn btn-primary btn-sm';
+  document.getElementById('gate-cancel-btn').style.display = '';
+  document.getElementById('gate-add-another-btn').style.display = 'none';
+
+  document.getElementById('g-type').value = g.type;
+  document.getElementById('g-width').value = g.width;
+  const stdHeights = [900,1050,1200,1500,1800,1950,2100];
+  if (stdHeights.includes(g.height)) {
+    document.getElementById('g-height-select').value = String(g.height);
+    document.getElementById('g-height-custom').style.display = 'none';
+  } else {
+    document.getElementById('g-height-select').value = 'custom';
+    document.getElementById('g-height-custom').value = g.height;
+    document.getElementById('g-height-custom').style.display = 'block';
+  }
+  document.getElementById('g-colour').value = g.col;
+  document.getElementById('g-gap').value = String(g.gap);
+  document.getElementById('g-slatsize').value = String(g.slatSize);
+  document.getElementById('g-post-size').value = String(g.postSize || 65);
+  document.getElementById('g-hinge-type').value = g.hingeType || 'kwikfit_ft';
+  document.getElementById('g-latch-type').value = g.latchType || 'magna_top';
+  onGateTypeChange();
+  document.getElementById('gate-form-section').scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+function cancelEditGate() {
+  editingGateIdx = null;
+  resetGateForm();
+}
+
+function removeGate(i) {
+  if (editingGateIdx === i) cancelEditGate();
+  else if (editingGateIdx !== null && editingGateIdx > i) editingGateIdx--;
+  gateList.splice(i, 1);
+  renderGateList();
 }
 
 // ─── Fence mapper gate sync ───────────────────────────────────────────────────
@@ -2113,9 +2379,98 @@ function generateSlidingGateBOM(gate, sectionBase) {
 // ─── GATE UI HELPERS ─────────────────────────────────────────────────────────
 function clearGates() { gateList = []; renderGateList(); }
 
+// ─── MATERIAL SUMMARY ────────────────────────────────────────────────────────
+function updateMaterialSummary() {
+  const el = document.getElementById('material-summary');
+  if (!el) return;
+  const sys = (document.getElementById('systemType')||{value:'qshs'}).value;
+  const sysLabel = {qshs:'QSHS Horizontal Slat',vs:'VS Vertical Slat',xpl:'XPL XPress Plus',bayg:'BAYG Buy-As-You-Go'}[sys]||'Slat Fence';
+  const run = Math.round(parseFloat(document.getElementById('runLength').value||0)*1000);
+  const runM = run ? (run/1000).toFixed(1)+'m' : '—';
+  const calcBox = document.getElementById('slat-calc-box');
+  const actualH = parseInt(calcBox?.dataset.actualHeight) || parseInt(document.getElementById('targetHeight').value) || 0;
+  const numSlats = parseInt(calcBox?.dataset.slats) || 0;
+  const col = document.getElementById('colour').value;
+  const colName = COLOUR_NAMES[col] || col;
+  const maxP = parseInt(document.getElementById('maxPanel').value) || 2600;
+  const leftTerm = document.getElementById('leftTerm').value;
+  const rightTerm = document.getElementById('rightTerm').value;
+  const termLabel = {
+    'post-post':'Post to post','post-wall':'Post to wall',
+    'wall-post':'Wall to post','wall-wall':'Wall to wall'
+  }[`${leftTerm}-${rightTerm}`] || `${leftTerm} / ${rightTerm}`;
+  const postMount = {concreted:'Concreted',baseplate:'Base-plated',coredrilled:'Core-drilled'}[document.getElementById('postMount').value]||'';
+  const numPanels = run ? Math.ceil(run/maxP) : 0;
+  const numPosts = numPanels ? numPanels + 1 + (parseInt(document.getElementById('corners').value)||0) : 0;
+  const actualHTarget = parseInt(document.getElementById('targetHeight').value)||0;
+  const heightNote = actualH && actualH !== actualHTarget ? ` <span style="color:#f59e0b;font-size:11px">(target ${actualHTarget}mm)</span>` : '';
+
+  let html = `<div style="display:grid;grid-template-columns:auto 1fr;gap:2px 12px;align-items:baseline">
+    <span style="color:#888;font-size:11px;font-weight:600;white-space:nowrap">FENCE</span><span style="color:#2c5a9a;font-size:11px;font-weight:700">${sysLabel}</span>
+    <span style="color:#888;font-size:11px">Run</span><span>${runM}${numPanels?` (${numPanels} panels)`:''}</span>
+    <span style="color:#888;font-size:11px">Height</span><span>${actualH?actualH+'mm':'—'}${heightNote}${numSlats?' — '+numSlats+' slats':''}</span>
+    <span style="color:#888;font-size:11px">Colour</span><span>${colName}</span>
+    <span style="color:#888;font-size:11px">Posts</span><span>${numPosts?numPosts+' posts':'—'}${postMount?' ('+postMount+')':''}</span>
+    <span style="color:#888;font-size:11px">Termination</span><span>${termLabel}</span>
+  </div>`;
+
+  if (gateList.length) {
+    const labels = { single_swing:'Single Swing Gate', double_swing:'Double Swing Gate', sliding:'Sliding Gate' };
+    gateList.forEach((g, i) => {
+      const gBlades = slatCount(g.type==='sliding'?g.height:g.height-130, g.type==='sliding'?g.slatSize:65, g.gap===5?9:g.gap);
+      const gColName = COLOUR_NAMES[g.col] || g.col;
+      html += `<div style="margin-top:8px;padding-top:8px;border-top:1px dashed #e5e7eb;display:grid;grid-template-columns:auto 1fr;gap:2px 12px;align-items:baseline">
+        <span style="color:#888;font-size:11px;font-weight:600;white-space:nowrap">GATE ${i+1}</span><span style="color:#2c5a9a;font-size:11px;font-weight:700">${labels[g.type]} ×${g.qty}</span>
+        <span style="color:#888;font-size:11px">Opening</span><span>${g.width}mm wide × ${g.height}mm high</span>
+        <span style="color:#888;font-size:11px">Slats/blades</span><span>${gBlades} × ${g.type==='sliding'?g.slatSize:65}mm / ${g.gap}mm gap</span>
+        <span style="color:#888;font-size:11px">Colour</span><span>${gColName}</span>
+        <span style="color:#888;font-size:11px">Posts</span><span>${g.postSize||65}mm posts (${g.type==='double_swing'?3:2} per gate)</span>
+      </div>`;
+    });
+  }
+  el.innerHTML = html;
+}
+
+// ─── FULFILMENT TOGGLE ────────────────────────────────────────────────────────
+function onFulfilmentChange() {
+  const isDelivery = document.getElementById('f-delivery').checked;
+  document.getElementById('delivery-address-section').style.display = isDelivery ? 'block' : 'none';
+}
+
+// ─── BOM VIEW FILTER ──────────────────────────────────────────────────────────
+let currentBomView = 'all';
+function setBomView(view, tabEl) {
+  currentBomView = view;
+  document.querySelectorAll('#bom-view-toggle-wrap .tier-tab').forEach(t => t.classList.remove('active'));
+  if (tabEl) tabEl.classList.add('active');
+  document.querySelectorAll('#bom-tables .bom-section').forEach(sec => {
+    const heading = (sec.querySelector('h3')?.textContent || '').toLowerCase();
+    const isGate = heading.includes('gate');
+    if (view === 'all') sec.style.display = '';
+    else if (view === 'fence') sec.style.display = isGate ? 'none' : '';
+    else if (view === 'gates') sec.style.display = isGate ? '' : 'none';
+  });
+}
+
+// ─── UNSET SELECT DEFAULTS ────────────────────────────────────────────────────
+function initSelectDefaults() {
+  const ids = ['systemType','slatSize','slatGap','colour','maxPanel','leftTerm','rightTerm','postMount'];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.add('unset');
+    el.addEventListener('change', function onceChange() {
+      el.classList.remove('unset');
+      el.removeEventListener('change', onceChange);
+    });
+  });
+}
+
 // Init
 onConfigChange();
 renderGateList();
+initSelectDefaults();
+updateMaterialSummary();
 </script>
 
 <script>
