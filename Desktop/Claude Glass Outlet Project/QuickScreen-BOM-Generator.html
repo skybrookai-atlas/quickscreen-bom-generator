@@ -557,6 +557,23 @@
           <div class="form-note">Posts either side of the gate opening</div>
         </div>
         <div>
+          <label>Hinge Type</label>
+          <select id="g-hinge-type">
+            <option value="kwikfit_ft">D&D Kwik Fit — Fixed Tension (standard)</option>
+            <option value="kwikfit_adj">D&D Kwik Fit — Adjustable</option>
+            <option value="heavy_duty">Heavy Duty Hinge Pair (weld-on)</option>
+          </select>
+        </div>
+        <div>
+          <label>Latch Type</label>
+          <select id="g-latch-type">
+            <option value="magna_top">D&D Magna Latch — Top Pull (standard)</option>
+            <option value="magna_lockbox">D&D Magna Latch + Lock Box Set</option>
+            <option value="drop_bolt">Drop Bolt only</option>
+            <option value="none">No Latch</option>
+          </select>
+        </div>
+        <div>
           <label>Gate Height (mm)</label>
           <div class="match-toggle"><input type="checkbox" id="g-height-match" checked onchange="onGateMatchChange('height')"> Match fence</div>
           <input type="number" id="g-height-custom" value="2100" min="600" max="2500" step="1" style="display:none">
@@ -1893,7 +1910,9 @@ function addGate() {
     warnings.push('No 5mm gate side frame in catalogue — using 9mm gate kit (closest available).');
 
   const gatePostSz = parseInt(document.getElementById('g-post-size').value) || 65;
-  gateList.push({ type, width, height: Math.min(gateHeight, type==='sliding'?9999:2100), col: gateCol, gap: gateGap, slatSize: gateSlatSz, qty, postSize: gatePostSz, warnings });
+  const hingeType = document.getElementById('g-hinge-type')?.value || 'kwikfit_ft';
+  const latchType = document.getElementById('g-latch-type')?.value || 'magna_top';
+  gateList.push({ type, width, height: Math.min(gateHeight, type==='sliding'?9999:2100), col: gateCol, gap: gateGap, slatSize: gateSlatSz, qty, postSize: gatePostSz, hingeType, latchType, warnings });
   renderGateList();
 }
 
@@ -1908,6 +1927,7 @@ function renderGateList() {
       <div class="gate-info">
         <strong>${g.qty > 1 ? g.qty + '× ' : ''}${labels[g.type]}</strong>
         &nbsp;—&nbsp; ${g.width}mm wide × ${g.height}mm high &nbsp;|&nbsp; ${g.gap}mm gap &nbsp;|&nbsp; ${COLOUR_NAMES[g.col]}
+        <div style="font-size:11px;color:#666;margin-top:2px">${{'kwikfit_ft':'Kwik Fit Fixed','kwikfit_adj':'Kwik Fit Adjustable','heavy_duty':'Heavy Duty Weld-On'}[g.hingeType]||'Standard Hinge'} &nbsp;|&nbsp; ${{'magna_top':'Magna Latch','magna_lockbox':'Magna Latch + Lock Box','drop_bolt':'Drop Bolt','none':'No Latch'}[g.latchType]||'Standard Latch'} &nbsp;|&nbsp; ${g.postSize||65}mm post</div>
         ${g.warnings.map(w => `<div class="gate-warn" style="margin-top:4px">${w}</div>`).join('')}
       </div>
       <button class="btn btn-sm" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;flex-shrink:0" onclick="removeGate(${i})">✕ Remove</button>
@@ -1930,7 +1950,9 @@ window.fmSyncGates = function(mapperGates) {
     gap:      fenceGap,
     slatSize: fenceSlatSz,
     qty:      1,
-    postSize: 65,
+    postSize:  mg.postSize  || 65,
+    hingeType: mg.hingeType || 'kwikfit_ft',
+    latchType: mg.latchType || 'magna_top',
     warnings: []
   }));
   renderGateList();
@@ -1967,11 +1989,23 @@ function generateSwingGateBOM(gate, sectionBase) {
   const hdStocksPerLeaf = Math.ceil(2 / hdPerStock);
   rows.push({ code: `XP-6100-HD6545-${col}`, desc: `65×45mm HD Rail ${COLOUR_NAMES[col]} 6100mm  (2 rails × ${leafWidth}mm, top + bottom)`, qty: hdStocksPerLeaf * leafCount * gate.qty });
 
-  // Hardware: Magna Latch + Kwik Fit hinge pair (per leaf)
-  rows.push({ code: 'ML-TL-KF-H-FT', desc: 'D&D Magna Latch Top Pull + Kwik Fit Hinge Pair (fixed tension)', qty: leafCount * gate.qty });
+  // Hinge pair (per leaf)
+  const hingeCode = (gate.hingeType === 'kwikfit_adj') ? 'ML-TL-KF-H-ADJ' : 'ML-TL-KF-H-FT';
+  const hingeDesc = (gate.hingeType === 'kwikfit_adj') ? 'D&D Kwik Fit Hinge Pair — Adjustable' :
+                    (gate.hingeType === 'heavy_duty')   ? 'Heavy Duty Hinge Pair (weld-on)' :
+                    'D&D Kwik Fit Hinge Pair — Fixed Tension (standard)';
+  rows.push({ code: hingeCode, desc: hingeDesc, qty: leafCount * gate.qty });
 
-  // Lock box (per gate, not per leaf — latch side only)
-  rows.push({ code: `XP-LBOX-LSET-${col}`, desc: `Lock Box ${COLOUR_NAMES[col]} — for Lever/Knob Lock Set`, qty: gate.qty });
+  // Latch (per gate)
+  if (!gate.latchType || gate.latchType === 'magna_top' || gate.latchType === 'magna_lockbox') {
+    rows.push({ code: 'ML-TL', desc: 'D&D Magna Latch Top Pull', qty: gate.qty });
+  } else if (gate.latchType === 'drop_bolt') {
+    rows.push({ code: 'SS-0300DB-ZP', desc: '300mm Drop Bolt — zinc plated', qty: gate.qty });
+  }
+  // Lock box (only if selected)
+  if (gate.latchType === 'magna_lockbox') {
+    rows.push({ code: `XP-LBOX-LSET-${col}`, desc: `Lock Box ${COLOUR_NAMES[col]} — for Lever/Knob Lock Set`, qty: gate.qty });
+  }
 
   // Gate frame screws (for blades + HD rails — not included in kit)
   rows.push({ code: 'XP-SCREWSGF-10PK', desc: 'Gate Frame Screws 12G×65mm 10-pack (blades & HD rails)', qty: 2 * leafCount * gate.qty });
@@ -1981,8 +2015,8 @@ function generateSwingGateBOM(gate, sectionBase) {
     rows.push({ code: 'SS-0300DB-ZP', desc: '300mm Drop Bolt — zinc plated (passive leaf)', qty: gate.qty });
   }
 
-  // Posts — size from g-post-size field (or gate.postSize if pre-set)
-  const postSizeMm = gate.postSize || parseInt(document.getElementById('g-post-size')?.value || '65');
+  // Posts — size from gate.postSize
+  const postSizeMm = gate.postSize || 65;
   const postCount  = gate.type === 'double_swing' ? 3 : 2;
   let gatePostCode, gatePostDesc;
   if (postSizeMm <= 50) {
@@ -2060,7 +2094,7 @@ function generateSlidingGateBOM(gate, sectionBase) {
   rows.push({ code: 'XPSG-ANCHOR', desc: `Track Anchor Pins (${anchors/gate.qty} per gate)`, qty: anchors });
 
   // Steel posts — 2 per gate (sliding gates always use steel posts)
-  const sgPostSizeMm = gate.postSize || parseInt(document.getElementById('g-post-size')?.value || '65');
+  const sgPostSizeMm = gate.postSize || 65;
   const sgPostDesc = sgPostSizeMm >= 75
     ? `65×65mm Galv. Steel Post 2700mm ${COLOUR_NAMES[col]} — ⚠ ${sgPostSizeMm}mm requested, confirm steel post stock with supplier`
     : `65×65mm Galv. Steel Post 2700mm ${COLOUR_NAMES[col]} (incl. base plate & cap)`;

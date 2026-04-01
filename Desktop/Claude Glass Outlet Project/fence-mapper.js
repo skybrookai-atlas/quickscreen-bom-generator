@@ -31,6 +31,8 @@
     zoom      : 1, panX: 0, panY: 0,
     showGrid  : true,
     showPosts : false,
+    draggingGate: null,   // {runIdx, gateIdx}
+    gateDragMoved: false,
     mapImage  : null,
     mapOpacity: 0.5,
     mapWorldOrigin     : { x:0, y:0 },
@@ -418,7 +420,27 @@
           </div>
           <label>Opening Width (mm)</label>
           <input id="fmg-width" type="number" value="900" min="400" max="8000" step="50">
-          <p style="font-size:11px;color:#888;margin:8px 0 0">Hinge side &amp; swing direction can be set by clicking the gate on the map after placing.</p>
+          <label>Hinge Type</label>
+          <select id="fmg-hinge-type">
+            <option value="kwikfit_ft">D&D Kwik Fit — Fixed Tension (standard)</option>
+            <option value="kwikfit_adj">D&D Kwik Fit — Adjustable</option>
+            <option value="heavy_duty">Heavy Duty Hinge Pair (weld-on)</option>
+          </select>
+          <label>Latch Type</label>
+          <select id="fmg-latch-type">
+            <option value="magna_top">D&D Magna Latch — Top Pull (standard)</option>
+            <option value="magna_lockbox">D&D Magna Latch + Lock Box Set</option>
+            <option value="drop_bolt">Drop Bolt only</option>
+            <option value="none">No Latch</option>
+          </select>
+          <label>Post Size</label>
+          <select id="fmg-post-size">
+            <option value="50">50×50mm post</option>
+            <option value="65" selected>65×65mm HD post (standard)</option>
+            <option value="75">75×75mm post</option>
+            <option value="100">100×100mm post</option>
+          </select>
+          <p style="font-size:11px;color:#888;margin:8px 0 0">Hinge side &amp; swing direction: click the gate on the map after placing, or click a gate post to set the hinge side.</p>
           <div class="btn-row">
             <button class="btn-ok" onclick="confirmFmGate()"
               style="flex:1;padding:8px;border-radius:5px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:#16a34a;color:#fff">
@@ -456,6 +478,26 @@
             <div class="fm-radio-opt" data-val="in" onclick="fmgcSelect(this,'swing')">In ↙</div>
           </div>
         </div>
+        <label>Hinge Type</label>
+        <select id="fmgc-hinge-type">
+          <option value="kwikfit_ft">D&D Kwik Fit — Fixed Tension (standard)</option>
+          <option value="kwikfit_adj">D&D Kwik Fit — Adjustable</option>
+          <option value="heavy_duty">Heavy Duty Hinge Pair (weld-on)</option>
+        </select>
+        <label>Latch Type</label>
+        <select id="fmgc-latch-type">
+          <option value="magna_top">D&D Magna Latch — Top Pull (standard)</option>
+          <option value="magna_lockbox">D&D Magna Latch + Lock Box Set</option>
+          <option value="drop_bolt">Drop Bolt only</option>
+          <option value="none">No Latch</option>
+        </select>
+        <label>Post Size</label>
+        <select id="fmgc-post-size">
+          <option value="50">50×50mm post</option>
+          <option value="65" selected>65×65mm HD post (standard)</option>
+          <option value="75">75×75mm post</option>
+          <option value="100">100×100mm post</option>
+        </select>
         <div class="btn-row">
           <button class="fm-btn-save" onclick="saveFmGateConfig()">Save</button>
           <button class="fm-btn-cancel" onclick="closeFmGateConfig()">Cancel</button>
@@ -560,6 +602,9 @@
   function openGateModal(runIdx, segIdx, t) {
     _pendingGate = { runIdx, segIdx, t };
     document.getElementById('fmg-width').value = 900;
+    document.getElementById('fmg-hinge-type').value = 'kwikfit_ft';
+    document.getElementById('fmg-latch-type').value = 'magna_top';
+    document.getElementById('fmg-post-size').value = '65';
     document.getElementById('fmg-type-group').querySelectorAll('.fm-radio-opt').forEach((el,i) => el.classList.toggle('selected', i===0));
     document.getElementById('fm-gate-modal-overlay').classList.add('open');
   }
@@ -571,13 +616,16 @@
     const direction = 'left';   // set via gate config popup after placement
     const swing     = 'out';    // set via gate config popup after placement
     const widthMm   = parseInt(document.getElementById('fmg-width').value) || 900;
+    const hingeType = document.getElementById('fmg-hinge-type').value || 'kwikfit_ft';
+    const latchType = document.getElementById('fmg-latch-type').value || 'magna_top';
+    const postSize  = parseInt(document.getElementById('fmg-post-size').value) || 65;
     const run = S.runs[runIdx];
     const seg = getSegment(run, segIdx);
     if (seg) {
       const segMm = pxToMm(distWorld(seg.a, seg.b));
       if (widthMm >= segMm) { alert(`Gate (${widthMm}mm) too wide for segment (${segMm}mm).`); return; }
     }
-    run.gates.push({ segIdx, t, widthMm, gateType, direction, swing });
+    run.gates.push({ segIdx, t, widthMm, gateType, direction, swing, hingeType, latchType, postSize });
     document.getElementById('fm-gate-modal-overlay').classList.remove('open');
     _pendingGate = null;
     render(); updateSummary(); updateApplyBtn();
@@ -600,9 +648,14 @@
         const seg = getSegment(run, g.segIdx);
         if (!seg) continue;
         const sa=w2s(seg.a.x,seg.a.y), sb=w2s(seg.b.x,seg.b.y);
-        const mx = sa.x+(sb.x-sa.x)*g.t;
-        const my = sa.y+(sb.y-sa.y)*g.t;
-        if (Math.hypot(sx-mx, sy-my) < 18) return { runIdx:ri, gateIdx:gi };
+        const lenPx = distWorld(seg.a,seg.b);
+        const half = lenPx>0 ? (g.widthMm/S.scale)*GRID/2/lenPx : 0;
+        const ax=sa.x+(sb.x-sa.x)*(g.t-half), ay=sa.y+(sb.y-sa.y)*(g.t-half);
+        const bx=sa.x+(sb.x-sa.x)*(g.t+half), by=sa.y+(sb.y-sa.y)*(g.t+half);
+        const mx=(ax+bx)/2, my=(ay+by)/2;
+        if (Math.hypot(sx-ax, sy-ay) < 13) return { runIdx:ri, gateIdx:gi, endpoint:'left' };
+        if (Math.hypot(sx-bx, sy-by) < 13) return { runIdx:ri, gateIdx:gi, endpoint:'right' };
+        if (Math.hypot(sx-mx, sy-my) < 18) return { runIdx:ri, gateIdx:gi, endpoint:null };
       }
     }
     return null;
@@ -622,6 +675,13 @@
       el.classList.toggle('selected', el.dataset.val === g.swing));
     // Show/hide swing section
     document.getElementById('fmgc-swing-section').style.display = g.gateType === 'sliding' ? 'none' : '';
+    // Set hinge/latch/post
+    const htEl = document.getElementById('fmgc-hinge-type');
+    if (htEl) htEl.value = g.hingeType || 'kwikfit_ft';
+    const ltEl = document.getElementById('fmgc-latch-type');
+    if (ltEl) ltEl.value = g.latchType || 'magna_top';
+    const psEl = document.getElementById('fmgc-post-size');
+    if (psEl) psEl.value = String(g.postSize || 65);
     // Position panel
     const panel = document.getElementById('fm-gate-config');
     panel.style.display = 'block';
@@ -656,6 +716,9 @@
     g.gateType  = document.querySelector('#fmgc-type-group .fm-radio-opt.selected')?.dataset.val  || g.gateType;
     g.direction = document.querySelector('#fmgc-dir-group .fm-radio-opt.selected')?.dataset.val   || g.direction;
     g.swing     = document.querySelector('#fmgc-swing-group .fm-radio-opt.selected')?.dataset.val || g.swing;
+    g.hingeType = document.getElementById('fmgc-hinge-type')?.value || g.hingeType;
+    g.latchType = document.getElementById('fmgc-latch-type')?.value || g.latchType;
+    g.postSize  = parseInt(document.getElementById('fmgc-post-size')?.value) || g.postSize;
     window.closeFmGateConfig();
     render(); updateSummary();
     showToast('Gate updated');
@@ -991,6 +1054,15 @@
         ctx.fillText(`${typePrefix} ${swingLbl}`, arcLabelX, arcLabelY); ctx.restore();
       }
 
+      // Move mode: show draggable gate post dots
+      if (S.mode==='move') {
+        [ax,ay,bx,by].forEach((_,i,a)=>{ if(i%2===0){
+          ctx.save(); ctx.beginPath(); ctx.arc(a[i],a[i+1],5,0,Math.PI*2);
+          ctx.fillStyle='#fff'; ctx.fill(); ctx.strokeStyle=GATE_COLOUR; ctx.lineWidth=2; ctx.stroke(); ctx.restore();
+        }});
+        ctx.save(); ctx.font='bold 9px sans-serif'; ctx.fillStyle=GATE_COLOUR; ctx.textAlign='center';
+        ctx.fillText('↔ drag', mx, my-14); ctx.restore();
+      }
       // Width indicator arrows
       drawArrow(ctx,mx,my,ax,ay,GATE_COLOUR);
       drawArrow(ctx,mx,my,bx,by,GATE_COLOUR);
@@ -1146,8 +1218,15 @@
         S.dragging=hn; S.dragOffset={x:node.x-wp.x,y:node.y-wp.y};
         _suppressClick=true;
       } else {
-        S.panning=true; S.panStart=s; S.panOrigin={x:S.panX,y:S.panY};
-        _suppressClick=true;
+        // Check for gate drag (midpoint only — endpoints handled by click)
+        const gh=hitTestGate(s.x,s.y);
+        if (gh && gh.endpoint===null) {
+          S.draggingGate=gh; S.gateDragMoved=false;
+          _suppressClick=false; // allow click fallthrough for config
+        } else {
+          S.panning=true; S.panStart=s; S.panOrigin={x:S.panX,y:S.panY};
+          _suppressClick=true;
+        }
       }
     }
     e.preventDefault();
@@ -1156,9 +1235,21 @@
   function onCanvasClick(e) {
     if (_suppressClick) { _suppressClick=false; return; }
     const s=evtScreen(e);
-    // Gate click takes priority
     const gateHit = hitTestGate(s.x, s.y);
-    if (gateHit) { openGateConfig(gateHit.runIdx, gateHit.gateIdx, e.clientX, e.clientY); return; }
+    if (gateHit) {
+      if (gateHit.endpoint === 'left' || gateHit.endpoint === 'right') {
+        // Click on gate post endpoint → set hinge to that side
+        const g = S.runs[gateHit.runIdx].gates[gateHit.gateIdx];
+        g.direction = gateHit.endpoint;
+        render();
+        showToast(`Hinge post set to ${gateHit.endpoint} side`);
+      } else if (!S.gateDragMoved) {
+        openGateConfig(gateHit.runIdx, gateHit.gateIdx, e.clientX, e.clientY);
+      }
+      S.gateDragMoved = false;
+      return;
+    }
+    S.gateDragMoved = false;
     const hit=hitTestLabelRects(s.x,s.y);
     if (hit) {
       if (hit.type==='label') openInlineEdit(hit.runIdx, hit.segIdx, hit.rect);
@@ -1172,6 +1263,23 @@
       S.panX=S.panOrigin.x-(s.x-S.panStart.x)/S.zoom;
       S.panY=S.panOrigin.y-(s.y-S.panStart.y)/S.zoom;
       render(); return;
+    }
+    if (S.draggingGate != null) {
+      const { runIdx, gateIdx } = S.draggingGate;
+      const g = S.runs[runIdx].gates[gateIdx];
+      const run = S.runs[runIdx];
+      const seg = getSegment(run, g.segIdx);
+      if (seg) {
+        const proj = projectOnSegScreen(s.x, s.y, seg);
+        const lenPx = distWorld(seg.a, seg.b);
+        const half = lenPx>0 ? (g.widthMm/S.scale)*GRID/2/lenPx : 0.05;
+        const newT = Math.max(half+0.01, Math.min(1-half-0.01, proj.t));
+        if (Math.abs(newT - g.t) > 0.002) {
+          g.t = newT; S.gateDragMoved = true;
+          render(); updateSummary();
+        }
+      }
+      e.preventDefault(); return;
     }
     if (S.mode==='move' && S.dragging) {
       const snapped=snapWorld(wp.x+S.dragOffset.x,wp.y+S.dragOffset.y);
@@ -1204,7 +1312,7 @@
     e.preventDefault();
   }
 
-  function onMouseUp(e) { S.panning=false; S.dragging=null; }
+  function onMouseUp(e) { S.panning=false; S.dragging=null; S.draggingGate=null; }
 
   function onDblClick(e) {
     e.preventDefault();
