@@ -1793,8 +1793,8 @@ function copyBOM() {
     text+=`  ${r.qty.toString().padStart(4)}  ${r.code.padEnd(22)}  ${r.desc.split('(')[0].trim().slice(0,45).padEnd(45)}  ${line!=null?'$'+line.toFixed(2):'POA'}\n`;
   });
   text += `\n${'─'.repeat(70)}\nTOTAL (ex-GST): $${total.toFixed(2)}\n`;
-  navigator.clipboard.writeText(text).then(()=>alert('BOM copied!')).catch(()=>{
-    const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); alert('BOM copied!');
+  navigator.clipboard.writeText(text).then(()=>showToast('✓ BOM copied to clipboard')).catch(()=>{
+    const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showToast('✓ BOM copied to clipboard');
   });
 }
 
