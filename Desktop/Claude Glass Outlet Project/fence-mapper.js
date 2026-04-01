@@ -9,6 +9,7 @@
   const GRID_COLOUR = '#e5e7eb';
   const AXIS_COLOUR = '#d1d5db';
   const RUN_PALETTE = ['#2563eb','#16a34a','#7c3aed','#dc2626','#ea580c','#0891b2','#b45309','#0f766e'];
+  const RUN_COLOUR  = '#2563eb'; // single colour used for all runs on canvas
 
   const HINT = {
     draw : 'Click to place start point, click again to extend — each segment becomes a new run. Double-click or press Enter to stop.',
@@ -689,7 +690,7 @@
     drawGrid();
     drawHoverHighlight();
     S.runs.forEach((run, ri) => {
-      const col = RUN_PALETTE[ri % RUN_PALETTE.length];
+      const col = RUN_COLOUR;
       drawRunSegments(run, ri, col);
       drawSegmentLabels(run, ri, col);
       drawGates(run, ri);
@@ -797,13 +798,15 @@
         gearRect :{ x:gx, y:gy, w:gw, h:gh }
       });
     });
-    // Run name at first node
+    // Run config override indicator (no run name label on canvas)
     if (run.nodes.length>0) {
-      const fn=w2s(run.nodes[0].x,run.nodes[0].y);
       const hasOverride = Object.values(run.config).some(v=>v!=null);
-      const suffix = run.config.height ? ` (${run.config.height}mm)` : hasOverride ? ' ✦' : '';
-      ctx.save(); ctx.font='bold 11px sans-serif'; ctx.fillStyle=col; ctx.textAlign='left';
-      ctx.fillText(run.label+suffix, fn.x+10, fn.y-10); ctx.restore();
+      if (hasOverride) {
+        const fn=w2s(run.nodes[0].x,run.nodes[0].y);
+        const suffix = run.config.height ? `${run.config.height}mm` : '✦';
+        ctx.save(); ctx.font='bold 10px sans-serif'; ctx.fillStyle=col; ctx.textAlign='left';
+        ctx.fillText(suffix, fn.x+8, fn.y-8); ctx.restore();
+      }
     }
   }
 
@@ -938,7 +941,7 @@
     const last = run.nodes[run.nodes.length-1];
     const s = w2s(last.x,last.y);
     ctx.save(); ctx.beginPath(); ctx.arc(s.x,s.y,NODE_R+5,0,Math.PI*2);
-    ctx.strokeStyle=RUN_PALETTE[S.activeRun%RUN_PALETTE.length];
+    ctx.strokeStyle=RUN_COLOUR;
     ctx.lineWidth=2; ctx.setLineDash([3,3]); ctx.globalAlpha=.7;
     ctx.stroke(); ctx.restore();
   }
@@ -1506,11 +1509,7 @@
         c2.save(); c2.font='bold 10px sans-serif'; c2.fillStyle=col; c2.textAlign='center';
         c2.fillText(n.label, n.x+ox, n.y+oy-12); c2.restore();
       });
-      if (run.nodes.length>0) {
-        const fn=run.nodes[0];
-        c2.save(); c2.font='bold 11px sans-serif'; c2.fillStyle=col;
-        c2.fillText(run.label, fn.x+ox+10, fn.y+oy-16); c2.restore();
-      }
+      // run label omitted from site plan export
     });
     return oc.toDataURL('image/png');
   };
